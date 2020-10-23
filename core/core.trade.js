@@ -226,6 +226,7 @@ module.exports = {
             return false;
         }
 
+
         return this.round_amount(market, amount);
 
     },
@@ -356,6 +357,7 @@ module.exports = {
             } else {
                 usd = size
             }
+            delete params.size
             size = undefined
         }
 
@@ -497,6 +499,9 @@ module.exports = {
         params[sizing] = size;
         params.side = side;
 
+        if (sizing == 'usd')
+            delete params.size
+
         // Extract params
         params = this.utils.lower_props(params);
         var [symbol, side, price, post, ioc, tag] = this.utils.extract_props(params, ['symbol', 'side', 'price', 'post', 'ioc', 'tag']);
@@ -587,7 +592,7 @@ module.exports = {
             price   :   (price != undefined ? price : null),
             params  :   {}
         }
-        
+     
         // Add additional parameters
         order_params.params[this.param_map.reduce] = (String(reduce) == "true" ? true : undefined);
         order_params.params[this.param_map.trigger] = trigger;

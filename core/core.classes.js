@@ -198,7 +198,7 @@ class frostybot_exchange extends frostybot_base {
 
     load_handler(stub) {
         this.handler = null;
-        var account = this.settings.get('accounts', stub, false);
+        var account = this.accounts.getaccount(stub)
         if (account) {
             account = this.utils.lower_props(account)
             if (account && account.hasOwnProperty(stub)) {
@@ -237,6 +237,8 @@ class frostybot_exchange extends frostybot_base {
         } else {
             var cachemethod = false;
         }
+        //if (this.handler == undefined)
+        //    this.load_handler(params.stub)
         let result = await this.handler.execute(method, params);
         if (cachemethod) this.cache.set(key, result);
         return result;
