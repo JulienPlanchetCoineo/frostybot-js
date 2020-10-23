@@ -2,6 +2,8 @@
 
 CURRENTPATH=`pwd`
 
+echo "Frostybot install started"
+
 sudo apt update -y
 sudo apt install nodejs npm jq wget git-core sqlite3 -y
 sudo mkdir -p /usr/local && cd /usr/local/
@@ -12,3 +14,13 @@ sudo npm install --unsafe-perm
 sudo ln -s /usr/local/frostybot-js/frostybot /usr/bin/frostybot
 
 cd "$CURRENTPATH" &
+
+
+echo "Frostybot install completed!"
+echo ""
+echo "You can start the server using this command:   frostybot start"
+echo "You can stop the server using this command:    frostybot stop"
+echo "You can upgrade the server using this command: frostybot upgrade"
+echo ""
+
+
