@@ -16,6 +16,7 @@ echo "Updating operating system..."
 sudo echo "Updating operating system..."  > /tmp/install.log 
 sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade > /tmp/install.log
 sudo -E apt-get -qy autoclean > /tmp/install.log 
+sudo -E apt-get -qy update > /tmp/install.log 
 
 sudo echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Installing prerequisite packages for Frostybot..."
