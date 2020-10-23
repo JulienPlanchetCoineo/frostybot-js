@@ -2,5 +2,29 @@
 
 URL="http://127.0.0.1/frostybot"
 COMMAND="$@"
+SCRIPTPATH=`dirname "$(readlink -f "$0")"`
+
+if [ "$COMMAND" == "start" ]; then
+    $SCRIPTPATH/scripts/start
+    exit
+else
+    if [ "$COMMAND" == "stop" ]; then
+        $SCRIPTPATH/scripts/stop
+        exit
+    else
+        if [ "$COMMAND" == "status" ]; then
+            $SCRIPTPATH/scripts/status
+            exit
+        else
+            if [ "$COMMAND" == "debug" ]; then
+                $SCRIPTPATH/scripts/debug
+                exit
+            fi
+        fi
+    fi
+fi
+
+
+
 WGETCMD="wget --no-check-certificate --method POST --header 'accept: application/json' --header 'cache-control: no-cache' --header 'Content-Type: text/plain' --body-data '$COMMAND' -qO- $URL"
 eval "$WGETCMD | jq"
