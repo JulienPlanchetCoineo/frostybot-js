@@ -9,6 +9,7 @@ if [ ! "$PID" == "" ]; then
 else
         echo "Starting Frostybot Server in DEBUG mode..."
         cd "$SCRIPTPATH" &
+        cd ../ &
 	npm start
 	cd "$CURRENTPATH" &
 fi

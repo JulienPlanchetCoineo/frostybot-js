@@ -9,6 +9,7 @@ if [ ! "$PID" == "" ]; then
 else
         echo "Starting Frostybot Server..."
         cd "$SCRIPTPATH" &
+        cd ../ &
 	npm start > /dev/null 2>&1 &
 	cd "$CURRENTPATH" &
 fi

@@ -7,6 +7,7 @@ SCRIPTPATH=`dirname "$(readlink -f "$0")"`
 if [ ! "$PID" == "" ]; then
         echo "Stopping Frostybot server (PID: $PID)..."
 	cd "$SCRIPTPATH" &
+        cd ../ &
         npm stop > /dev/null 2>&1 &
         cd "$CURRENTPATH" &
 else
