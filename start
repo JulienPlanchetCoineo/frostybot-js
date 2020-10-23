@@ -1,0 +1,14 @@
+#/bin/bash
+
+PID=`ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+CURRENTPATH=`pwd`
+SCRIPTPATH=`dirname "$(readlink -f "$0")"`
+
+if [ ! "$PID" == "" ]; then
+        echo "Frostybot server is already running (PID: $PID)"
+else
+        echo "Starting Frostybot Server..."
+        cd "$SCRIPTPATH" &
+	npm start > /dev/null 2>&1 &
+	cd "$CURRENTPATH" &
+fi

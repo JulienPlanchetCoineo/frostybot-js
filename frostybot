@@ -1,0 +1,6 @@
+#!/bin/bash
+
+URL="http://127.0.0.1:5000/frostybot"
+COMMAND="$@"
+WGETCMD="wget --no-check-certificate --method POST --header 'accept: application/json' --header 'cache-control: no-cache' --header 'Content-Type: text/plain' --body-data '$COMMAND' -qO- $URL"
+eval "$WGETCMD | jq"
