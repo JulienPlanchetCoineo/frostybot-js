@@ -1,0 +1,27 @@
+#!/bin/bash
+
+PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+CURRENTPATH=`pwd`
+SCRIPTPATH=`dirname "$(readlink -f "$0")"`
+
+if [ ! "$PID" == "" ]; then
+        echo "Frostybot server is running, stopping for upgrade..."
+        cd "$SCRIPTPATH" &
+        cd ../ &
+        ./scripts/stop
+        cd "$CURRENTPATH" &
+        DOSTART="true"
+else
+        DOSTART="false"
+fi
+
+cd "$SCRIPTPATH" &
+cd ../ &
+sudo git pull -f
+
+if [ "$DOSTART" == "true" ]; then
+    ./scripts/start
+fi
+
+cd "$CURRENTPATH" &
+

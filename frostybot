@@ -7,7 +7,7 @@ SCRIPTPATH=`dirname "$(readlink -f "$0")"`
 
 #echo "$SCRIPTPATH"
 
-for x in "start" "stop" "status" "debug"; do
+for x in "start" "stop" "status" "debug" "upgrade"; do
     if [ "$COMMAND" == "$x" ]; then
         cd "$SCRIPTPATH"
         pwd
