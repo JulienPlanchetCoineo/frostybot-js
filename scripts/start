@@ -1,6 +1,6 @@
 #/bin/bash
 
-PID=`ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
 CURRENTPATH=`pwd`
 SCRIPTPATH=`dirname "$(readlink -f "$0")"`
 
@@ -10,6 +10,6 @@ else
         echo "Starting Frostybot Server..."
         cd "$SCRIPTPATH" &
         cd ../ &
-	npm start > /dev/null 2>&1 &
+	sudo npm start > /dev/null 2>&1 &
 	cd "$CURRENTPATH" &
 fi

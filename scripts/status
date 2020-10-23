@@ -1,6 +1,6 @@
 #/bin/bash
 
-PID=`ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
 
 if [ ! "$PID" == "" ]; then
         echo "Frostybot server is running (PID: $PID)"

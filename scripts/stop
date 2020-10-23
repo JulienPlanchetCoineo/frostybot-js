@@ -1,6 +1,6 @@
 #/bin/bash
 
-PID=`ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
 CURRENTPATH=`pwd`
 SCRIPTPATH=`dirname "$(readlink -f "$0")"`
 
@@ -8,7 +8,7 @@ if [ ! "$PID" == "" ]; then
         echo "Stopping Frostybot server (PID: $PID)..."
 	cd "$SCRIPTPATH" &
         cd ../ &
-        npm stop > /dev/null 2>&1 &
+        sudo npm stop > /dev/null 2>&1 &
         cd "$CURRENTPATH" &
 else
 	echo "Frostybot server is not currently started"
