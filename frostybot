@@ -10,7 +10,6 @@ SCRIPTPATH=`dirname "$(readlink -f "$0")"`
 for x in "start" "stop" "status" "debug" "upgrade"; do
     if [ "$COMMAND" == "$x" ]; then
         cd "$SCRIPTPATH"
-        pwd
         ./scripts/$x
         cd "$CURRENTPATH"
         exit
