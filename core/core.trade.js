@@ -532,7 +532,7 @@ module.exports = {
         order_params.params[this.param_map.ioc]    = (String(ioc)    == "true" ? true : undefined);
         order_params.params[this.param_map.tag]    = tag;
 
-        return this.utils.remove_props(order_params, [null, undefined]);
+        return this.utils.remove_values(order_params, [null, undefined]);
 
     },
 
@@ -598,7 +598,7 @@ module.exports = {
         order_params.params[this.param_map.trigger] = trigger;
         //order_params.params[this.param_map.tag]    = tag;
         
-        return this.utils.remove_props(order_params, [null, undefined]);
+        return this.utils.remove_values(order_params, [null, undefined]);
 
     },
 
@@ -835,7 +835,7 @@ module.exports = {
         if (!this.utils.is_array(result)) {
             this.output.success('position_retrieve', result.symbol)
         } else {
-            this.output.error('position_retrieve', params.symbol)
+            this.output.error('position_retrieve', this.utils.serialize( this.utils.remove_props(params, ['stub']) ))
         }
         return result;
     },
@@ -874,7 +874,7 @@ module.exports = {
         if (!this.utils.is_array(result)) {
             this.output.success('market_retrieve', result.symbol)
         } else {
-            this.output.error('market_retrieve', params.symbol)
+            this.output.error('market_retrieve', this.utils.serialize( this.utils.remove_props(params, ['stub']) ))
         }
         return result;        
     },

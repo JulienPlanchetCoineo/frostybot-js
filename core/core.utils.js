@@ -207,20 +207,36 @@ module.exports = {
     },
 
 
-    // Walk over object and remove properties that match provided array elements
+    // Walk over object and remove properties with the names provided in the props array element
 
-    remove_props(obj, vals = []) {
+    remove_props(obj, props = []) {
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
             if (typeof obj[key] === 'object' && obj[key] !== null)
-                obj[key] = this.remove_props(obj[key], vals);
+                obj[key] = this.remove_props(obj[key], props);
+            else
+                if (props.includes(key)) 
+                    delete obj[key];
+        }
+        return obj;
+    },
+
+
+    // Walk over object and remove properties that have the values provided in the vals array element
+
+    remove_values(obj, vals = []) {
+        for (var key in obj) {
+            if (!obj.hasOwnProperty(key))
+                continue;
+            if (typeof obj[key] === 'object' && obj[key] !== null)
+                obj[key] = this.remove_values(obj[key], vals);
             else
                 if (vals.includes(obj[key])) 
                     delete obj[key];
         }
         return obj;
-    },
+    },    
 
 
     // Recursively trim object properties and change the property names to lowercase

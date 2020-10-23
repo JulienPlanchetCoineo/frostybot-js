@@ -50,7 +50,7 @@ module.exports = {
             return result;
         } else {
             if (result !== false) {
-                result = this.utils.remove_props(result, [null, undefined, false]);
+                result = this.utils.remove_values(result, [null, undefined, false]);
                 for (var symbol in result) {
                     var mapping = result[symbol];
                     this.output.debug('symbolmap_get', [exchange, symbol, mapping]);

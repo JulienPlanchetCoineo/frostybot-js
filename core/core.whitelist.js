@@ -56,7 +56,7 @@ module.exports = {
             if (result.hasOwnProperty('ip')) {
                 this.output.debug('whitelist_get', [result.ip, result.description]);
             } else {
-                result = this.utils.remove_props(result, [false, undefined]);
+                result = this.utils.remove_values(result, [false, undefined]);
                 Object.values(result).forEach(val => {
                     this.output.debug('whitelist_get', [val.ip, val.description]);
                 });
