@@ -4,44 +4,43 @@ CURRENTPATH=`pwd`
 
 echo "Frostybot install started" 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 2>&1 &
+echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Updating package manager..."
-echo "Updating package manager..." > /tmp/install.log 2>&1 &
+echo "Updating package manager..." > /tmp/install.log
 export DEBIAN_FRONTEND=noninteractive
 export DEBIAN_PRIORITY=critical
-sudo -E apt-get -qy update > /tmp/install.log 2>&1 &
+sudo -E apt-get -qy update > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 2>&1 &
+echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Updating operating system..." 
-echo "Updating operating system..."  > /tmp/install.log 2>&1 &
-sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade > /tmp/install.log 2>&1 &
-sudo -E apt-get -qy autoclean > /tmp/install.log 2>&1 &
+echo "Updating operating system..."  > /tmp/install.log 
+sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade > /tmp/install.log
+sudo -E apt-get -qy autoclean > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 2>&1 &
+echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Installing prerequisite packages for Frostybot..."
-echo "Installing prerequisite packages for Frostybot..."  > /tmp/install.log 2>&1 &
-sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" install nodejs npm jq wget git-core sqlite3 > /tmp/install.log 2>&1 &
+echo "Installing prerequisite packages for Frostybot..."  > /tmp/install.log 
+sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" install nodejs npm jq wget git-core sqlite3 > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 2>&1 &
+echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Cloning Frostybot Github respository..."
-echo "Cloning Frostybot Github respository..."  > /tmp/install.log 2>&1 &
+echo "Cloning Frostybot Github respository..."  > /tmp/install.log 
 sudo mkdir -p /usr/local && cd /usr/local/
-sudo git clone https://github.com/CryptoMF/frostybot-js.git frostybot-js > /tmp/install.log 2>&1 &
+sudo git clone https://github.com/CryptoMF/frostybot-js.git frostybot-js > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 2>&1 &
+echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Setting permissions..."
-echo "Setting permissions..." > /tmp/install.log 2>&1 &
+echo "Setting permissions..." > /tmp/install.log 
 cd /usr/local/frostybot-js
-sudo chgrp $USER -R /usr/local/frostybot-js > /tmp/install.log 2>&1 &
-sudo npm install --unsafe-perm > /tmp/install.log 2>&1 &
+sudo chgrp $USER -R /usr/local/frostybot-js > /tmp/install.log 
+sudo npm install --unsafe-perm > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 2>&1 &
+echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Creating frostybot command shortcut..." 
-echo "Creating frostybot command shortcut..." > /tmp/install.log 2>&1 &
-sudo ln -s /usr/local/frostybot-js/frostybot /usr/bin/frostybot > /tmp/install.log 2>&1 &
+echo "Creating frostybot command shortcut..." > /tmp/install.log 
+sudo ln -s /usr/local/frostybot-js/frostybot /usr/bin/frostybot > /tmp/install.log 
 
 cd "$CURRENTPATH" &
-
 
 echo "Frostybot install completed!"
 echo ""
