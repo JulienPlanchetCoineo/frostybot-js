@@ -4,40 +4,40 @@ CURRENTPATH=`pwd`
 
 echo "Frostybot install started" 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
+sudo echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Updating package manager..."
-echo "Updating package manager..." > /tmp/install.log
+sudo echo "Updating package manager..." > /tmp/install.log
 export DEBIAN_FRONTEND=noninteractive
 export DEBIAN_PRIORITY=critical
 sudo -E apt-get -qy update > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
+sudo echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Updating operating system..." 
-echo "Updating operating system..."  > /tmp/install.log 
+sudo echo "Updating operating system..."  > /tmp/install.log 
 sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" upgrade > /tmp/install.log
 sudo -E apt-get -qy autoclean > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
+sudo echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Installing prerequisite packages for Frostybot..."
-echo "Installing prerequisite packages for Frostybot..."  > /tmp/install.log 
+sudo echo "Installing prerequisite packages for Frostybot..."  > /tmp/install.log 
 sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" install nodejs npm jq wget git-core sqlite3 > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
+sudo echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Cloning Frostybot Github respository..."
-echo "Cloning Frostybot Github respository..."  > /tmp/install.log 
+sudo echo "Cloning Frostybot Github respository..."  > /tmp/install.log 
 sudo mkdir -p /usr/local && cd /usr/local/
 sudo git clone https://github.com/CryptoMF/frostybot-js.git frostybot-js > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
+sudo echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Setting permissions..."
-echo "Setting permissions..." > /tmp/install.log 
+sudo echo "Setting permissions..." > /tmp/install.log 
 cd /usr/local/frostybot-js
 sudo chgrp $USER -R /usr/local/frostybot-js > /tmp/install.log 
 sudo npm install --unsafe-perm > /tmp/install.log 
 
-echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
+sudo echo "-------------------------------------------------------------------------------------" > /tmp/install.log 
 echo "Creating frostybot command shortcut..." 
-echo "Creating frostybot command shortcut..." > /tmp/install.log 
+sudo echo "Creating frostybot command shortcut..." > /tmp/install.log 
 sudo ln -s /usr/local/frostybot-js/frostybot /usr/bin/frostybot > /tmp/install.log 
 
 cd "$CURRENTPATH" &
