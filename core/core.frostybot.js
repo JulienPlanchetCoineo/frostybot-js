@@ -219,6 +219,7 @@ module.exports = {
                 this.output.notice('loaded_module', module)    
                 var method = this.utils.is_array(method.split(':')) ? method.split(':')[0] : method;
                 if (this.method_exists(module, method)) {
+                    var start = (new Date).getTime();
                     global.frostybot['command'] = {
                         module: module,
                         method: method
@@ -235,7 +236,15 @@ module.exports = {
                             }    
                         }
                     }
-                    var start = (new Date).getTime();
+                    // If stub is supplied, and not adding a new stub, make sure the account exists
+                    if (params.hasOwnProperty('stub') && !(module == 'accounts' && method == 'add')) {
+                        var stub = params.stub.toLowerCase()
+                        if (this.accounts.getaccount(stub) === false) {
+                            return this.output.parse(this.output.error('unknown_stub', stub))
+                        } 
+                        this.output.debug('stub_valid', stub)
+                        params.stub = stub
+                    }
                     let result = await this[module][method](params);
                     var end = (new Date).getTime();
                     var duration = (end - start) / 1000;            

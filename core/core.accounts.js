@@ -25,8 +25,8 @@ module.exports = {
 
     getaccount(stub) {
         this.initialize();
-        var account = this.settings.get('accounts', stub, false);
-        if (account) {
+        var account = this.settings.get('accounts', stub);
+        if (account !== null) {
             return this.utils.lower_props(account)
         }
         return false;

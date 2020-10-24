@@ -131,7 +131,8 @@ module.exports = {
 
     async map(exchange, symbol) {
         this.initialize()
-        return await this.settings.get('symbolmap:' + exchange, symbol, false)
+        var result = await this.settings.get('symbolmap:' + exchange, symbol.toUpperCase())
+        return (result === null ? false : result)
     }
 
 };

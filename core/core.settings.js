@@ -53,8 +53,12 @@ module.exports = {
             } else {
                 var result = db.select('settings', { mainkey: mainkey, subkey: subkey } )
                 if (result.length == 0) {
-                    this.set(mainkey, subkey, defval);
-                    return defval
+                    if (defval != undefined) {
+                        this.set(mainkey, subkey, defval);
+                        return defval
+                    } else {
+                        return null;
+                    }
                 }
                 if (result.length == 1) {
                     var value = result[0].value

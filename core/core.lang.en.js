@@ -25,6 +25,7 @@ module.exports = {
 
     debug: {
 
+        stub_valid:         'The stub {0} refers to a valid account',
         whitelist_verify:   'Address is whitelisted: {0}. Allowing access to the API.',
         whitelist_get:      'Retrieved IP address from the whitelist: {0}: {1}',
         symbolmap_get:      'Retrieved symbol mapping: {0}: {1} => {2}',
@@ -74,7 +75,8 @@ module.exports = {
         incorrect_type:     'Incorrect Type: {0}, Expected: {1}, Actual: {2}',  
         malformed_param:    'Malformed Parameter: {0}', 
         unknown_module:     'Unknown Module: {0}',
-        unknown_method:     'Unknown Command: {0}',      
+        unknown_method:     'Unknown Command: {0}',
+        unknown_stub:       'Unknown account stub: {0}. Please use accounts:add to add the account.',      
 
         account_retrieve:   'Failed to retrieve account(s): {0}',
         account_create:     'Failed to create account: {0}',
