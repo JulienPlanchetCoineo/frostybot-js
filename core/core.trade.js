@@ -338,7 +338,7 @@ module.exports = {
     
     async convert_size(type, params) {
 
-        var [market, symbol, size, base, quote, usd, maxsize] = this.utils.extract_props(params, ['market', 'symbol', 'size', 'base', 'quote', 'usd', 'maxsize']);
+        var [market, symbol, size, base, quote, usd, scale, maxsize] = this.utils.extract_props(params, ['market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize']);
         var side = null;
         var is_close = false;   // Report is order will result in position closure
         var is_flip = false;    // Report is order will result in position flip
@@ -347,6 +347,18 @@ module.exports = {
         if (this.is_factor(base) || this.is_factor(quote)) {
             this.output.translate('error','factor_only_size')
             return false;
+        }
+
+        // Check if no size was given for close order
+        if (type == 'close') {
+            var size_provided = false
+            if (base != undefined)  size_provided = true
+            if (quote != undefined) size_provided = true
+            if (size != undefined)  size_provided = true
+            if (usd != undefined)   size_provided = true
+            if (!size_provided) {
+                size = '100%'
+            }
         }
 
         // size=xxx is the same as usd=xxx
@@ -385,9 +397,10 @@ module.exports = {
             var dir = 'flat'
             var current = 0; 
         }
-        
-        // Convert relative size
 
+        var target = null
+
+        // Convert relative size
         var order_is_relative = false
         if (this.is_relative(requested)) {
             if (['long', 'short'].includes(type)) {
@@ -401,7 +414,17 @@ module.exports = {
             }
         }
 
-        var target = null
+        // Convert scale parameter
+        if (scale != undefined) {
+            if (dir == 'flat') {
+                return this.output.error('order_scale_nopos', symbol)
+            }
+            var current = (dir == 'long' ? 1 : -1) * parseFloat(current_position['usd_size'])
+            scale = parseFloat(scale)
+            sizing = 'usd'
+            requested = current * parseFloat(scale);
+        }        
+        
         requested = parseFloat(requested)   // Ensure requested is a float
 
         switch (type) {
@@ -442,7 +465,7 @@ module.exports = {
         }
 
         // Check if already long or short more than requested (non relative orders only)
-        if (!order_is_relative && ((type == 'long' && target < current) || (type == 'short' && target > current))) {
+        if (!order_is_relative && scale == undefined && ((type == 'long' && target < current) || (type == 'short' && target > current))) {
             return this.output.error('order_size_exceeds', type)  
         }
 
@@ -453,20 +476,21 @@ module.exports = {
             target = 0
         }
 
+        // Check if close order would exceed current position size
+        if (type == 'close' && ((target > 0 && current < 0) || (target < 0 && current > 0))) {
+            this.output.debug('close_exceeds_pos', [requested, 0 - current])
+            target = 0;
+        }
+
         // Check for a position flip 
         if ((dir == 'long' && target < 0) || (dir == 'short' && target > 0)) {
             is_flip = true
             this.output.warning('order_will_flip', [dir, (dir == 'long' ? 'short' : 'long')])
         }
 
-        // Check if close order would exceed current position size
-        if (type == 'close' && ((target > 0 && current < 0) || (target < 0 && current > 0))) {
-            this.output.warning('close_exceeds_pos', [requested, 0 - current])
-            target = 0;
-        }
-
         var order_size = target - current
         var order_side = (order_size >= 0 ? 'buy' : 'sell')
+        var order_size = Math.abs(order_size)
 
         var currencies = {
             base:  market.base,

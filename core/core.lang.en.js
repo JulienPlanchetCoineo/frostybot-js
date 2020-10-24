@@ -41,6 +41,7 @@ module.exports = {
         order_sizing_cur:   'Current position {0} size is: {1} {2}',
         order_sizing_tar:   'Target position {0} size is:  {1} {2}',
         order_sizing_ord:   'Order required to reach target: {0} {1} {2}',
+        close_exceeds_pos:  'The closing order size of {0} exceeds your current position, adjusting order size to {1}.',
 
     },
 
@@ -67,7 +68,6 @@ module.exports = {
         testnet_not_avail:  'The exchange {0} does not have a testnet, using mainnet instead.',
         order_over_maxsize: 'The order size of {0} would exceed maxsize. Adjusting order size to {1}.',
         order_rel_close:    'The relative decrease requested is greater than your current position, closing position.',
-        close_exceeds_pos:  'The closing order size of {0} exceeds your current position, adjusting order size to {1}.',
         order_will_flip:    'The provided order sizing results in a position flip from {0} to {1}',
         order_flip_price:   'The {0} parameter was changed from {1} to {2}',
 
@@ -116,6 +116,7 @@ module.exports = {
         order_size_exceeds: 'Already {0} more than requested',
         order_size_rel:     'Relative sizing (+/-) not permitted on {0} orders',
         order_rel_req_max:  'When using relative sizes on {0} orders, the maxsize parameter is required',
+        order_scale_nopos:  'You cannot use the scale parameter because do not have a position on {0}',
 
         position_retrieve:  'You do not have a position on {0}',
         positions_retrieve: 'There was an error retrieving positions',
