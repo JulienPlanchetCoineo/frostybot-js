@@ -78,10 +78,10 @@ frostybot status
 
 * **Add your exchange API keys to Frostybot**
 
-  You will need to identify this account in Frostybot using what is called a stub. It is a lowercase single word to name the account in Frostybot. You will use this stub in all subsequent interactions with the exchange. For example, if your exchange subaccount is called "Algo"-Trading"", add your API keys using this command:
-  ```
-  frostybot accounts:add stub=algotrading exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
-  ```
+You will need to identify this account in Frostybot using what is called a stub. It is a lowercase single word to name the account in Frostybot. You will use this stub in all subsequent interactions with the exchange. For example, if your exchange subaccount is called "Algo"-Trading"", add your API keys using this command:
+```
+frostybot accounts:add stub=algotrading exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
+```
 
 ## Usage
 
