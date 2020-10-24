@@ -106,7 +106,7 @@ module.exports = {
     // Parse raw text into parameter object
 
     parse_raw(text) {
-        var lines = (text + '\n').trim().split('\n');
+        var lines = (text.trim() + '\n').split('\n');
         var commands = [];
         for (var l = 0; l < lines.length; l++) {
             var line = lines[l];
