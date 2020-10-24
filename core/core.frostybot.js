@@ -114,11 +114,13 @@ module.exports = {
             var paramObj = {};
             if (Array.isArray(params)) {
                 for(var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param.indexOf('=') < 0)
+                    var param = params[i].trim();
+                    if (param.toLowerCase() != 'frostybot') {  // In case user included the "frostybot" in the webhook command
+                        if (param.indexOf('=') < 0)
                         param = param.indexOf(':') >= 0 ? 'command=' + param : param;
-                    var [key, val] = param.split('=');
-                    paramObj[key] = val;
+                        var [key, val] = param.split('=');
+                        paramObj[key] = val;
+                    } 
                 }
                 commands.push(paramObj);
             }
