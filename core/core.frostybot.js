@@ -46,7 +46,9 @@ const api_methods = {
     whitelist:  [
         'get', 
         'add', 
-        'delete', 
+        'delete',
+        'enable',
+        'disable', 
     ],
 
 }
@@ -83,6 +85,11 @@ module.exports = {
     // Verify whitelist
 
     verify_whitelist(ip) {
+        return this.whitelist.verify(ip);
+        if (result === null) {
+            return true;
+        }
+        return result
         var acl = this.settings.get('whitelist', ip);
         if (acl) {
             this.output.debug('whitelist_verify', ip);

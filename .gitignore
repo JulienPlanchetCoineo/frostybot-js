@@ -62,3 +62,8 @@ typings/
 
 # next.js build output
 .next
+
+# Frostybot Database
+database/database.db
+database/database.db-shm
+database/database.db-wal

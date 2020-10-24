@@ -55,6 +55,10 @@ module.exports = {
         processed_queue:    'Processed order queue:  {0}/{1} order(s) submitted successfully.',
         order_queued:       'Order queued: {0}',
         symbol_mapping:     'Using symbol mapping: {0}: {1} => {2}',
+        whitelist_disabled: 'Whitelist verification is disabled',
+        whitelist_enabled:  'Whitelist verification is enabled',
+        whitelist_verify:   'IP Address {0} is whitelisted. Allowing access to the API',
+
 
     },
 

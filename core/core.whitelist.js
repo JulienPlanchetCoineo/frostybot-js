@@ -104,14 +104,52 @@ module.exports = {
     },
 
 
+    // Enable whitelist verification
+
+    enable() {
+        if (this.settings.set('whitelist', 'enabled', true)) {
+            this.output.notice('whitelist_enabled')
+            return true
+        }
+        return false
+    },
+
+
+    // Disable whitelist verification
+    
+    disable() {
+        if (this.settings.set('whitelist', 'enabled', false)) {
+            this.output.notice('whitelist_disabled')
+            return true
+        }
+        return false
+    },
+
+
+    // Check if whitelist is enabled
+
+    is_enabled() {
+        var result = this.settings.get('whitelist', 'enabled');
+        if (result === null) {
+            return true;
+        }
+        return result
+    },
+
     // Verify IP in whitelist
 
     verify(ip) {
-        var acl = this.settings.get('whitelist', ip);
-        if (acl) {
-            return this.output.success('whitelist_verify', ip);
+        this.initialize()
+        if (this.is_enabled()) {
+            var acl = this.settings.get('whitelist', ip);
+            if (acl) {
+                return this.output.notice('whitelist_verify', ip);
+            }
+            return this.output.error('whitelist_verify', ip);
+        } else {
+            this.output.notice('whitelist_disabled')
+            return true
         }
-        return this.output.error('whitelist_verify', ip);
     }
 
 
