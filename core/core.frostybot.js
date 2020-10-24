@@ -106,23 +106,25 @@ module.exports = {
     // Parse raw text into parameter object
 
     parse_raw(text) {
-        var lines = text.trim().split('\n');
+        var lines = (text + '\n').trim().split('\n');
         var commands = [];
         for (var l = 0; l < lines.length; l++) {
             var line = lines[l];
-            var params = line.split(' ');
-            var paramObj = {};
-            if (Array.isArray(params)) {
-                for(var i = 0; i < params.length; i++) {
-                    var param = params[i].trim();
-                    if (param.toLowerCase() != 'frostybot') {  // In case user included the "frostybot" in the webhook command
-                        if (param.indexOf('=') < 0)
-                        param = param.indexOf(':') >= 0 ? 'command=' + param : param;
-                        var [key, val] = param.split('=');
-                        paramObj[key] = val;
-                    } 
-                }
-                commands.push(paramObj);
+            if (line.trim() != '') {
+                var params = line.split(' ');
+                var paramObj = {};
+                if (Array.isArray(params)) {
+                    for(var i = 0; i < params.length; i++) {
+                        var param = params[i].trim();
+                        if (param.toLowerCase() != 'frostybot') {  // In case user included the "frostybot" in the webhook command
+                            if (param.indexOf('=') < 0)
+                            param = param.indexOf(':') >= 0 ? 'command=' + param : param;
+                            var [key, val] = param.split('=');
+                            paramObj[key] = val;
+                        } 
+                    }
+                    commands.push(paramObj);
+                }    
             }
         }
         return (commands.length == 1 ? commands[0] : commands);
