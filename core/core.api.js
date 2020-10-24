@@ -19,6 +19,7 @@ module.exports = {
         'get|/accounts'                     :   'accounts:get',     // Get all accounts
         'get|/accounts/:stub'               :   'accounts:get',     // Get specific account
         'post|/accounts'                    :   'accounts:add',     // Create new account
+        'post|/accounts/:stub/test'         :   'accounts:test',    // Test account api keys
         'put|/accounts'                     :   'accounts:add',     // Update account
         'delete|/accounts/:stub'            :   'accounts:delete',  // Delete account
 
