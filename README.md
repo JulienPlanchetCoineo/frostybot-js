@@ -1,6 +1,6 @@
 ![logo](https://i.imgur.com/YAME6yT.png "#FrostyBot")
 
-## Frostybot-JS - A NodeJS API endpoint for Cryptocurrency Trading
+## Frostybot-JS : A NodeJS API endpoint for Cryptocurrency Trading
 
 FrostyBot-JS is an API endpoint for REST and webhooks that is designed to receive API requests, such as Tradingview webhooks, and to submit them as orders to a cryptocurrency exchange.
 
