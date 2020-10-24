@@ -23,18 +23,27 @@ Object.keys(api).forEach(baseapi => {
             const route = '/' + routeparts.slice(2).join('/')
 
             const api = require('../core/core.api');
+
             const routes = api.hasOwnProperty(baseapi) ? api[baseapi] : null
 
             const routeinfo = [req.method.toLowerCase(), route].join('|')
+
             if (routes.hasOwnProperty(routeinfo)) {
                 var command = {command: routes[routeinfo]}
             }
 
+            core.initialize();
+
+            if (req.rawBody !== undefined) {
+                var body = core.parse_raw(req.rawBody)
+            } else {
+                var body = req.body
+            }
+
             var params = {
-                body: {...command, ...req.params, ...req.query, ...req.body}
+                body: {...command, ...req.params, ...req.query, ...body}
             }
             
-            core.initialize();
             
             var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).replace('::ffff:','').replace('::1, ','');
 
