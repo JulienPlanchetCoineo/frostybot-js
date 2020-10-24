@@ -64,7 +64,7 @@ Alternatively, the latest docker image is available at frostyio/frostybot-js:lat
 
 ## Post-Install Configuration
 
-* **Start the Frostybot server**
+# Start the Frostybot server
 
 To start the Frostybot server, use this command:
 ```
@@ -76,16 +76,18 @@ To see the status of the server, use this command:
 frostybot status
 ```
 
-* **Add your exchange API keys to Frostybot**
+# Add your exchange API keys to Frostybot
 
 You will need to identify this account in Frostybot using what is called a stub. It is a lowercase single word to name the account in Frostybot. You will use this stub in all subsequent interactions with the exchange. For example, if your exchange subaccount is called "Algo"-Trading"", add your API keys using this command:
 ```
 frostybot accounts:add stub=algotrading exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
 ```
 
+The API keys will be tested with the exchange when you add then so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
+
 ## Usage
 
-We will add some usage examples here in the next day or two, but for the moment there are plenty of examples on our Discord server
+**TODO:** We will add some usage examples here in the next day or two, but for the moment there are plenty of examples on our Discord server
  
 ## Report Bugs
 
