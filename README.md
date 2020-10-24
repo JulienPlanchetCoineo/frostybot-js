@@ -83,9 +83,37 @@ You will need to identify this account in Frostybot using what is called a stub.
 frostybot accounts:add stub=algotrading exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
 ```
 
-The API keys will be tested with the exchange when you add then so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
+**Important:** The subaccount parameter is case-sensitive. Make sure that it is exactly the same as the name on the Exchange. The API keys will be tested with the exchange when you add them so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
 
 ## Usage
+
+Frostybot can take orders from the commandline and from webhooks or API requests. The commandline commands are the same as the commands provided in a webhook. They can be provided in inline command format, or in JSON format. Lets go through a couple of inline commands so that you can get a feel for how it works. These commands can be supplied on your Linux commandline, or in the message box of a Tradingview alert:
+
+#### Account Information Commands
+```
+   frostybot trade:mystub:markets                       (Get list of markets supported on the exchange)
+   frostybot trade:mystub:market symbol=SOL/USD         (Get market info for the SOL/USD pair)
+   frostybot trade:mystub:positionss                    (Get all current positions from exchange)
+   frostybot trade:mystub:position symbol=LTC-PERP      (Get current position info for the LTC-PERP market)
+   frostybot trade:mystub:orders                        (Get list of orders from the exchange)
+   frostybot trade:mystub:order status=open             (Get list of open orders)
+   frostybot trade:mystub:market symbol=SOL/USD         (Get market info for the SOL/USD pair)
+   frostybot trade:mystub:balances                      (Get current equity balances from the exchange)     
+```
+
+#### Basic Trading Commands
+```
+    frostybot trade:mystub:long symbol=BTC-PERP size=1000             ($1000 market buy on BTC-PERP)
+    frostybot trade:mystub:short symbol=BTC/USD size=2000 price=7600  ($2000 limit sell at $7600 on FTX BTC/USD)
+    frostybot trade:mystub:long symbol=ETH-PERP size=3x               (Market buy 3x of my account balance ETH-PERP)
+    frostybot trade:mystub:buy base=5 symbol=ADA/USD                  (Market buy 5 ADA using USD)
+    frostybot trade:mystub:sell quote=500 symbol=ADA/USD              (Market sell $500 worth of ADA)
+    frostybot trade:mystub:buy symbol=ETH/BTC usd=250                 (Market buy $250 worth of ETH, using BTC)
+    frostybot trade:mystub:cancel id=10483883                         (Cancel order 10483883)
+    frostybot trade:mystub:cancelall symbol=RUNE-PERP                 (Cancel all RUNE-PERP orders)
+```
+
+#### Advanced Commands
 
 **TODO:** We will add some usage examples here in the next day or two, but for the moment there are plenty of examples on our Discord server
  
