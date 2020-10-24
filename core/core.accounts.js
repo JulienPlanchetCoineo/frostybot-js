@@ -27,7 +27,7 @@ module.exports = {
         this.initialize();
         var account = this.settings.get('accounts', stub);
         if (account !== null) {
-            return this.utils.lower_props(account)
+            return this.utils.decrypt_props( this.utils.lower_props(account), ['apikey', 'secret'])
         }
         return false;
     },    
@@ -40,14 +40,14 @@ module.exports = {
             var accounts = this.settings.get('accounts');
             if (accounts) {
                 for (const [stub, account] of Object.entries(accounts)) {
-                    accounts[stub] = this.utils.lower_props(account);
+                    accounts[stub] = this.utils.lower_props(account)
                 }
                 this.output.success('account_retrieve');
                 return this.censored(accounts);
             }
             return this.output.error('account_retrieve');
         }  else {
-            var account = this.settings.get('accounts', stub, false);
+            var account = this.settings.get('accounts', stub);
             if (account) {
                 var accounts = {};
                 accounts[stub] = this.utils.lower_props(account)
@@ -65,7 +65,8 @@ module.exports = {
         if (accounts != false) {
             for (var [stub, account] of Object.entries(accounts)) {
                 if (account != false) {
-                    account = this.utils.censor_props(account, ['apikey', 'secret']);
+                    account = this.utils.decrypt_props(account, ['apikey', 'secret'])
+                    account = this.utils.censor_props(account, ['apikey', 'secret'])
                 }
                 result[stub] = account;
             }
@@ -122,7 +123,7 @@ module.exports = {
         var [stub, data] = this.create_params(params);
         let testresult = await this.test(data);
         if (testresult) {
-            if (this.settings.set('accounts', stub, data)) {
+            if (this.settings.set('accounts', stub, this.utils.encrypt_props(data, ['apikey', 'secret']))) {
                 this.output.success('account_create', stub);
                 return true;
             }
@@ -146,6 +147,7 @@ module.exports = {
         let testresult = await this.test(data);
         if (testresult) {
             this.output.success('account_test', stub);
+            data = this.utils.encrypt_props(data, ['apikey', 'secret'])
             if (this.settings.set('accounts', stub, data)) {
                 this.output.success('account_update', stub);
             }
@@ -205,8 +207,8 @@ module.exports = {
             exchange: account.hasOwnProperty('exchange') ? account.exchange : null,
             description: account.hasOwnProperty('description') ? account.description : null,
             parameters: {
-                apiKey:     account.parameters.hasOwnProperty('apikey')     ? account.parameters.apikey     : null,
-                secret:     account.parameters.hasOwnProperty('secret')     ? account.parameters.secret     : null,
+                apiKey:     account.parameters.hasOwnProperty('apikey') ? this.encryption.decrypt(account.parameters.apikey) : null,
+                secret:     account.parameters.hasOwnProperty('secret') ? this.encryption.decrypt(account.parameters.secret) : null,
                 urls:       {},
                 //type:       account.parameters.hasOwnProperty('type')       ? account.parameters.type       : null,
             },   

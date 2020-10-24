@@ -88,6 +88,9 @@ module.exports = {
         account_delete:     'Failed to delete account: {0}',
         account_test:       'Cannot connect using these account settings',
 
+        encryption_failed:  'Failed to encrypt data',
+        decryption_failed:  'Failed to decrypt data',
+
         cache_flush:        'Failed to flush cache',
 
         whitelist_get:      'Failed to get IP address(es) from the whitelist: {0}',

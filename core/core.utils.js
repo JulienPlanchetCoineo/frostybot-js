@@ -187,6 +187,42 @@ module.exports = {
     },
 
 
+    // Walk over object and encrypt properties with the names provided in the props array element
+
+    encrypt_props(obj, props = []) {
+        for (var key in obj) {
+            if (!obj.hasOwnProperty(key))
+                continue;
+            if (typeof obj[key] === 'object' && obj[key] !== null)
+                obj[key] = this.encrypt_props(obj[key], props);
+            else
+                if (props.includes(key)) {
+                    var val = this.encryption.encrypt(obj[key])
+                    obj[key] = val
+                } 
+    }
+        return obj;
+    },
+
+
+    // Walk over object and decrypt properties with the names provided in the props array element
+
+    decrypt_props(obj, props = []) {
+        for (var key in obj) {
+            if (!obj.hasOwnProperty(key))
+                continue;
+            if (typeof obj[key] === 'object' && obj[key] !== null)
+                obj[key] = this.encrypt_props(obj[key], props);
+            else
+                if (props.includes(key)) {
+                    var val = this.encryption.decrypt(obj[key])
+                    obj[key] = val
+                } 
+        }
+        return obj;
+    },
+
+
     // Trim whitespace from object properties recursively
 
     trim_props(obj) {
@@ -252,11 +288,11 @@ module.exports = {
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
-            if (typeof obj[key] === 'object' && obj[key] !== null)
-                obj[key] = this.censor_props(obj[key], props);
-            else
-                if (props.includes(key)) 
-                    obj[key] = '**********';
+            if (props.includes(key)) 
+                obj[key] = '**********'
+            else 
+                if (typeof obj[key] === 'object' && obj[key] !== null)
+                    obj[key] = this.censor_props(obj[key], props);
         }
         return obj;
     },
