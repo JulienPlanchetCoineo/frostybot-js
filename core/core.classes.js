@@ -237,8 +237,8 @@ class frostybot_exchange extends frostybot_base {
         } else {
             var cachemethod = false;
         }
-        //if (this.handler == undefined)
-        //    this.load_handler(params.stub)
+        if (this.handler == undefined)
+            this.load_handler(params.stub)
         let result = await this.handler.execute(method, params);
         if (cachemethod) this.cache.set(key, result);
         return result;
