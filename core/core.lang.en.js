@@ -97,6 +97,8 @@ module.exports = {
         whitelist_add:      'Failed to add IP address to the whitelist: {0}',
         whitelist_delete:   'Cannot delete IP address from the whitelist: {0}',
         whitelist_verify:   'Address is not whitelisted: {0}. Blocking access to the API.',
+        whitelist_enable:   'Failed to enable whitelist verification',
+        whitelist_disable:  'Failed to disabled whitelist verification',
 
         symbolmap_get:      'Failed to retrieve symbol mapping: {0}: {1}',
         symbolmap_add:      'Failed to add symbol mapping: {0}: {1} => {2}',
@@ -138,9 +140,12 @@ module.exports = {
         account_test:       'Successfully tested account settings',
 
         cache_flush:        'Successfully flushed cache: {0} items deleted',
+        cache_stats:        'Sucessfully retrieved cache stats: {0}',
 
         whitelist_add:      'Added IP address to the whitelist: {0}',
         whitelist_delete:   'Deleted IP address from the whitelist: {0}',
+        whitelist_enable:   'Successfully enabled whitelist verification',
+        whitelist_disable:  'Successfully disabled whitelist verification',
 
         symbolmap_add:      'Added symbol mapping: {0}: {1} => {2}',
         symbolmap_delete:   'Deleted symbol mapping: {0}: {1}',

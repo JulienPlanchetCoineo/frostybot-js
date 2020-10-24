@@ -1,11 +1,12 @@
 var express     = require('express');
 var bodyParser  = require('body-parser');
 
+
 // Set App Title
 process.title = "frostybot-js";
 
-//var frostybot   = require('./lib/lib.frostybot');
-var frostybot   = require('./core/core.frostybot');
+// Import core library
+const frostybot   = require('./core/core.frostybot');
 
 // Initialize 
 
@@ -13,10 +14,9 @@ frostybot.initialize();
 global.frostybot.modules.output.initialize();
 global.frostybot.modules.output.section('frostybot_startup');
 
-// Routers
+// API Router
 
-var frostybotRouter = require('./routes/routes.frostybot');
-
+var apiRouter = require('./routes/routes.api');  
 
 var app = express();
 
@@ -35,8 +35,8 @@ app.use(bodyParser.raw({ type: 'text/plain', verify: rawBufferSaver }));
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Route to router mappings
-app.use('/frostybot', frostybotRouter);
+// Map to API router
 
+app.use('/', apiRouter);
 
 module.exports = app;

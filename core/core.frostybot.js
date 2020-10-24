@@ -36,6 +36,11 @@ const api_methods = {
         'cancel', 
         'cancelall',
     ],
+
+    settings: [
+        'get',
+        'set',
+    ],
     
     symbolmap:  [
         'get', 
@@ -47,6 +52,7 @@ const api_methods = {
         'get', 
         'add', 
         'delete',
+        'verify',
         'enable',
         'disable', 
     ],
@@ -64,7 +70,7 @@ module.exports = {
             settings : {},
         };
         fs.readdirSync( dir ).forEach( file => {
-            if ((file != 'core.frostybot.js') && (file.indexOf('core.lang') < 0)) {
+            if ((file != 'core.frostybot.js') && (file != 'core.api.js') && (file.indexOf('core.lang') < 0)) {
                 var module = file.split('.')[1];
                 global.frostybot.modules[module] = require('./' + file);
             }

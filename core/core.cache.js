@@ -34,12 +34,14 @@ module.exports = {
         }
         total = this.cachestats.hit + this.cachestats.miss;
         ratio = (total > 0 ? Math.round((this.cachestats.hit / total) * 100) : 0);
-        return {
+        var result = {
             hit: this.cachestats.hit,
             miss: this.cachestats.miss,
             total: total,
             ratio: ratio
         };
+        this.output.success('cache_stats', this.utils.serialize(result))
+        return result
     },
 
 
@@ -119,6 +121,7 @@ module.exports = {
                 }
             }                            
         }); 
+        this.output.success('cache_flush', total)
         return total;
     },
 

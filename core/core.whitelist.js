@@ -108,10 +108,9 @@ module.exports = {
 
     enable() {
         if (this.settings.set('whitelist', 'enabled', true)) {
-            this.output.notice('whitelist_enabled')
-            return true
+            return this.output.success('whitelist_enable')
         }
-        return false
+        return this.output.error('whitelist_enable')
     },
 
 
@@ -119,10 +118,9 @@ module.exports = {
     
     disable() {
         if (this.settings.set('whitelist', 'enabled', false)) {
-            this.output.notice('whitelist_disabled')
-            return true
+            return this.output.success('whitelist_disable')
         }
-        return false
+        return this.output.error('whitelist_disable')
     },
 
 
@@ -130,9 +128,11 @@ module.exports = {
 
     is_enabled() {
         var result = this.settings.get('whitelist', 'enabled');
-        if (result === null) {
+        if ((result === null) || (result == true)) {
+            this.output.notice('whitelist_enabled')
             return true;
         }
+        this.output.notice('whitelist_disabled')
         return result
     },
 
@@ -140,10 +140,14 @@ module.exports = {
 
     verify(ip) {
         this.initialize()
+        if (this.utils.is_object(ip) && ip.hasOwnProperty('ip')) 
+            ip = ip.ip
+        this.initialize()
         if (this.is_enabled()) {
             var acl = this.settings.get('whitelist', ip);
             if (acl) {
-                return this.output.notice('whitelist_verify', ip);
+                this.output.notice('whitelist_verify', ip);
+                return true
             }
             return this.output.error('whitelist_verify', ip);
         } else {
