@@ -43,7 +43,7 @@ Currently only FTX is supported. But we will add support for Deribit, Binance (S
 ## Scope      
 This bot is specifically designed to execute orders based on webhook or REST API requests. These can be from Tradingview, or any other software that can execute webhooks.
 
-While is may seem a little complicated to setup and configure for novices, the point of Frostybot is that it's entirely free. You retain total control over your API keys and trading engine. It is perfect for integration projects where you have a trading engine (like a Tradingview strategy or some custom Python script) that you want to integrate with your exchange.
+While it may seem a little complicated to setup and configure for novices, the point of Frostybot is that it's entirely free. You retain total control over your API keys and trading engine. It is perfect for integration projects where you have a trading engine (like a Tradingview strategy or some custom Python script) that you want to integrate it with your exchange.
 
 ## Requirements
 In order to use Frostybot, you will need the following:
@@ -80,7 +80,7 @@ frostybot status
 
 You will need to identify this account in Frostybot using what is called a stub. It is a lowercase single word to name the account in Frostybot. You will use this stub in all subsequent interactions with the exchange. For example, if your exchange subaccount is called "Algo"-Trading"", add your API keys using this command:
 ```
-frostybot accounts:add stub=algotrading exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
+frostybot accounts:add stub=mystub exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
 ```
 
 **Important:** The subaccount parameter is case-sensitive. Make sure that it is exactly the same as the name on the Exchange. The API keys will be tested with the exchange when you add them so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
