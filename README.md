@@ -28,7 +28,7 @@ Developers listed below can normally be found on the [FrostyBot Discord Server](
 We kindly ask that you fully [**read the documentation**](https://github.com/CryptoMF/frostybot-js/wiki) before requesting any support, as most of the questions we get asked are already well documented.
 
 ## Donations
-If you love this software, and would like to contribute, we accept donations in Bitcoin. Any donations will be shared evenly amoungst all active developers. Our wallet addresses are as follows:
+If you love this software, and would like to contribute, we accept donations in Bitcoin, Ethereum or Litecoin. Any donations will be shared evenly amoungst all active developers. Our wallet addresses are as follows:
 
 * **BTC:** 3QV4xXXDSAXm31kLZHRFrznoS7Qv8BWAri
 * **ETH:** 0xBd6E3c74024B021b5c94eEF8EB8e5bEEF04b57aD
