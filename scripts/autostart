@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sudo crontab -l | grep -iv frostybot | grep -iv "no crontab" > /tmp/tmpcron
+sudo sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' /tmp/tmpcron
 sudo echo "" >> /tmp/tmpcron
 sudo echo "# Automatically start Frostybot when server reboots" >> /tmp/tmpcron
 sudo echo "@reboot frostybot start > /dev/null 2>&1" >> /tmp/tmpcron
