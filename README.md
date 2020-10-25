@@ -76,7 +76,7 @@ You will need to identify this account in Frostybot using what is called a stub.
 frostybot accounts:add stub=mystub exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
 ```
 
-**Important:** The subaccount parameter is case-sensitive. Make sure that it is exactly the same as the name on the Exchange. The API keys will be tested with the exchange when you add them so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
+**Important:** The subaccount parameter is case-sensitive. Make sure that it is exactly the same as the name on the exchange. The API keys will be tested with the exchange when you add them so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
 
 ## Usage
 
