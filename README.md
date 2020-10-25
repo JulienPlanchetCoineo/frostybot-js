@@ -7,7 +7,7 @@ FrostyBot-JS is an API endpoint for REST and webhooks that is designed to receiv
 The way it works is simple:
 
 * There are four main trading commands, namely: 
-  * **long** : Create a long order for the size provided. If you are already long, the order size will be adjusted so that the resulting position size equals the size your provided. If you are currently short, the order size will be adjusted so that your resulting position will be long the size you requested.
+  * **long** : Create a long order for the size provided. If you are already long, the order size will be adjusted so that the resulting position size equals the size you provided. If you are currently short, the order size will be adjusted so that your resulting position will be long the size you requested.
   * **short** : The inverse of the long command above
   * **buy**: Will create a simple order that will buy the amount requested
   * **sell**: The inverse of the buy order above
