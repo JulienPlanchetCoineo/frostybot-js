@@ -22,15 +22,11 @@ sudo chgrp $USER -R /usr/local/frostybot-js >> /tmp/install.log 2>&1
 sudo npm install --unsafe-perm >> /tmp/install.log 2>&1
 
 echo "Creating frostybot command shortcut..." 
+sudo rm -Rf /usr/bin/frostybot
 sudo ln -s /usr/local/frostybot-js/frostybot /usr/bin/frostybot >> /tmp/install.log 2>&1
 
-echo "Starting Frostybot server..." 
-sudo frostybot start >> /tmp/install.log 2>&1
-
-frostybot status
-
-echo "Setting Frostybot to automatically start when server reboots..." 
-sudo frostybot autostart >> /tmp/install.log 2>&1
+frostybot start
+frostybot autostart
 
 cd "$CURRENTPATH" &
 
