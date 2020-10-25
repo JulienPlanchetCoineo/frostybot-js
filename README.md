@@ -25,7 +25,7 @@ Developers listed below can normally be found on the [FrostyBot Discord Server](
 * Barnz
 * SemiQuasi
 
-We kindly ask that you fully **read the documentation** before requesting any support, as most of the questions we get asked are already well documented.
+We kindly ask that you fully [**read the documentation**](https://github.com/CryptoMF/frostybot-js/wiki) before requesting any support, as most of the questions we get asked are already well documented.
 
 ## Donations
 If you love this software, and would like to contribute, we accept donations in Bitcoin. Any donations will be shared evenly amoungst all active developers. Our wallet addresses are as follows:
