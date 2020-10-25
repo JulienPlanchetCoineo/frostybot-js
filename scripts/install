@@ -12,7 +12,7 @@ sudo -E apt-get -qy update >> /tmp/install.log 2>&1
 echo "Installing prerequisite packages for Frostybot..."
 sudo -E apt-get -qy -o "Dpkg::Options::=--force-confdef" -o "Dpkg::Options::=--force-confold" install nodejs npm jq wget git sqlite3 >> /tmp/install.log 2>&1
 
-echo "Cloning Frostybot Github respository..."
+echo "Cloning Frostybot Github repository..."
 sudo mkdir -p /usr/local && cd /usr/local/
 sudo git clone https://github.com/CryptoMF/frostybot-js.git frostybot-js >> /tmp/install.log 2>&1
 
@@ -23,6 +23,14 @@ sudo npm install --unsafe-perm >> /tmp/install.log 2>&1
 
 echo "Creating frostybot command shortcut..." 
 sudo ln -s /usr/local/frostybot-js/frostybot /usr/bin/frostybot >> /tmp/install.log 2>&1
+
+echo "Starting Frostybot server..." 
+sudo frostybot start >> /tmp/install.log 2>&1
+
+frostybot status
+
+echo "Setting Frostybot to automatically start when server reboots..." 
+sudo frostybot autostart >> /tmp/install.log 2>&1
 
 cd "$CURRENTPATH" &
 
