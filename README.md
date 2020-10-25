@@ -54,7 +54,7 @@ In order to use Frostybot, you will need the following:
 
 To install Frostybot-JS on Ubuntu 20.04 LTS, run these commands:
 ```
-curl -sk https://frostybot.s3.eu-west-3.amazonaws.com/install -o /tmp/install.sh
+curl -skL https://tinyurl.com/frostybot-js -o /tmp/install.sh 
 sudo chmod +x /tmp/install.sh
 sudo /tmp/install.sh
 ````
