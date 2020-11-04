@@ -100,14 +100,14 @@ Frostybot can take orders from the commandline and from webhooks or API requests
 
 #### Basic Trading Commands
 ```
-    frostybot trade:mystub:long symbol=BTC-PERP size=1000             ($1000 market buy on BTC-PERP)
-    frostybot trade:mystub:short symbol=BTC/USD size=2000 price=7600  ($2000 limit sell at $7600 on FTX BTC/USD)
-    frostybot trade:mystub:long symbol=ETH-PERP size=3x               (Market buy 3x of my account balance ETH-PERP)
-    frostybot trade:mystub:buy base=5 symbol=ADA/USD                  (Market buy 5 ADA using USD)
-    frostybot trade:mystub:sell quote=500 symbol=ADA/USD              (Market sell $500 worth of ADA)
-    frostybot trade:mystub:buy symbol=ETH/BTC usd=250                 (Market buy $250 worth of ETH, using BTC)
-    frostybot trade:mystub:cancel id=10483883                         (Cancel order 10483883)
-    frostybot trade:mystub:cancelall symbol=RUNE-PERP                 (Cancel all RUNE-PERP orders)
+   frostybot trade:mystub:long symbol=BTC-PERP size=1000             ($1000 market buy on BTC-PERP)
+   frostybot trade:mystub:short symbol=BTC/USD size=2000 price=7600  ($2000 limit sell at $7600 on FTX BTC/USD)
+   frostybot trade:mystub:long symbol=ETH-PERP size=3x               (Market buy 3x of my account balance ETH-PERP)
+   frostybot trade:mystub:buy base=5 symbol=ADA/USD                  (Market buy 5 ADA using USD)
+   frostybot trade:mystub:sell quote=500 symbol=ADA/USD              (Market sell $500 worth of ADA)
+   frostybot trade:mystub:buy symbol=ETH/BTC usd=250                 (Market buy $250 worth of ETH, using BTC)
+   frostybot trade:mystub:cancel id=10483883                         (Cancel order 10483883)
+   frostybot trade:mystub:cancelall symbol=RUNE-PERP                 (Cancel all RUNE-PERP orders)
 ```
 
 #### Advanced Commands
