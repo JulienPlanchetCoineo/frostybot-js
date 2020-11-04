@@ -88,14 +88,14 @@ Frostybot can take orders from the commandline and from webhooks or API requests
 
 #### Account Information Commands
 ```
-   frostybot trade:mystub:markets                       (Get list of markets supported on the exchange)
-   frostybot trade:mystub:market symbol=SOL/USD         (Get market info for the SOL/USD pair)
-   frostybot trade:mystub:positions                     (Get all current positions from exchange)
-   frostybot trade:mystub:position symbol=LTC-PERP      (Get current position info for the LTC-PERP market)
-   frostybot trade:mystub:orders                        (Get list of orders from the exchange)
-   frostybot trade:mystub:order status=open             (Get list of open orders)
-   frostybot trade:mystub:market symbol=SOL/USD         (Get market info for the SOL/USD pair)
-   frostybot trade:mystub:balances                      (Get current equity balances from the exchange)     
+   frostybot trade:mystub:markets                                    (Get list of markets supported on the exchange)
+   frostybot trade:mystub:market symbol=SOL/USD                      (Get market info for the SOL/USD pair)
+   frostybot trade:mystub:positions                                  (Get all current positions from exchange)
+   frostybot trade:mystub:position symbol=LTC-PERP                   (Get current position info for the LTC-PERP market)
+   frostybot trade:mystub:orders                                     (Get list of orders from the exchange)
+   frostybot trade:mystub:order status=open                          (Get list of open orders)
+   frostybot trade:mystub:market symbol=SOL/USD                      (Get market info for the SOL/USD pair)
+   frostybot trade:mystub:balances                                   (Get current equity balances from the exchange)     
 ```
 
 #### Basic Trading Commands
