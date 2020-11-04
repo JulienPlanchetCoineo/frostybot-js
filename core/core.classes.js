@@ -167,16 +167,16 @@ class frostybot_exchange extends frostybot_base {
         // Methods to cache and how many seconds they should be cached for
 
         this.cached_methods = {
-            //positions: 10,
-            //position: 10,
-            //markets: 10,
-            //market: 10,
-            //ticker: 10,
-            //balances: 10,
-            //orders: 10,
-            //get_market_by_id: 10,
-            //get_market_by_symbol: 10,
-            //get_market_by_id_or_symbol: 10,
+            positions: 2,
+            position: 2,
+            markets: 10,
+            market: 10,
+            ticker: 10,
+            balances: 2,
+            orders: 2,
+            get_market_by_id: 10,
+            get_market_by_symbol: 10,
+            get_market_by_id_or_symbol: 10,
         }
 
         this.load_modules()
