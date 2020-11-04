@@ -112,7 +112,7 @@ Frostybot can take orders from the commandline and from webhooks or API requests
 
 #### Advanced Commands
 
-**TODO:** We will add some usage examples here in the next day or two, but for the moment there are plenty of examples on our Discord server
+For more advanced usage, check out the documentation on our [Wiki](https://github.com/CryptoMF/frostybot-js/wiki)
  
 ## Report Bugs
 
