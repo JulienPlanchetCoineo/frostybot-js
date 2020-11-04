@@ -29,6 +29,7 @@ module.exports = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
+                oneof: ['ftx'],
             },
             symbol: {
                 optional: 'string',
@@ -70,6 +71,7 @@ module.exports = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
+                oneof: ['ftx'],
             },
             symbol: {
                 required: 'string',
@@ -106,6 +108,7 @@ module.exports = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
+                oneof: ['ftx'],
             },
             symbol: {
                 required: 'string',

@@ -49,6 +49,16 @@ module.exports = {
     // Get whitelist
 
     get(params) {
+        
+        var schema = {
+            ip: {
+                optional: 'ip',
+                format:   'lowercase',
+            },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         var ip = this.utils.extract_props(params, 'ip');
         //this.tradingview();
         var result = (ip == undefined ? this.settings.get('whitelist') : this.settings.get('whitelist', ip, false));
@@ -70,6 +80,16 @@ module.exports = {
     // Add IP to whitelist
 
     add(params) {
+
+        var schema = {
+            ip: {
+                required: 'ip',
+                format: 'lowercase',
+            },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         var [ip, description] = this.utils.extract_props(params, ['ip', 'description']);
         if (!this.settings.get('whitelist', ip)) {
             var data = {
@@ -89,6 +109,16 @@ module.exports = {
     // Delete IP from whitelist
 
     delete(params) {
+
+        var schema = {
+            ip: {
+                required: 'ip',
+                format: 'lowercase',
+            },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         var ip = this.utils.extract_props(params, 'ip');
         var acl = this.settings.get('whitelist', ip);
         if (acl) {

@@ -76,6 +76,8 @@ module.exports = {
     error: {
 
         required_param:     'Parameter Required: {0}',  
+        required_oneof:     'At least one of the following parameters is required: {0}',  
+        param_val_oneof:    'The {0} parameter should be one of {1}',
         incorrect_type:     'Incorrect Type: {0}, Expected: {1}, Actual: {2}',  
         malformed_param:    'Malformed Parameter: {0}', 
         unknown_module:     'Unknown Module: {0}',

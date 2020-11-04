@@ -237,16 +237,26 @@ module.exports = {
                         module: module,
                         method: method
                     };
+                    // If no symbol is supplied, use the default symbol
+                    if (module != 'symbolmap' && !params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
+                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
+                        if (exchangeid !== false) {
+                            var mapping = await this.symbolmap.map(exchangeid, 'DEFAULT');
+                            if (mapping !== false) {
+                                this.output.notice('symbol_mapping', [exchangeid, 'default', mapping])
+                                params.symbol = mapping;
+                            } 
+                        }
+                    }
                     // Check for symbol mapping and use it
                     if (module != 'symbolmap' && params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
                         var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
                         if (exchangeid !== false) {
                             var mapping = await this.symbolmap.map(exchangeid, params.symbol);
                             if (mapping !== false) {
-                                console.log(mapping)
                                 this.output.notice('symbol_mapping', [exchangeid, params.symbol, mapping])
                                 params.symbol = mapping;
-                            }    
+                            } 
                         }
                     }
                     // If stub is supplied, and not adding a new stub, make sure the account exists

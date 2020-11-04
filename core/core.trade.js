@@ -742,13 +742,25 @@ module.exports = {
 
 
     // ------------------------------------------------------------------------------------------- //
-    // ------------------ The method below are used by modules/mod.trade.js ---------------------- //
+    //                        The methods below are exposed to the API                             //
     // ------------------------------------------------------------------------------------------- //
 
 
     // Long Order
 
     async long(params) {
+
+        var schema = {
+            stub:   { required: 'string', format: 'lowercase', },
+            symbol: { required: 'string', format: 'uppercase', },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('long', params);
     },
@@ -756,6 +768,18 @@ module.exports = {
     // Short Order
 
     async short(params) {
+
+        var schema = {
+            stub:   { required: 'string', format: 'lowercase', },
+            symbol: { required: 'string', format: 'uppercase', },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('short', params);
     },
@@ -764,6 +788,18 @@ module.exports = {
     // Buy Order
 
     async buy(params) {
+
+        var schema = {
+            stub:   { required: 'string', format: 'lowercase', },
+            symbol: { required: 'string', format: 'uppercase', },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('buy', params);
     },
@@ -772,6 +808,18 @@ module.exports = {
     // Sell Order
 
     async sell(params) {
+
+        var schema = {
+            stub:   { required: 'string', format: 'lowercase', },
+            symbol: { required: 'string', format: 'uppercase', },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('sell', params);
     },
@@ -780,6 +828,15 @@ module.exports = {
     // Stoploss Order
 
     async stoploss(params) {
+
+        var schema = {
+            stub:          { required: 'string', format: 'lowercase', },
+            symbol:        { required: 'string', format: 'uppercase', },
+            stoptrigger:   { required: 'string',  },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('stoploss', params);
     },
@@ -788,6 +845,15 @@ module.exports = {
     // Takeprofit Order
 
     async takeprofit(params) {
+
+        var schema = {
+            stub:          { required: 'string', format: 'lowercase', },
+            symbol:        { required: 'string', format: 'uppercase', },
+            profittrigger: { required: 'string',  },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('takeprofit', params);
     },
@@ -796,6 +862,15 @@ module.exports = {
     // Trailstop Order
 
     async trailstop(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+            symbol:      { required: 'string', format: 'uppercase', },
+            trailstop:   { required: 'string',  },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('trailstop', params);
     },
@@ -804,6 +879,14 @@ module.exports = {
     // Close Order
 
     async close(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+            symbol:      { required: 'string', format: 'uppercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         return await this.create_and_submit_order('close', params);
     },
@@ -827,6 +910,15 @@ module.exports = {
     // Cancel orders
     
     async cancel(params) {
+
+        var schema = {
+            stub:   { required: 'string', format: 'lowercase', },
+            symbol: { required: 'string', format: 'uppercase', },
+            id:     { required: 'string',  },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         let result = await this.exchange.cancel(params);
         if (this.utils.is_array(result) && result.length == 1) {
@@ -841,6 +933,14 @@ module.exports = {
     // Cancel all orders
     
     async cancelall(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+            symbol:      { required: 'string', format: 'uppercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         let result = await this.exchange.cancel_all(params);
         if (this.utils.is_array(result)) {
@@ -854,6 +954,14 @@ module.exports = {
     // Get position
     
     async position(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+            symbol:      { required: 'string', format: 'uppercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         var result = await this.exchange.position(params);
         if (!this.utils.is_array(result)) {
@@ -867,6 +975,13 @@ module.exports = {
     // Get positions
     
     async positions(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         var result = await this.exchange.positions(params);
         if (this.utils.is_array(result)) {
@@ -880,6 +995,13 @@ module.exports = {
     // Get balances
     
     async balances(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         var result = await this.exchange.balances(params);
         if (this.utils.is_array(result)) {
@@ -893,6 +1015,14 @@ module.exports = {
     // Get market
     
     async market(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+            symbol:      { required: 'string', format: 'uppercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         var result = await this.exchange.market(params);
         if (!this.utils.is_array(result)) {
@@ -907,6 +1037,13 @@ module.exports = {
     // Get markets
     
     async markets(params) {
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
         this.initialize_exchange(params);
         var result = await this.exchange.markets(params);
         if (this.utils.is_array(result)) {

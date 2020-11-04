@@ -42,42 +42,6 @@ module.exports = {
         return global.frostybot.command.module + ':' + global.frostybot.command.method;
     },
 
-    // Method parameter validator
-
-    validator(params, schema) {
-        this.initialize();
-        params = this.lower_props(params);
-        schema = this.lower_props(schema);
-        for (var prop in schema) {
-            if (!schema.hasOwnProperty(prop)) continue;
-            var settings = schema[prop];
-            var required = settings.hasOwnProperty('required') ? true : false;
-            var expected_type = settings[(required ? 'required' : 'optional')];
-            var format = settings.hasOwnProperty('format') ? settings['format'].toLowerCase() : null;
-            var present = params.hasOwnProperty(prop) ? true : false;
-            if (required && !present) {
-                this.output.error('required_param', prop + ' (' + expected_type + ') in ' + this.get_current_command());
-                return false;
-            }
-            if (present) {
-                var val = params[prop];
-                var actual_type = this.is_bool(val) && expected_type == 'boolean' ? 'boolean' : typeof val;
-                if (actual_type !== expected_type) {
-                    this.output.error('incorrect_type', [prop, expected_type, actual_type]);
-                    return false;    
-                }
-                if (format != null) {
-                    switch(format) {
-                        case 'uppercase' : val = val.toUpperCase(); break;
-                        case 'lowercase' : val = val.toLowerCase(); break;
-                    }
-                }
-                params[prop] = val;
-            }
-        }
-        return params;
-    },
-
 
     // Check if value is JSON
 
@@ -119,7 +83,7 @@ module.exports = {
     },
 
 
-    // Check if value is an object
+    // Check if value is an array
 
     is_array(val) {
         return Array.isArray(val);
@@ -136,6 +100,12 @@ module.exports = {
         )
     },
 
+    // Check if a value is an IP address
+
+    is_ip(value) {
+        const net = require('net')
+        return (net.isIPv4(value) || net.isIPv6(value));
+    },
 
     // Force a value to be an array if it not already an array
 
@@ -419,5 +389,88 @@ module.exports = {
         });
         return words.join(' ');
     },
+
+
+    // Method parameter validator
+
+    validator(params, schema) {
+        this.initialize();
+        params = this.lower_props(params);
+        schema = this.lower_props(schema);
+        for (var prop in schema) {
+            if (!schema.hasOwnProperty(prop)) continue;
+            var settings = schema[prop];
+            var required = settings.hasOwnProperty('required') ? true : false;
+            var expected_type = settings[(required ? 'required' : 'optional')];
+            var oneof = settings.hasOwnProperty('oneof') ? settings['oneof'] : null;
+            var requiredifnotpresent = settings.hasOwnProperty('requiredifnotpresent') ? settings['requiredifnotpresent'] : null;
+            var format = settings.hasOwnProperty('format') ? settings['format'].toLowerCase() : null;
+            var present = params.hasOwnProperty(prop) ? true : false;
+
+            // Check that one of the specified required params is present
+
+            if (requiredifnotpresent != null) {
+                var found = false;
+                requiredoneof = this.force_array(requiredifnotpresent);
+                requiredoneof.push(prop)
+                Object.getOwnPropertyNames(params).forEach(propname => {
+                    if (requiredoneof.includes(propname)) {
+                        found = true
+                    }
+                });
+                if (!found) {
+                    this.output.error('required_oneof', this.serialize_array(requiredoneof));
+                    return false;    
+                }
+            }
+
+            // Param is required but not present
+
+            if (required && !present) {
+                this.output.error('required_param', prop + ' (' + expected_type + ') in ' + this.get_current_command());
+                return false;
+            }
+            if (present) {
+                var val = params[prop];
+
+                // Check param type
+
+                switch(expected_type) {
+                    case    'boolean'   :   var actual_type = this.is_bool(val) ? 'boolean' : typeof val; break;
+                    case    'ip'        :   var actual_type = this.is_ip(val)   ? 'ip'      : typeof val; break;
+                    default             :   var actual_type = typeof val;
+                }
+
+                // Param is the incorrect type
+
+                if ( (expected_type != undefined) && (actual_type !== expected_type) ) {
+                    this.output.error('incorrect_type', [prop, expected_type, actual_type]);
+                    return false;    
+                }
+
+                // Param is the incorrect format
+
+                if (format != null) {
+                    switch(format) {
+                        case 'uppercase' : val = val.toUpperCase(); break;
+                        case 'lowercase' : val = val.toLowerCase(); break;
+                    }
+                }
+
+                // Param is not in the list of allowed values
+
+                if ( (oneof != null) && (this.is_array(oneof)) ) {
+                    if (!oneof.includes(val)) {
+                        this.output.error('param_val_oneof', [prop, this.serialize_array(oneof)]);
+                        return false;
+                    }
+                }
+                params[prop] = val;
+            }
+        }
+        return params;
+    },
+
+
 
 }
