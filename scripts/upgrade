@@ -4,25 +4,38 @@ PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
 CURRENTPATH=`pwd`
 SCRIPTPATH=`dirname "$(readlink -f "$0")"`
 
-if [ ! "$PID" == "" ]; then
-        echo "Frostybot server is running, stopping for upgrade..."
-        cd "$SCRIPTPATH" &
-        cd ../ &
-        ./scripts/stop
-        sleep 2
-        cd "$CURRENTPATH" &
-        DOSTART="true"
-else
-        DOSTART="false"
-fi
-
 cd "$SCRIPTPATH" &
 cd ../ &
-sudo git pull -f
 
-if [ "$DOSTART" == "true" ]; then
+echo "Checking for updates..."
+sudo git fetch > /dev/null 2>&1
+CHECK=`sudo git status | grep "up to date" | wc -l`
+
+if [ "$CHECK" -eq "1" ]; then
+  echo "Frostybot is up to date, no upgrade is required"
+else
+  echo "Frostybot updates available, proceeding with upgrade"
+  if [ ! "$PID" == "" ]; then
+    ./scripts/stop
+    while [ ! "$PID" == "" ]; do
+      sleep 2
+      PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+    done
+    cd "$CURRENTPATH" &
+    DOSTART="true"
+  else
+    DOSTART="false"
+  fi
+  echo "Frostybot server stopped successfully, upgrading now"
+  sudo git pull -f
+  if [ "$DOSTART" == "true" ]; then
     ./scripts/start
+    while [ "$PID" == "" ]; do
+      sleep 2
+      PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+    done
+    echo "Frostybot server started"
+  fi
+  echo "Upgrade complete"
 fi
-
 cd "$CURRENTPATH" &
-
