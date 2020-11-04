@@ -9,6 +9,7 @@ if [ ! "$PID" == "" ]; then
         cd "$SCRIPTPATH" &
         cd ../ &
         ./scripts/stop
+        sleep 2
         cd "$CURRENTPATH" &
         DOSTART="true"
 else
