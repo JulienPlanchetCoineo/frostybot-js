@@ -18,6 +18,10 @@ The way it works is simple:
 * If you specify the price using the price=xxx parameter, a limit order will be used. If you omit the price, a market order will be used at the current market price.
 * Anything that can trigger a webhook (like an alert in Tradingview) can be used with this bot for trade execution.
 
+## Documentation
+
+All documentation can be found on our [Wiki](https://github.com/CryptoMF/frostybot-js/wiki)
+
 ## Authors
 Developers listed below can normally be found on the [FrostyBot Discord Server](https://discord.gg/yK4U93s). They are also known to frequent #the-lab channel on [Krown's Crypto Cave Discord Server](https://discordapp.com/invite/hzKU7qe):
 
