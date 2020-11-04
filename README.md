@@ -3,9 +3,11 @@
 ## Frostybot-JS : A NodeJS API endpoint for Cryptocurrency Trading
 
 FrostyBot-JS is an API endpoint for REST and webhooks that is designed to receive API requests, such as Tradingview webhooks, and to submit them as orders to a cryptocurrency exchange.
-
+ 
 The way it works is simple:
 
+* Commands can be sent to Frostybot via Tradingview alerts (webhooks), a REST API, or the Linux commandline interface (CLI)
+* Frostybot converts the commands into orders and submits them to the exchange
 * There are six main trading commands, namely: 
   * **long** : Create a long order for the size provided. If you are already long, the order size will be adjusted so that the resulting position size equals the size you provided. If you are currently short, the order size will be adjusted so that your resulting position will be long the size you requested.
   * **short** : The inverse of the long command above
