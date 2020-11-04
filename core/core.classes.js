@@ -36,10 +36,11 @@ class frostybot_balance extends frostybot_base {
 
 class frostybot_market extends frostybot_base {
 
-    constructor(id, symbol, base, quote, bid, ask, expiration, contract_size, precision, raw) {
+    constructor(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, raw) {
         super();
         this.id = id;
         this.symbol = symbol;
+        this.type = type;
         this.base = base;
         this.quote = quote;
         this.bid = bid;
@@ -58,13 +59,17 @@ class frostybot_market extends frostybot_base {
 
 class frostybot_position extends frostybot_base {
 
-    constructor(market, direction, base_size, quote_size, entry_price, liquidation_price, pnl = null, raw = null) {
+    constructor(market, direction, base_size, quote_size, entry_price, liquidation_price, pnl = null, note = null, raw = null) {
         super();
 
         var usdbase = market.usd.hasOwnProperty('base') ? market.usd.base : market.usd / base_size;
         var usdquote = market.usd.hasOwnProperty('quote') ? market.usd.quote : market.usd;
 
         this.symbol = market.symbol;
+        this.type = market.type;
+        if (note != null) {
+            this.note = note;
+        }
         this.direction = direction;
         this.base_size = base_size;
         this.quote_size = quote_size;
@@ -167,8 +172,8 @@ class frostybot_exchange extends frostybot_base {
         // Methods to cache and how many seconds they should be cached for
 
         this.cached_methods = {
-            positions: 2,
-            position: 2,
+            //positions: 2,
+            //position: 2,
             markets: 10,
             market: 10,
             ticker: 10,

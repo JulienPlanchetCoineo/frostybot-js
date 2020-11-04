@@ -65,10 +65,18 @@ module.exports = {
         return num.replace(operator, flip);
     },
 
+    
     // Round a number to a given precision
 
     round_num(num, precision) {
         return (Math.round(num / precision) * precision).toFixed(this.utils.num_decimals(precision));
+    },
+
+    
+    // Floor a number to a given precision
+
+    floor_num(num, precision) {
+        return (Math.floor(num / precision) * precision).toFixed(this.utils.num_decimals(precision));
     },
 
 
@@ -83,6 +91,13 @@ module.exports = {
 
     round_amount(market, amount) {
         return this.round_num(amount, market.precision.amount);
+    },
+
+
+    // Floor an order amount to the supported market precision
+
+    floor_amount(market, amount) {
+        return this.floor_num(amount, market.precision.amount);
     },
 
 
@@ -350,6 +365,7 @@ module.exports = {
         }
 
         // Check if no size was given for close order
+        var closeall = false;
         if (type == 'close') {
             var size_provided = false
             if (base != undefined)  size_provided = true
@@ -358,6 +374,8 @@ module.exports = {
             if (usd != undefined)   size_provided = true
             if (!size_provided) {
                 size = '100%'
+                target = 0
+                closeall = true;
             }
         }
 
@@ -433,7 +451,7 @@ module.exports = {
             case 'long'  :  target = requested;                   break;
             case 'short' :  target = -1 * Math.abs(requested);    break;
             case 'close' :  if (dir == 'flat') return this.output.error('position_none', symbol)
-                            target = (dir == 'long') ? current - requested : current + requested
+                            target = closeall ? 0 : ((dir == 'long') ? current - requested : current + requested)
                             is_close = true
         }
 
@@ -486,6 +504,13 @@ module.exports = {
         if ((dir == 'long' && target < 0) || (dir == 'short' && target > 0)) {
             is_flip = true
             this.output.warning('order_will_flip', [dir, (dir == 'long' ? 'short' : 'long')])
+        }
+
+        // Ensure that when closing all of position and the exchange uses base sizing that the order size equals the current base size
+        if ((type == 'close') && (closeall) && (this.exchange.get('order_sizing') == 'base')) {
+            sizing = 'base'
+            current = this.floor_amount(market, current_position['base_size'])
+            target = 0
         }
 
         var order_size = target - current

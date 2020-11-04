@@ -167,6 +167,48 @@ module.exports = class frostybot_exchange_base {
         })
     }
 
+
+    // Get account balances
+
+    async balances() {
+        if (this.data.balances != null) {
+            return this.data.balances;
+        }
+        let results = await this.ccxt('fetch_balance');
+        await this.markets();
+        if (results.result == 'success') {
+            var raw_balances = results.data;
+            delete raw_balances.info;
+            delete raw_balances.free;
+            delete raw_balances.used;
+            delete raw_balances.total;
+            var balances = [];
+            Object.keys(raw_balances)
+                .forEach(currency => {
+                    var raw_balance = raw_balances[currency];
+                    const used = raw_balance.used;
+                    const free = raw_balance.free;
+                    const total = raw_balance.total;
+                    var price = null;
+                    if (this.stablecoins.includes(currency)) {
+                        price = 1;
+                    } else {
+                        var market = this.data.markets_by_symbol[currency + '/USD'];
+                        if (market != null) {
+                            price = (market.bid + market.ask) / 2;
+                        }
+                    }
+                    const balance = new this.classes.balance(currency, price, free, used, total);
+                    if (Math.round(balance.usd.total) != 0) {
+                        balances.push(balance);
+                    }
+                });
+            this.data.balances = balances;
+            return balances;
+        }   
+        return [];
+    }
+
     // Get total of all equity assets in USD
 
     async balance_usd() {
@@ -249,6 +291,16 @@ module.exports = class frostybot_exchange_base {
         return result;
     }
 
+    // Get ticker for a symbol
+
+    async ticker(symbol) {
+        let results = await this.ccxt('fetch_ticker', symbol);
+        if (results.result == 'success') {
+            return results.data;
+        }
+        return null;
+    }
+
     // Get position for specific filter
     
     async position(filter) {
@@ -260,5 +312,53 @@ module.exports = class frostybot_exchange_base {
         return result;
     }
 
+    // Create new order
+
+    async create_order(params) {
+        var [symbol, type, side, amount, price, order_params] = this.utils.extract_props(params, ['symbol', 'type', 'side', 'amount', 'price', 'params']);
+        let create_result = await this.ccxt('create_order',[symbol, type, side, amount, price, order_params]);
+        if (create_result.result == 'error') {
+            var errortype = create_result.data.name;
+            var trimerr = create_result.data.message.replace('ftx','')
+            if (this.utils.is_json(trimerr)) {
+                var errormsg = JSON.parse(trimerr).error;
+                var result = {result: 'error', params: params, error: {type: errortype, message: errormsg}};
+            } else {
+                var errormsg = create_result.data.message;
+                var result = {result: 'error', params: params, error: {type: errortype, message: errormsg}};
+            }
+        } else {
+            var result = {result: 'success', params: params, order: this.parse_order(create_result.data)};
+        }
+        return result;
+    }
+    
+
+    // Get orders
+
+    async orders(params) {
+        if (params == undefined) {
+            params = { id: 'all'};
+        }
+        var [status, type, dir] = this.utils.extract_props(params, ['status', 'type', 'direction']);
+        if (status == 'open') {
+            var orders = await this.open_orders(params);    
+        } else {
+            var orders = await this.all_orders(params);
+        }
+        return orders
+            .filter(order => (status == null || order.status == status))
+            .filter(order => (type == null || order.type == type))
+            .filter(order => (dir == null || order.direction == dir));
+    }
+
+
+    // Cancel all orders
+    
+    async cancel_all(params) {
+        params.id = 'all';
+        return this.cancel(params);
+    }
+    
 
 }
