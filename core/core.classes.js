@@ -76,7 +76,6 @@ class frostybot_position extends frostybot_base {
 
         var sizing = base_size == null ? 'quote' : (quote_size == null ? 'base' : 'unknown')
         var current_price = (market.avg != null ? market.avg : (market.bid + market.ask) / 2);
-        console.log(sizing);
         switch (sizing) {
             case    'base'  :   this.base_size = base_size;
                                 this.quote_size = base_size * entry_price;
