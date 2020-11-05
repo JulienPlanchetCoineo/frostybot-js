@@ -1,3 +1,5 @@
+const { raw } = require('body-parser');
+
 frostybot_exchange_base = require('./exchange.base');
 
 module.exports = class frostybot_exchange_deribit extends frostybot_exchange_base {
@@ -8,7 +10,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         super(stub);
         this.stablecoins = ['USD', 'USDT'];  // Stablecoins supported on this exchange
         this.order_sizing = 'quote';         // Exchange requires base size for orders
-        this.collateral_assets = ['BTC', 'ETH', 'USDT'];   // Assets that are used for collateral
+        this.collateral_assets = ['BTC','ETH'];   // Assets that are used for collateral
         this.balances_market_map = '{currency}-PERPETUAL'  // Which market to use to convert non-USD balances to USD
         this.param_map = {                   // Order parameter mappings
             limit              : 'limit',
@@ -19,13 +21,44 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
             takeprofit_market  : 'limit',
             post               : 'post_only',
             reduce             : 'reduce_only',
-            ioc                : 'ioc',              // TODO
+            ioc                : 'ioc',         
             tag                : 'label',
             trigger            : 'stop_price',
             stoploss_trigger   : 'stop_price',       
             takeprofit_trigger : 'price',
             trigger_type       : 'trigger',
         };
+    }
+
+    // Get available equity in USD for placing an order on a specific symbol using size as a factor of equity (size=1x)
+
+    async available_equity_usd(symbol) {
+        var collateral_map = {  
+            '-USDT-' : 'USDT',
+            'ETH-'   : 'ETH',
+            'BTC-'   : 'BTC',
+        }
+        var keys = Object.keys(collateral_map);
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (symbol.includes(key)) {
+                var currency = collateral_map[key];
+                var raw_balances = await this.fetch_balance(currency);
+                if (raw_balances.result == 'success') {
+                    raw_balances = raw_balances.data;
+                }
+                var raw_balance = raw_balances[currency];
+                const used = raw_balance.used;
+                const free = raw_balance.free;
+                const total = raw_balance.total;
+                var price = this.get_usd_price(currency)
+                const balance = new this.classes.balance(currency, price, free, used, total);
+                if (this.utils.is_object(balance)) {
+                    return Math.floor(balance.usd.free);
+                }
+            }    
+        }
+        return false;
     }
 
     // Get list of current positions
@@ -35,9 +68,10 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         var positions = []; 
         for (var i = 0; i < this.collateral_assets.length; i++) {
             var currency = this.collateral_assets[i];
-            let results = await this.ccxtobj.private_get_get_positions({currency: currency, kind: 'future'});
-            if (this.utils.is_array(results.result)) {
-                var raw_positions = results.result;
+            //var results = await this.ccxtobj.private_get_get_positions({currency: currency, kind: 'future'});
+            var results = await this.ccxt('private_get_get_positions', [{currency: currency, kind: 'future'}]);
+            if (results.result == 'success') {
+                var raw_positions = this.utils.force_array(results.data.result);
             } else {
                 var raw_positions = [];
             }
@@ -63,15 +97,16 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
 
     // Get current balances (need to override for Deribit because CCXT is broken)
 
-    async fetch_balance() {
+    async fetch_balance(currency = null) {
         var results = {
             result: 'success',
             data: {},
         };
-        for (var i = 0; i < this.collateral_assets.length; i++) {
-            var currency = this.collateral_assets[i];
+        var assets = currency == null ? this.collateral_assets : [currency];
+        for (var i = 0; i < assets.length; i++) {
+            var currency = assets[i];
             this.set_code(currency)
-            var rawbalance = await this.ccxtobj.privateGetGetAccountSummary({currency: currency})
+            var rawbalance = await this.ccxtobj.private_get_get_account_summary({currency: currency})
             var total = rawbalance.result.equity
             var free = rawbalance.result.available_funds
             var used = total - free;
@@ -99,12 +134,32 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
     // Get tickers
 
     async fetch_tickers() {
-        if (this.data.tickers != null) {
-            return this.data.tickers;
-        }
-        this.data.tickers = {};
+//        if (this.data.tickers != null) {
+//            return this.data.tickers;
+//        }
+//        this.data.tickers = {};
+        var results = {};
         for (var i = 0; i < this.collateral_assets.length; i++) {
             var currency = this.collateral_assets[i];
+            var result = await this.ccxt('public_get_get_book_summary_by_currency', {currency: currency, kind: 'future'});
+            if (result.result == 'success') {
+                var tickers = result.data.result;
+                for (var j =0; j < tickers.length; j++) {
+                    var ticker = tickers[j]
+                    var symbol = ticker.instrument_name
+                    var bid = ticker.bid_price
+                    var ask = ticker.ask_price
+                    results[symbol] = {
+                        symbol: symbol,
+                        bid:    bid,
+                        ask:    ask,
+                    }
+                }
+            }
+        }
+        this.data.tickers = results;
+        return results;
+            /*
             this.set_code(currency);
             var result = await this.ccxt('fetch_tickers');
             if (result.result == 'success') {
@@ -118,6 +173,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
             }
         }
         return this.data.tickers;
+            */
     }
 
     // Get list of markets from exchange

@@ -342,7 +342,7 @@ module.exports = {
             default  : var factor = 1; break;
         }
         var position_size = await this.position_size_usd(symbol);
-        var balance_size = await this.exchange.total_balance_usd();
+        var balance_size = await this.exchange.available_equity_usd(symbol);
         if (order_type == 'close') {
             var base = Math.abs(position_size)
             operator = '';  // Ignore operator on close orders
@@ -522,6 +522,13 @@ module.exports = {
         if ((type == 'close') && (closeall) && (this.exchange.get('order_sizing') == 'base')) {
             sizing = 'base'
             current = this.floor_amount(market, current_position['base_size'])
+            target = 0
+        }
+
+        // Ensure that when closing all of position and the exchange uses quote sizing that the order size equals the current quote size
+        if ((type == 'close') && (closeall) && (this.exchange.get('order_sizing') == 'quote')) {
+            sizing = 'quote'
+            current = this.floor_amount(market, current_position['quote_size'])
             target = 0
         }
 

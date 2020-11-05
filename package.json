@@ -17,6 +17,7 @@
     "fs": "0.0.1-security",
     "md5": "^2.3.0",
     "morgan": "~1.9.1",
+    "node-cache": "^5.1.2",
     "trim-newlines": "^3.0.0",
     "uuid": "^8.3.0"
   }

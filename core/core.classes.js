@@ -1,6 +1,11 @@
 // Frostybot Custom Classes
 
 
+// Caching modules
+
+const NodeCache = require( "node-cache" )
+const cache = new NodeCache( { stdTTL: 30, checkperiod: 120 } )
+
 // The base class (All Frostybot classes are derived from this)
 class frostybot_base {
 
@@ -50,7 +55,7 @@ class frostybot_market extends frostybot_base {
         this.expiration = expiration;
         this.contract_size = contract_size;
         this.precision = precision;
-        //this.raw = raw;
+        this.raw = raw;
     }
 
 }
@@ -174,6 +179,7 @@ class frostybot_exchange extends frostybot_base {
             'ticker',
             'total_balance_usd',
             'free_balance_usd',
+            'available_equity_usd',
             'balances',
             'orders',
             'cancel',
@@ -189,6 +195,7 @@ class frostybot_exchange extends frostybot_base {
         this.cached_methods = {
             //positions: 2,
             //position: 2,
+            available_equity_usd: 2,
             markets: 10,
             market: 10,
             ticker: 10,
@@ -245,23 +252,26 @@ class frostybot_exchange extends frostybot_base {
     // Cache method
 
     async cache_method(method, params) {
-        const md5 = require('md5');
+        
+        if (this.handler == undefined)
+            this.load_handler(params.stub)
+
         if (this.cached_methods.hasOwnProperty(method)) {
             var cachemethod = true;
             var cachetime = this.cached_methods[method];
-            var key = md5(this.stub + method + JSON.stringify(params));
-            var cacheresult = this.cache.get(key, cachetime);
-            if (cacheresult != null) {
-                return cacheresult;
+            var key = md5([this.stub, method, this.utils.serialize(params)].join('|'));
+            var value = cache.get( key );
+            if ( value == undefined ) {
+                var result = await this.handler.execute(method, params);
+                cache.set( key, result, cachetime );
+            } else {
+                var result = value;
             }
         } else {
-            var cachemethod = false;
+            var result = await this.handler.execute(method, params);
         }
-        if (this.handler == undefined)
-            this.load_handler(params.stub)
-        let result = await this.handler.execute(method, params);
-        if (cachemethod) this.cache.set(key, result);
         return result;
+        
     }
 
 

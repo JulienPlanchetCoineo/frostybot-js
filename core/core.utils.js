@@ -278,7 +278,7 @@ module.exports = {
             var fields = Object.getOwnPropertyNames(obj);
             fields.forEach(field => {
                 var fieldname = field.toLowerCase();
-                if (filters[field] != undefined) {
+                if (filters[fieldname] != undefined) {
                     var filterval = filters[field];
                     if (obj[field].toLowerCase() == filterval.toLowerCase()) {
                         results.push(obj);

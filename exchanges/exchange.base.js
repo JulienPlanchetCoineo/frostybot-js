@@ -1,7 +1,9 @@
 // Exchange Base Class
 
 const ccxtlib = require ('ccxt')
-
+md5 = require('md5')
+const NodeCache = require( "node-cache" )
+const cache = new NodeCache( { stdTTL: 30, checkperiod: 120 } )
 
 // Normalizer base class
 
@@ -15,6 +17,7 @@ module.exports = class frostybot_exchange_base {
             markets_by_id: {},
             markets_by_symbol: {},
         }
+        this.stub = stub;
         this.account = this.accounts.getaccount(stub);
         if (this.account) {
             const accountParams = this.accounts.ccxtparams(this.account);
@@ -63,7 +66,25 @@ module.exports = class frostybot_exchange_base {
             if (!this.utils.is_array(params)) {
                 params = [params];
             }
-            let result = await this.ccxtobj[method](...params);
+            var cache_methods = {
+                //'fetch_tickers' : 5,
+                'fetch_markets' : 5,
+                'private_get_get_positions' : 5,
+                'public_get_get_book_summary_by_currency': 15,
+            }
+            if (cache_methods.hasOwnProperty(method)) {
+                var cachetime = cache_methods[method]
+                var key = md5([this.stub, method, this.utils.serialize(params)].join('|'));
+                var value = cache.get( key );
+                if ( value == undefined ) {
+                    var result = await this.ccxtobj[method](...params);
+                    cache.set( key, result, cachetime );
+                } else {
+                    var result = value;
+                }
+            } else {
+                var result = await this.ccxtobj[method](...params);
+            }
             return { result: 'success', data: result }
         }
         catch (error) {
@@ -168,6 +189,25 @@ module.exports = class frostybot_exchange_base {
     }
 
 
+    // Get USD price for a currency
+
+    get_usd_price(currency) {
+        var price = null;
+        if (this.stablecoins.includes(currency)) {
+            price = 1;
+            return price;
+        } else {
+            var mapsymbol = this.balances_market_map.replace('{currency}', currency);
+            var market = this.data.markets_by_symbol[mapsymbol];
+            if (market != null) {
+                price = (market.bid + market.ask) / 2;
+                return price;
+            }
+        }
+        return false;
+    }
+
+
     // Get account balances
 
     async balances() {
@@ -189,16 +229,7 @@ module.exports = class frostybot_exchange_base {
                     const used = raw_balance.used;
                     const free = raw_balance.free;
                     const total = raw_balance.total;
-                    var price = null;
-                    if (this.stablecoins.includes(currency)) {
-                        price = 1;
-                    } else {
-                        var mapsymbol = this.balances_market_map.replace('{currency}', currency);
-                        var market = this.data.markets_by_symbol[mapsymbol];
-                        if (market != null) {
-                            price = (market.bid + market.ask) / 2;
-                        }
-                    }
+                    var price = this.get_usd_price(currency)
                     const balance = new this.classes.balance(currency, price, free, used, total);
                     if (Math.round(balance.usd.total) != 0) {
                         balances.push(balance);

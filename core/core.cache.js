@@ -7,8 +7,12 @@ module.exports = {
     // Initialize Module
 
     initialize() {
-        if (this.initialized !== true)
+        if (this.initialized !== true) {
             this.modules();
+            if (!global.frostybot.hasOwnProperty('cachedata')) {
+                global.frostybot.cachedata = {}
+            }
+        }
         this.initialized = true;
     },
 
@@ -95,6 +99,7 @@ module.exports = {
             'timestamp': Date.now() / 1000,
             'data': JSON.stringify(data),
         };
+        global.frostybot.cachedata[keymd5] = cachedata
         if (this.database.insertOrReplace('cache', cachedata).changes == 1) {
             return true;
         }

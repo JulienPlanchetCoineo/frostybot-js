@@ -27,7 +27,12 @@ else
     DOSTART="false"
   fi
   echo "Frostybot server stopped successfully, upgrading now"
+  echo "Updating Frostybot files from Github"
   sudo git pull -f
+  echo "Installing outstanding NodeJS modules"
+  sudo npm install --unsafe-perm > /dev/null 2>&1
+  echo "Updating existing NodeJS modules"
+  sudo npm upgrade > /dev/null 2>&1
   if [ "$DOSTART" == "true" ]; then
     ./scripts/start
     while [ "$PID" == "" ]; do
