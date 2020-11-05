@@ -1,10 +1,8 @@
 // Frostybot Custom Classes
 
 
-// Caching modules
+md5 = require('md5')
 
-const NodeCache = require( "node-cache" )
-const cache = new NodeCache( { stdTTL: 30, checkperiod: 120 } )
 
 // The base class (All Frostybot classes are derived from this)
 class frostybot_base {
@@ -55,7 +53,7 @@ class frostybot_market extends frostybot_base {
         this.expiration = expiration;
         this.contract_size = contract_size;
         this.precision = precision;
-        this.raw = raw;
+        //this.raw = raw;
     }
 
 }
@@ -69,7 +67,6 @@ class frostybot_position extends frostybot_base {
 
         var usdbase = market.usd.hasOwnProperty('base') ? market.usd.base : market.usd;
         var usdquote = market.usd.hasOwnProperty('quote') ? market.usd.quote : market.usd;
-
         this.symbol = market.symbol;
         this.type = market.type;
         if (note != null) {
@@ -79,6 +76,7 @@ class frostybot_position extends frostybot_base {
 
         var sizing = base_size == null ? 'quote' : (quote_size == null ? 'base' : 'unknown')
         var current_price = (market.avg != null ? market.avg : (market.bid + market.ask) / 2);
+        console.log(sizing);
         switch (sizing) {
             case    'base'  :   this.base_size = base_size;
                                 this.quote_size = base_size * entry_price;
@@ -257,13 +255,12 @@ class frostybot_exchange extends frostybot_base {
             this.load_handler(params.stub)
 
         if (this.cached_methods.hasOwnProperty(method)) {
-            var cachemethod = true;
             var cachetime = this.cached_methods[method];
             var key = md5([this.stub, method, this.utils.serialize(params)].join('|'));
-            var value = cache.get( key );
+            var value = this.cache.get( key );
             if ( value == undefined ) {
                 var result = await this.handler.execute(method, params);
-                cache.set( key, result, cachetime );
+                this.cache.set( key, result, cachetime );
             } else {
                 var result = value;
             }

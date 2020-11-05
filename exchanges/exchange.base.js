@@ -2,8 +2,6 @@
 
 const ccxtlib = require ('ccxt')
 md5 = require('md5')
-const NodeCache = require( "node-cache" )
-const cache = new NodeCache( { stdTTL: 30, checkperiod: 120 } )
 
 // Normalizer base class
 
@@ -70,22 +68,28 @@ module.exports = class frostybot_exchange_base {
                 //'fetch_tickers' : 5,
                 'fetch_markets' : 5,
                 'private_get_get_positions' : 5,
+                'private_get_get_account_summary': 5,
+                'private_get_positions' : 5,
+                'fetch_orders' : 5,
+                'fetch_open_orders' : 5,
+                'fetch_closed_orders' : 5,
                 'public_get_get_book_summary_by_currency': 15,
+                'v3_get_ticker_bookticker': 15,
             }
             if (cache_methods.hasOwnProperty(method)) {
                 var cachetime = cache_methods[method]
                 var key = md5([this.stub, method, this.utils.serialize(params)].join('|'));
-                var value = cache.get( key );
+                var value = this.cache.get( key );
                 if ( value == undefined ) {
                     var result = await this.ccxtobj[method](...params);
-                    cache.set( key, result, cachetime );
+                    this.cache.set( key, result, cachetime );
                 } else {
                     var result = value;
                 }
             } else {
                 var result = await this.ccxtobj[method](...params);
             }
-            return { result: 'success', data: result }
+            return result;
         }
         catch (error) {
             return { result: 'error', data: error }
@@ -216,8 +220,8 @@ module.exports = class frostybot_exchange_base {
         }
         let results = await this.execute('fetch_balance');
         await this.markets();
-        if (results.result == 'success') {
-            var raw_balances = results.data;
+        if (results.result != 'error') {
+            var raw_balances = results;
             delete raw_balances.info;
             delete raw_balances.free;
             delete raw_balances.used;
@@ -351,7 +355,7 @@ module.exports = class frostybot_exchange_base {
         let create_result = await this.ccxt('create_order',[symbol, type, side, amount, price, order_params]);
         if (create_result.result == 'error') {
             var errortype = create_result.data.name;
-            var trimerr = create_result.data.message.replace('ftx','')
+            var trimerr = create_result.data.message.replace('ftx','').replace('deribit','')
             if (this.utils.is_json(trimerr)) {
                 var errormsg = JSON.parse(trimerr).error;
                 var result = {result: 'error', params: params, error: {type: errortype, message: errormsg}};
@@ -360,7 +364,7 @@ module.exports = class frostybot_exchange_base {
                 var result = {result: 'error', params: params, error: {type: errortype, message: errormsg}};
             }
         } else {
-            var result = {result: 'success', params: params, order: this.parse_order(create_result.data)};
+            var result = {result: 'success', params: params, order: this.parse_order(create_result)};
         }
         return result;
     }
