@@ -174,7 +174,7 @@ module.exports = class frostybot_exchange_base {
         if (this.data.balances != null) {
             return this.data.balances;
         }
-        let results = await this.ccxt('fetch_balance');
+        let results = await this.execute('fetch_balance');
         await this.markets();
         if (results.result == 'success') {
             var raw_balances = results.data;
@@ -193,7 +193,8 @@ module.exports = class frostybot_exchange_base {
                     if (this.stablecoins.includes(currency)) {
                         price = 1;
                     } else {
-                        var market = this.data.markets_by_symbol[currency + '/USD'];
+                        var mapsymbol = this.balances_market_map.replace('{currency}', currency);
+                        var market = this.data.markets_by_symbol[mapsymbol];
                         if (market != null) {
                             price = (market.bid + market.ask) / 2;
                         }

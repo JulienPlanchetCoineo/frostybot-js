@@ -109,7 +109,7 @@ module.exports = {
 
         var schema = {
             stub: {        required: 'string', format: 'lowercase' },
-            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx'] },
+            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit'] },
             description: { optional: 'string'  },
             apikey: {      required: 'string'  },
             secret: {      required: 'string'  },
@@ -226,12 +226,10 @@ module.exports = {
         if (testnet) {
             if (ccxturls.hasOwnProperty('test')) {
                 const url = ccxturls.test;
+                result.parameters.urls.api = url
             } else {
                 this.output.translate('warning', 'testnet_not_avail', this.utils.uc_first(result.exchange));
-                const url = ccxturls.api;
             }
-        } else {
-            const url = ccxturls.api;
         }
         return result;
     },

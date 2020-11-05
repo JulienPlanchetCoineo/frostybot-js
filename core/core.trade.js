@@ -190,6 +190,18 @@ module.exports = {
                                 break;
         }
 
+
+        // Default size when no size provided for stoploss and takeprofit
+        if ((['stoploss', 'takeprofit'].includes(type)) && (size == null) && (base == null) && (quote == null) && (usd == null)) {
+            var order_sizing = this.exchange.get('order_sizing');
+            var position = await this.get_position(symbol);
+            switch (order_sizing) {
+                case 'base'  :   base  = position.base_size;   break;
+                case 'quote' :   quote = position.quote_size;  break;
+            }
+        }
+
+        // If size provided, assume it's the quote size
         if (size != undefined) quote = size;
 
         // Get market data for symbol
@@ -593,12 +605,12 @@ module.exports = {
         params = this.utils.lower_props(params);
 
         switch (type) {
-            case 'stoploss' :   var [symbol, side, trigger, price, reduce, tag] = this.utils.extract_props(params, ['symbol', 'side', 'stoptrigger', 'stopprice', 'reduce', 'tag']);
+            case 'stoploss' :   var [symbol, side, trigger, triggertype, price, reduce, tag] = this.utils.extract_props(params, ['symbol', 'side', 'stoptrigger', 'triggertype', 'stopprice', 'reduce', 'tag']);
                                 var above = 'buy';
                                 var below = 'sell';
                                 side = undefined;
                                 break;
-            case 'takeprofit' : var [symbol, side, trigger, price, reduce, tag] = this.utils.extract_props(params, ['symbol', 'side', 'profittrigger', 'profitprice', 'reduce', 'tag']);
+            case 'takeprofit' : var [symbol, side, trigger, triggertype, price, reduce, tag] = this.utils.extract_props(params, ['symbol', 'side', 'profittrigger', 'triggertype', 'profitprice', 'reduce', 'tag']);
                                 var above = 'sell';
                                 var below = 'buy';
                                 side = undefined;
@@ -644,7 +656,21 @@ module.exports = {
      
         // Add additional parameters
         order_params.params[this.param_map.reduce] = (String(reduce) == "true" ? true : undefined);
-        order_params.params[this.param_map.trigger] = trigger;
+        
+        // Trigger for TP/SL
+        if (this.param_map.hasOwnProperty(type + '_trigger')) {
+            order_params.params[this.param_map[type + '_trigger']] = trigger;
+        } else {
+            order_params.params[this.param_map.trigger] = trigger;
+        }
+        if (order_params.params.hasOwnProperty('price')) {
+            order_params.price = order_params.params.price;
+            delete order_params.params.price
+        }
+
+        // Trigger type for TP/SL
+        order_params.params[this.param_map.trigger_type] = triggertype == undefined ? 'mark_price' : triggertype;
+
         //order_params.params[this.param_map.tag]    = tag;
         
         return this.utils.remove_values(order_params, [null, undefined]);

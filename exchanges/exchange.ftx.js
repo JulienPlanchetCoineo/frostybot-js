@@ -9,6 +9,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
         this.stablecoins = ['USD', 'USDT'];  // Stablecoins supported on this exchange
         this.order_sizing = 'base';          // Exchange requires base size for orders
         this.collateral_assets = ['BCH','BNB','BTC','BVOL','CUSDT','ETH','FTT','IBVOL','KNC','LINK','LTC','PAXG','SOL','SRM','TRX','TRYB','USD','USDT','XAUT','XRP'];  // Assets that are used for collateral
+        this.balances_market_map = '{currency}/USD'  // Which market to use to convert non-USD balances to USD
         this.param_map = {                   // Order parameter mappings
             limit             : 'limit',
             market            : 'market',
@@ -45,12 +46,11 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
                 const direction = (raw_position.side == 'buy' ? 'long' : 'short');
                 const base_size = raw_position.size;
                 const entry_price = raw_position.recentAverageOpenPrice;
-                const quote_size = base_size * entry_price;
                 const liquidation_price = raw_position.estimatedLiquidationPrice;
                 const pnl = raw_position.realizedPnl;
                 const note = null;
                 const raw = raw_position;
-                const position = new this.classes.position(market, direction, base_size, quote_size, entry_price, liquidation_price, pnl, note, raw);
+                const position = new this.classes.position(market, direction, base_size, null, entry_price, liquidation_price, pnl, note, raw);
                 positions.push(position)
             })
         // Emulate spot "positions" against USD for non-stablecoin balances
