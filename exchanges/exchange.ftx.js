@@ -35,12 +35,8 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
     // Get list of current positions
 
     async positions() { 
-        let results = await this.ccxt('privateGetPositions', {showAvgPrice: true});
-        if (results.result == 'success') {
-            var raw_positions = results.data.result;
-        } else {
-            var raw_positions = [];
-        }
+        let results = await this.ccxt('private_get_positions', {showAvgPrice: true});
+        var raw_positions = results.result;
         await this.markets();
         // Get futures positions
         var positions = []; 
@@ -74,7 +70,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
                     const pnl = null;
                     const note = "This spot 'position' is derived from your " + market.base + " account balance. Entry price and PNL are not calculated.";
                     const raw = null;
-                    const position = new this.classes.position(market, direction, base_size, quote_size, entry_price, liquidation_price, pnl, note, raw);
+                    const position = new this.classes.position(market, direction, base_size, null, entry_price, liquidation_price, pnl, note, raw);
                     positions.push(position)
                 }
             }
@@ -89,12 +85,8 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
         if (this.data.markets != null) {
             return this.data.markets;
         }
-        let result = await this.ccxt('fetch_markets');
-        if (result.result == 'success') {
-            var raw_markets = result.data;
-        } else {
-            return false;
-        }  
+        let results = await this.ccxt('fetch_markets');
+        var raw_markets = results;
         this.data.markets = [];
         raw_markets
             .filter(raw_market => raw_market.active == true)
@@ -118,27 +110,13 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
         return this.data.markets;
     }
 
-    // Get account collateral
-
-    async collateral() {
-        let results = await this.ccxt('privateGetAccount');
-        if (results.result == 'success') {
-            var account = results.data.result;
-            var result = {
-                total: account.collateral,
-                free: account.freeCollateral
-            }
-            return result;
-        }
-        return null;
-    }
 
     // Get open orders
 
     async open_orders(params) {
         var [symbol, since, limit] = this.utils.extract_props(params, ['symbol', 'since', 'limit']);
-        let raworders1 = await this.ccxtobj.fetchOpenOrders(symbol, since, limit, {method: 'privateGetOrders'});
-        let raworders2 = await this.ccxtobj.fetchOpenOrders(symbol, since, limit, {method: 'privateGetConditionalOrders'});
+        let raworders1 = await this.ccxt('fetch_open_orders',[symbol, since, limit, {method: 'privateGetOrders'}]);
+        let raworders2 = await this.ccxt('fetch_open_orders',[symbol, since, limit, {method: 'privateGetConditionalOrders'}]);
         var raworders = this.merge_orders(raworders1, raworders2);
         return this.parse_orders(raworders);
     }
@@ -147,8 +125,8 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
 
     async all_orders(params) {
         var [symbol, since, limit] = this.utils.extract_props(params, ['symbol', 'since', 'limit']);
-        let raworders1 = await this.ccxtobj.fetchOrders(symbol, since, limit, {method: 'privateGetOrdersHistory'});
-        let raworders2 = await this.ccxtobj.fetchOrders(symbol, since, limit, {method: 'privateGetConditionalOrdersHistory'});
+        let raworders1 = await this.ccxt('fetch_orders',[symbol, since, limit, {method: 'privateGetOrdersHistory'}]);
+        let raworders2 = await this.ccxt('fetch_orders',[symbol, since, limit, {method: 'privateGetConditionalOrdersHistory'}]);
         var raworders = this.merge_orders(raworders1, raworders2);
         return this.parse_orders(raworders);
     }
