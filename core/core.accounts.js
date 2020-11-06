@@ -109,7 +109,7 @@ module.exports = {
 
         var schema = {
             stub: {        required: 'string', format: 'lowercase' },
-            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit'] },
+            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit', 'binance'] },
             description: { optional: 'string'  },
             apikey: {      required: 'string'  },
             secret: {      required: 'string'  },
@@ -210,13 +210,22 @@ module.exports = {
                 apiKey:     account.parameters.hasOwnProperty('apikey') ? this.encryption.decrypt(account.parameters.apikey) : null,
                 secret:     account.parameters.hasOwnProperty('secret') ? this.encryption.decrypt(account.parameters.secret) : null,
                 urls:       {},
-                //type:       account.parameters.hasOwnProperty('type')       ? account.parameters.type       : null,
             },   
         }
         if ((result.exchange == 'ftx') && (subaccount != null)) {
             result.parameters.headers = {
                 'FTX-SUBACCOUNT': subaccount
             };
+        }
+        if (result.exchange == 'binance') {
+            var type = account.parameters.hasOwnProperty('type') ? account.parameters['type'].replace('futures','future') : 'future';
+            if (!['spot', 'future'].includes(type)) {
+                return this.output.error('param_val_oneof', ['type', this.serialize_array(['spot', 'futures'])])
+            } else {
+                result.parameters['options'] = {
+                    defaultType : type,
+                };
+            }
         }
         const exchangeId = account.exchange;
         const exchangeClass = ccxtlib[exchangeId];

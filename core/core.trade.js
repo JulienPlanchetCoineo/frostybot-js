@@ -670,13 +670,18 @@ module.exports = {
         } else {
             order_params.params[this.param_map.trigger] = trigger;
         }
+        //if ((order_params.type == 'STOP_LOSS_LIMIT') && (order_params.price == null)) {
+        //    order_params.price = (trigger * 1)+1
+        //}
         if (order_params.params.hasOwnProperty('price')) {
             order_params.price = order_params.params.price;
             delete order_params.params.price
         }
 
         // Trigger type for TP/SL
-        order_params.params[this.param_map.trigger_type] = triggertype == undefined ? 'mark_price' : triggertype;
+        if (this.param_map.hasOwnProperty('trigger_type')) {
+            order_params.params[this.param_map.trigger_type] = triggertype == undefined ? 'mark_price' : triggertype;
+        }
 
         //order_params.params[this.param_map.tag]    = tag;
         

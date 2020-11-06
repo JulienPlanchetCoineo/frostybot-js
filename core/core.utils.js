@@ -62,6 +62,13 @@ module.exports = {
     },
 
 
+    // Check if value is numeric
+
+    is_numeric(val) {
+        return !isNaN(parseFloat(val)) && isFinite(val);
+    },
+
+
     // Check if value is true
 
     is_true(val) {

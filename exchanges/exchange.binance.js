@@ -1,28 +1,28 @@
 frostybot_exchange_base = require('./exchange.base');
 
-module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
+module.exports = class frostybot_exchange_binance extends frostybot_exchange_base {
 
     // Class constructor
 
     constructor(stub) {
         super(stub);
-        this.stablecoins = ['USD', 'USDT'];  // Stablecoins supported on this exchange
-        this.order_sizing = 'base';          // Exchange requires base size for orders
-        this.collateral_assets = ['BCH','BNB','BTC','BVOL','CUSDT','ETH','FTT','IBVOL','KNC','LINK','LTC','PAXG','SOL','SRM','TRX','TRYB','USD','USDT','XAUT','XRP'];  // Assets that are used for collateral
-        this.balances_market_map = '{currency}/USD'  // Which market to use to convert non-USD balances to USD
-        this.param_map = {                   // Order parameter mappings
-            limit             : 'limit',
-            market            : 'market',
-            stoploss_limit    : 'stop',
-            stoploss_market   : 'stop',
-            takeprofit_limit  : 'takeProfit', 
-            takeprofit_market : 'takeProfit',
-            trailing_stop     : 'trailingStop', 
-            post              : 'postOnly',
+        this.stablecoins = ['USDT','BUSD'];          // Stablecoins supported on this exchange
+        this.order_sizing = 'base';                  // Exchange requires base size for orders
+        this.collateral_assets = ['USDT','BUSD'];    // Assets that are used for collateral
+        this.balances_market_map = '{currency}/USDT' // Which market to use to convert non-USD balances to USD
+        this.param_map = {                           // Order parameter mappings
+            limit             : 'LIMIT',
+            market            : 'MARKET',
+            stoploss_limit    : 'STOP_LOSS_LIMIT',
+            stoploss_market   : 'STOP_LOSS_LIMIT',   // Market stops are not supported by the Binance Spot API, even through their documentation says it is
+            takeprofit_limit  : 'TAKE_PROFIT_LIMIT', 
+            takeprofit_market : 'TAKE_PROFIT',
+            trailing_stop     : null, 
+            post              : null,                // TODO
             reduce            : 'reduceOnly',
-            ioc               : 'ioc',
-            tag               : 'clientId',
-            trigger           : 'triggerPrice',
+            ioc               : null,                // TODO
+            tag               : null,                // TODO
+            trigger           : 'stopPrice',
         };
     }
 
@@ -35,25 +35,9 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
     // Get list of current positions
 
     async positions() { 
-        let results = await this.ccxt('private_get_positions', {showAvgPrice: true});
-        var raw_positions = results.result;
-        await this.markets();
-        // Get futures positions
-        var positions = []; 
-        await raw_positions
-            .filter(raw_position => raw_position.size != 0)
-            .forEach(async raw_position => {
-                const symbol = raw_position.future;
-                const market = await this.get_market_by_symbol(symbol);
-                const direction = (raw_position.side == 'buy' ? 'long' : 'short');
-                const base_size = raw_position.size;
-                const entry_price = raw_position.recentAverageOpenPrice;
-                const liquidation_price = raw_position.estimatedLiquidationPrice;
-                const raw = raw_position;
-                const position = new this.classes.position_futures(market, direction, base_size, null, entry_price, liquidation_price, raw);
-                positions.push(position)
-            })
         // Emulate spot "positions" against USD for non-stablecoin balances
+        await this.markets();
+        var positions = []; 
         var balances = await this.balances();
         this.stablecoins.forEach(async (stablecoin) => {
             balances.forEach(async (balance) => {
@@ -79,7 +63,8 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
         if (this.data.markets != null) {
             return this.data.markets;
         }
-        let results = await this.ccxt('fetch_markets');
+        await this.fetch_tickers();
+        let results = await this.ccxt('fetch_markets')
         var raw_markets = results;
         this.data.markets = [];
         raw_markets
@@ -87,11 +72,12 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
             .forEach(raw_market => {
                 const id = raw_market.id;
                 const symbol = raw_market.symbol;
-                const type = raw_market.info.type;
+                const type = 'spot';
                 const base = raw_market.base;
                 const quote = raw_market.quote;
-                const bid = raw_market.info.bid;
-                const ask = raw_market.info.ask;
+                var ticker = this.data.tickers.hasOwnProperty(id) ? this.data.tickers[id] : null;
+                const bid = ticker != null ? ticker.bid : null;
+                const ask = ticker != null ? ticker.ask : null;
                 const expiration = (raw_market.expiration != null ? raw_market.expiration : null);
                 const contract_size = (raw_market.info.contractSize != null ? raw_market.info.contractSize : 1);
                 const precision = raw_market.precision;
@@ -105,13 +91,30 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
     }
 
 
+    // Fetch tickers
+
+    async fetch_tickers() {
+        var results = {};
+        this.data.tickers = {};
+        var tickersRaw = await this.ccxt('v3_get_ticker_bookticker')
+        for (var i = 0; i < tickersRaw.length; i++) {
+            var tickerRaw = tickersRaw[i];
+            var symbol = tickerRaw.symbol;
+            results[symbol] = {
+                bid: this.utils.is_numeric(tickerRaw.bidPrice) ? tickerRaw.bidPrice * 1 : null,
+                ask: this.utils.is_numeric(tickerRaw.askPrice) ? tickerRaw.askPrice * 1 : null,
+            }
+        }
+        this.data.tickers = results;
+        return results;
+    }
+
+    
     // Get open orders
 
     async open_orders(params) {
         var [symbol, since, limit] = this.utils.extract_props(params, ['symbol', 'since', 'limit']);
-        let raworders1 = await this.ccxt('fetch_open_orders',[symbol, since, limit, {method: 'privateGetOrders'}]);
-        let raworders2 = await this.ccxt('fetch_open_orders',[symbol, since, limit, {method: 'privateGetConditionalOrders'}]);
-        var raworders = this.merge_orders(raworders1, raworders2);
+        let raworders = await this.ccxt('fetch_open_orders',[symbol, since, limit]);
         return this.parse_orders(raworders);
     }
 
@@ -119,9 +122,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
 
     async all_orders(params) {
         var [symbol, since, limit] = this.utils.extract_props(params, ['symbol', 'since', 'limit']);
-        let raworders1 = await this.ccxt('fetch_orders',[symbol, since, limit, {method: 'privateGetOrdersHistory'}]);
-        let raworders2 = await this.ccxt('fetch_orders',[symbol, since, limit, {method: 'privateGetConditionalOrdersHistory'}]);
-        var raworders = this.merge_orders(raworders1, raworders2);
+        let raworders = await this.ccxt('fetch_orders',[symbol, since, limit]);
         return this.parse_orders(raworders);
     }
 
@@ -131,22 +132,17 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
         var [symbol, id] = this.utils.extract_props(params, ['symbol', 'id']);
         var orders = await this.open_orders({symbol: symbol});
         if (id.toLowerCase() == 'all') {
-            let result = await this.ccxtobj.privateDeleteOrders({market: symbol});
-            if (String(result.success) == "true") {
-                orders.forEach((order, idx) => {
-                    order.status = 'cancelled';
-                    orders[idx] = order;
-                })   
-            } 
+            let cancel = await this.ccxt('cancel_all_orders',[symbol]);
+            console.log(cancel)
+            orders.forEach((order, idx) => {
+                order.status = 'cancelled';
+                orders[idx] = order;
+            })   
         } else {
             orders = orders.filter(order => ['all',order.id].includes(id));
             await orders.forEach(async (order) => {
                 var id = order.id;
-                if (['market','limit'].includes(order.type)) {
-                    await this.ccxtobj.privateDeleteOrdersOrderId({'order_id': id});
-                } else {
-                    await this.ccxtobj.privateDeleteConditionalOrdersOrderId({'order_id': id});
-                }
+                let orders = await this.ccxt('cancel_order',[{market: symbol, id: id}]);
             });
             orders.forEach((order, idx) => {
                 order.status = 'cancelled';
@@ -182,7 +178,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
             case 'take_profit'   :  type = (price != trigger ? 'takeprofit_limit' : 'takeprofit_market');
                                     break;
         }
-        const status = order.status.replace('canceled', 'cancelled');   // Fix spelling error
+        const status = order.status.replace('CANCELED', 'cancelled');   // Fix spelling error
         const raw = order.info;
         return new this.classes.order(market, id, timestamp, type, direction, price, trigger, size_base, size_quote, filled_base, filled_quote, status, raw);
     }

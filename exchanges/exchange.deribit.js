@@ -9,7 +9,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
     constructor(stub) {
         super(stub);
         this.stablecoins = ['USD', 'USDT'];  // Stablecoins supported on this exchange
-        this.order_sizing = 'quote';         // Exchange requires base size for orders
+        this.order_sizing = 'quote';         // Exchange requires quote size for orders
         this.collateral_assets = ['BTC','ETH'];   // Assets that are used for collateral
         this.balances_market_map = '{currency}-PERPETUAL'  // Which market to use to convert non-USD balances to USD
         this.param_map = {                   // Order parameter mappings
@@ -68,13 +68,8 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         var positions = []; 
         for (var i = 0; i < this.collateral_assets.length; i++) {
             var currency = this.collateral_assets[i];
-            //var results = await this.ccxtobj.private_get_get_positions({currency: currency, kind: 'future'});
             var results = await this.ccxt('private_get_get_positions', [{currency: currency, kind: 'future'}]);
-            if (results.result == 'success') {
-                var raw_positions = this.utils.force_array(results.data.result);
-            } else {
-                var raw_positions = [];
-            }
+            var raw_positions = results.result;
             await raw_positions
                 .filter(raw_position => raw_position.size != 0)
                 .forEach(async raw_position => {
@@ -84,10 +79,8 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
                     const entry_price = raw_position.average_price;
                     const quote_size = raw_position.size;
                     const liquidation_price = raw_position.estimated_liquidation_price;
-                    const pnl = raw_position.realized_profit_loss;
-                    const note = null;
                     const raw = raw_position;
-                    const position = new this.classes.position(market, direction, null, quote_size, entry_price, liquidation_price, pnl, note, raw);
+                    const position = new this.classes.position_futures(market, direction, null, quote_size, entry_price, liquidation_price, raw);
                     positions.push(position)
                 })
             }
@@ -106,7 +99,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         for (var i = 0; i < assets.length; i++) {
             var currency = assets[i];
             this.set_code(currency)
-            var rawbalance = await this.ccxtobj.private_get_get_account_summary({currency: currency})
+            var rawbalance = await this.ccxt('private_get_get_account_summary',[{currency: currency}]);
             var total = rawbalance.result.equity
             var free = rawbalance.result.available_funds
             var used = total - free;
@@ -134,46 +127,27 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
     // Get tickers
 
     async fetch_tickers() {
-//        if (this.data.tickers != null) {
-//            return this.data.tickers;
-//        }
-//        this.data.tickers = {};
         var results = {};
+        this.data.tickers = {};
         for (var i = 0; i < this.collateral_assets.length; i++) {
             var currency = this.collateral_assets[i];
-            var result = await this.ccxt('public_get_get_book_summary_by_currency', {currency: currency, kind: 'future'});
-            if (result.result == 'success') {
-                var tickers = result.data.result;
-                for (var j =0; j < tickers.length; j++) {
-                    var ticker = tickers[j]
-                    var symbol = ticker.instrument_name
-                    var bid = ticker.bid_price
-                    var ask = ticker.ask_price
-                    results[symbol] = {
-                        symbol: symbol,
-                        bid:    bid,
-                        ask:    ask,
-                    }
+            var rawtickers = await this.ccxt('public_get_get_book_summary_by_currency', {currency: currency, kind: 'future'});
+            var tickers = rawtickers.result;
+            for (var j =0; j < tickers.length; j++) {
+                var ticker = tickers[j]
+                var symbol = ticker.instrument_name
+                var bid = ticker.bid_price
+                var ask = ticker.ask_price
+                results[symbol] = {
+                    symbol: symbol,
+                    bid:    bid,
+                    ask:    ask,
                 }
+
             }
         }
         this.data.tickers = results;
         return results;
-            /*
-            this.set_code(currency);
-            var result = await this.ccxt('fetch_tickers');
-            if (result.result == 'success') {
-                var tickers = Object.values(result.data);
-                if (this.utils.is_array(tickers)) {
-                    tickers.forEach(ticker => {
-                        var symbol = ticker.symbol;
-                        this.data.tickers[symbol] = ticker;
-                    })
-                }
-            }
-        }
-        return this.data.tickers;
-            */
     }
 
     // Get list of markets from exchange
@@ -184,12 +158,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         }
         await this.fetch_tickers();
         this.data.markets = [];
-        var result = await this.ccxt('fetch_markets');
-        if (result.result == 'success') {
-            var raw_markets = result.data;
-        } else {
-            return false;
-        }  
+        var raw_markets = await this.ccxt('fetch_markets');
         raw_markets
             .filter(raw_market => raw_market.active == true && ['spot', 'future'].includes(raw_market.type))
             .forEach(raw_market => {
@@ -215,20 +184,6 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         return this.data.markets;
     }
 
-    // Get account collateral
-
-    async collateral() {
-        let results = await this.ccxt('privateGetAccount');
-        if (results.result == 'success') {
-            var account = results.data.result;
-            var result = {
-                total: account.collateral,
-                free: account.freeCollateral
-            }
-            return result;
-        }
-        return null;
-    }
 
     // Get open orders
 
@@ -236,7 +191,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         var [symbol, since, limit] = this.utils.extract_props(params, ['symbol', 'since', 'limit']);
         var currency = symbol.slice(0,3);
         this.set_code(currency);
-        let raworders = await this.ccxtobj.fetchOpenOrders(symbol, since, limit, {type: 'all'});
+        let raworders = await this.ccxt('fetch_open_orders', [symbol, since, limit, {type: 'all'}]);
         return this.parse_orders(raworders);
     }
 
@@ -246,8 +201,8 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
         var [symbol, since, limit] = this.utils.extract_props(params, ['symbol', 'since', 'limit']);
         var currency = symbol.slice(0,3);
         this.set_code(currency);
-        let raworders1 = await this.ccxtobj.fetchOpenOrders(symbol, since, limit, {type: 'all'});
-        let raworders2 = await this.ccxtobj.fetchClosedOrders(symbol, since, limit, {type: 'all'});
+        let raworders1 = await this.ccxt('fetch_open_orders', [symbol, since, limit, {type: 'all'}]);
+        let raworders2 = await this.ccxt('fetch_closed_orders', [symbol, since, limit, {type: 'all'}]);
         var raworders = this.merge_orders(raworders1, raworders2);
         return this.parse_orders(raworders);
     }

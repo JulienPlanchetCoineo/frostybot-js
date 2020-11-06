@@ -58,47 +58,59 @@ class frostybot_market extends frostybot_base {
 
 }
 
-// Position Object
+// Position Base Object
 
 class frostybot_position extends frostybot_base {
 
-    constructor(market, direction, base_size, quote_size, entry_price, liquidation_price, pnl = null, note = null, raw = null) {
+    constructor(market, direction, base_size, quote_size, price, raw) {
         super();
 
         var usdbase = market.usd.hasOwnProperty('base') ? market.usd.base : market.usd;
         var usdquote = market.usd.hasOwnProperty('quote') ? market.usd.quote : market.usd;
+        //this.raw = raw;
+        
         this.symbol = market.symbol;
         this.type = market.type;
-        if (note != null) {
-            this.note = note;
-        }
         this.direction = direction;
 
         var sizing = base_size == null ? 'quote' : (quote_size == null ? 'base' : 'unknown')
-        var current_price = (market.avg != null ? market.avg : (market.bid + market.ask) / 2);
         switch (sizing) {
             case    'base'  :   this.base_size = base_size;
-                                this.quote_size = base_size * entry_price;
-                                this.usd_size = base_size * usdbase;
-                                this.entry_price = entry_price;
-                                this.entry_value = base_size * this.entry_price;
-                                this.current_price = current_price
-                                this.current_value = base_size * this.current_price;
+                                this.quote_size = this.base_size * price;
+                                this.usd_size = this.base_size * usdbase;
                                 break;
-            case    'quote' :   this.base_size = quote_size / entry_price;
+            case    'quote' :   this.base_size = quote_size / price;
                                 this.quote_size = quote_size;
                                 this.usd_size = this.base_size * usdquote;
-                                this.entry_price = entry_price;
-                                this.entry_value = this.base_size * this.entry_price;
-                                this.current_price = current_price
-                                this.current_value = this.base_size * this.current_price;
                                 break;
         }
 
+    }
+
+}
+
+// Futures Position Object
+
+class frostybot_position_futures extends frostybot_position {
+    
+    constructor(market, direction, base_size, quote_size, entry_price, liquidation_price, raw = null) {
+        super(market, direction, base_size, quote_size, entry_price, raw);
+        this.entry_price = entry_price;
+        this.entry_value = this.base_size * this.entry_price;
+        this.current_price = (market.avg != null ? market.avg : (market.bid + market.ask) / 2)
+        this.current_value = base_size * this.current_price;
         this.liquidation_price = liquidation_price;
-        //this.pnl = (pnl != null ? pnl : this.current_value - this.entry_value); // Calculate PNL is not supplied by exchange
         this.pnl = (this.current_value - this.entry_value); // Calculate PNL is not supplied by exchange
-        //this.raw = raw;
+    }
+
+}
+
+// Spot Position Object
+
+class frostybot_position_spot extends frostybot_position {
+
+    constructor(market, direction, base_size, quote_size, raw = null) {
+        super(market, direction, base_size, quote_size, market.avg, raw);
     }
 
 }
@@ -292,11 +304,12 @@ class frostybot_exchange extends frostybot_base {
 
 module.exports = {
 
-    balance:  frostybot_balance,
-    position: frostybot_position,
-    market:   frostybot_market,
-    order:    frostybot_order,
-    output:   frostybot_output,
-    exchange: frostybot_exchange,
+    balance:            frostybot_balance,
+    position_futures:   frostybot_position_futures,
+    position_spot:      frostybot_position_spot,
+    market:             frostybot_market,
+    order:              frostybot_order,
+    output:             frostybot_output,
+    exchange:           frostybot_exchange,
 
 }
