@@ -36,7 +36,6 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
 
     async positions() { 
         let raw_positions = await this.ccxt('fapiPrivate_get_positionrisk');
-        console.log(raw_positions)
         await this.markets();
         // Get futures positions
         var positions = []; 
