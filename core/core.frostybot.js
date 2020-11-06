@@ -265,7 +265,6 @@ module.exports = {
                         if (this.accounts.getaccount(stub) === false) {
                             return this.output.parse(this.output.error('unknown_stub', stub))
                         } 
-                        this.output.debug('stub_valid', stub)
                         params.stub = stub
                     }
                     let result = await this[module][method](params);

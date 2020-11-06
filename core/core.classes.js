@@ -242,7 +242,8 @@ class frostybot_exchange extends frostybot_base {
             }    
             const exchange_id = account.exchange;
             this.exchange_id = exchange_id;
-            this.exchanges[exchange_id] = require('../exchanges/exchange.' + exchange_id);
+            var type = account.hasOwnProperty('type') ? account.type : null;
+            this.exchanges[exchange_id] = require('../exchanges/exchange.' + exchange_id + (type != null ? '.' + type : ''));
             const exchange_class = this.exchanges[exchange_id];
             this.handler = new exchange_class (stub);
         }

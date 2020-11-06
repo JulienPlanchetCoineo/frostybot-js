@@ -1,6 +1,6 @@
-frostybot_exchange_base = require('./exchange.base');
+frostybot_exchange_binance_base = require('./exchange.binance.base');
 
-module.exports = class frostybot_exchange_binance extends frostybot_exchange_base {
+module.exports = class frostybot_exchange_binance_futures extends frostybot_exchange_binance_base {
 
     // Class constructor
 
@@ -9,15 +9,15 @@ module.exports = class frostybot_exchange_binance extends frostybot_exchange_bas
         this.stablecoins = ['USDT','BUSD'];          // Stablecoins supported on this exchange
         this.order_sizing = 'base';                  // Exchange requires base size for orders
         this.collateral_assets = ['USDT','BUSD'];    // Assets that are used for collateral
-        this.balances_market_map = '{currency}/USDT' // Which market to use to convert non-USD balances to USD
+        this.balances_market_map = '{currency}USDT'  // Which market to use to convert non-USD balances to USD
         this.param_map = {                           // Order parameter mappings
             limit             : 'LIMIT',
             market            : 'MARKET',
-            stoploss_limit    : 'STOP_LOSS_LIMIT',
-            stoploss_market   : 'STOP_LOSS_LIMIT',   // Market stops are not supported by the Binance Spot API, even through their documentation says it is
-            takeprofit_limit  : 'TAKE_PROFIT_LIMIT', 
-            takeprofit_market : 'TAKE_PROFIT',
-            trailing_stop     : null, 
+            stoploss_limit    : 'STOP',
+            stoploss_market   : 'STOP_MARKET',
+            takeprofit_limit  : 'TAKE_PROFIT', 
+            takeprofit_market : 'TAKE_PROFIT_MARKET',
+            trailing_stop     : 'TRAILING_STOP_MARKET', 
             post              : null,                // TODO
             reduce            : 'reduceOnly',
             ioc               : null,                // TODO
@@ -35,24 +35,25 @@ module.exports = class frostybot_exchange_binance extends frostybot_exchange_bas
     // Get list of current positions
 
     async positions() { 
-        // Emulate spot "positions" against USD for non-stablecoin balances
+        let raw_positions = await this.ccxt('fapiPrivate_get_positionrisk');
+        console.log(raw_positions)
         await this.markets();
+        // Get futures positions
         var positions = []; 
-        var balances = await this.balances();
-        this.stablecoins.forEach(async (stablecoin) => {
-            balances.forEach(async (balance) => {
-                if (!this.stablecoins.includes(balance.currency)) {
-                    const symbol = balance.currency + '/' + stablecoin;
-                    const market = await this.get_market_by_symbol(symbol);
-                    if (market != null) {
-                        const direction = 'long';
-                        const base_size = balance.base.total;
-                        const position = new this.classes.position_spot(market, direction, base_size);
-                        positions.push(position)
-                    }
-                }
-            });
-        });
+        await raw_positions
+            .filter(raw_position => raw_position.positionAmt != 0)
+            .forEach(async raw_position => {
+                const symbol = raw_position.symbol;
+                const market = await this.get_market_by_id_or_symbol(symbol);
+                const direction = (raw_position.positionAmt > 0 ? 'long' : (raw_position.positionAmt <  0 ? 'short' : 'flat'));
+                const base_size = (raw_position.positionAmt * 1);
+                const entry_price = (raw_position.entryPrice * 1);
+                const liquidation_price = this.utils.is_numeric(raw_position.liquidationPrice) ? (raw_position.liquidationPrice * 1) : null;
+                const raw = raw_position;
+                console.log(market)
+                const position = new this.classes.position_futures(market, direction, base_size, null, entry_price, liquidation_price, raw);
+                positions.push(position)
+            })
         this.positions = positions;
         return this.positions;
     }
@@ -72,7 +73,7 @@ module.exports = class frostybot_exchange_binance extends frostybot_exchange_bas
             .forEach(raw_market => {
                 const id = raw_market.id;
                 const symbol = raw_market.symbol;
-                const type = 'spot';
+                const type = 'futures';
                 const base = raw_market.base;
                 const quote = raw_market.quote;
                 var ticker = this.data.tickers.hasOwnProperty(id) ? this.data.tickers[id] : null;
@@ -80,7 +81,12 @@ module.exports = class frostybot_exchange_binance extends frostybot_exchange_bas
                 const ask = ticker != null ? ticker.ask : null;
                 const expiration = (raw_market.expiration != null ? raw_market.expiration : null);
                 const contract_size = (raw_market.info.contractSize != null ? raw_market.info.contractSize : 1);
-                const precision = raw_market.precision;
+                const price_filter  = this.utils.filter_objects(raw_market.info.filters, {filterType: 'PRICE_FILTER'} );
+                const amount_filter = this.utils.filter_objects(raw_market.info.filters, {filterType: 'LOT_SIZE'} );
+                const precision = {
+                    price: (price_filter[0].tickSize * 1),
+                    amount: (amount_filter[0].stepSize * 1)
+                }
                 const raw = raw_market.info;
                 const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, raw)
                 this.data.markets.push(market);
@@ -96,7 +102,7 @@ module.exports = class frostybot_exchange_binance extends frostybot_exchange_bas
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
-        var tickersRaw = await this.ccxt('v3_get_ticker_bookticker')
+        var tickersRaw = await this.ccxt('fapiPublic_get_ticker_bookticker')
         for (var i = 0; i < tickersRaw.length; i++) {
             var tickerRaw = tickersRaw[i];
             var symbol = tickerRaw.symbol;
@@ -162,7 +168,7 @@ module.exports = class frostybot_exchange_binance extends frostybot_exchange_bas
         const symbol = order.symbol;
         const market = this.data.markets_by_symbol[symbol];
         const id = order.id;
-        const timestamp = order.timestamp;
+        const timestamp = order.info.updateTime;
         const direction = order.side;
         const trigger = (order.info.trailValue != undefined ? order.info.trailValue : (order.info.triggerPrice != undefined ? order.info.triggerPrice : null));
         const market_price = (direction == 'buy' ? market.ask : market.bid);

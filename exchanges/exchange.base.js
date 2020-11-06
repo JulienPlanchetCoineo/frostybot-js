@@ -73,8 +73,10 @@ module.exports = class frostybot_exchange_base {
                 'fetch_orders' : 5,
                 'fetch_open_orders' : 5,
                 'fetch_closed_orders' : 5,
-                'public_get_get_book_summary_by_currency': 15,
-                'v3_get_ticker_bookticker': 15,
+                'public_get_get_book_summary_by_currency': 5,
+                'v3_get_ticker_bookticker': 5,
+                'fapiPublic_get_ticker_bookticker': 5,
+                'fapiPrivate_get_positionrisk' : 5,
             }
             if (cache_methods.hasOwnProperty(method)) {
                 var cachetime = cache_methods[method]
@@ -219,6 +221,7 @@ module.exports = class frostybot_exchange_base {
             return this.data.balances;
         }
         let results = await this.execute('fetch_balance');
+        console.log(results)
         await this.markets();
         if (results.result != 'error') {
             var raw_balances = results;

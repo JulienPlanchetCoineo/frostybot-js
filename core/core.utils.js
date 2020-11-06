@@ -286,7 +286,7 @@ module.exports = {
             fields.forEach(field => {
                 var fieldname = field.toLowerCase();
                 if (filters[fieldname] != undefined) {
-                    var filterval = filters[field];
+                    var filterval = filters[fieldname];
                     if (obj[field].toLowerCase() == filterval.toLowerCase()) {
                         results.push(obj);
                     }

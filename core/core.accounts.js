@@ -92,12 +92,15 @@ module.exports = {
         const stub = params.stub.toLowerCase();
         const description = params.hasOwnProperty('description') ? params.description : params.exchange;
         const exchange = params.exchange.toLowerCase();
+        const type = params.hasOwnProperty('type') ? params.type : undefined;
         delete params.stub;
         delete params.description;
         delete params.exchange;
+        delete params.type;
         var data = {
             description: description,
             exchange: exchange,
+            type: type,
             parameters: params,
         }
         return [stub, data];
@@ -115,10 +118,15 @@ module.exports = {
             secret: {      required: 'string'  },
             testnet: {     optional: 'boolean' },
             subaccount: {  optional: 'string'  },
-            type: {        optional: 'string', format: 'lowercase' },
+            type: {        optional: 'string', format: 'lowercase', oneof: ['spot', 'futures'] },
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
+
+
+        if ((params.exchange == 'binance') && (!params.hasOwnProperty('type'))) {
+            return this.output.error('binance_req_type')
+        }
 
         var [stub, data] = this.create_params(params);
         let testresult = await this.test(data);
@@ -218,7 +226,7 @@ module.exports = {
             };
         }
         if (result.exchange == 'binance') {
-            var type = account.parameters.hasOwnProperty('type') ? account.parameters['type'].replace('futures','future') : 'future';
+            var type = (account.hasOwnProperty('type') ? account.type.replace('futures','future') : 'future');
             if (!['spot', 'future'].includes(type)) {
                 return this.output.error('param_val_oneof', ['type', this.serialize_array(['spot', 'futures'])])
             } else {

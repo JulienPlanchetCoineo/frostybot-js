@@ -25,7 +25,6 @@ module.exports = {
 
     debug: {
 
-        stub_valid:         'The stub {0} refers to a valid account',
         whitelist_verify:   'Address is whitelisted: {0}. Allowing access to the API.',
         whitelist_get:      'Retrieved IP address from the whitelist: {0}: {1}',
         symbolmap_get:      'Retrieved symbol mapping: {0}: {1} => {2}',
@@ -89,6 +88,7 @@ module.exports = {
         account_update:     'Failed to update account: {0}',
         account_delete:     'Failed to delete account: {0}',
         account_test:       'Cannot connect using these account settings',
+        binance_req_type:   'The Binance exchange requires the type parameter (type=spot or type=futures)',
 
         encryption_failed:  'Failed to encrypt data',
         decryption_failed:  'Failed to decrypt data',
