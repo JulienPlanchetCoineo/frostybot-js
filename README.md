@@ -37,7 +37,7 @@ We kindly ask that you fully [**read the documentation**](https://github.com/Cry
 Use this API at your own risk. The authors accept no responsibility for losses incurred through using this software. This is a 0.x release which means it's beta software. So it may and probably will have some bugs. We strongly advise you to use a sub-account with a limited balance, or a testnet account to ensure that the bot is profitable before going live with any strategy. While we have gone to great lengths to test the software, if you do find any bugs, please report them to us in the [FrostyBot Discord Server](https://discord.gg/yK4U93s) or on Github, and we will sort them out. Remember that risk management is your responsibility. If you lose your account, that's entirely on you.
 
 ## Supported Exchanges
-Currently only FTX and Deribit are supported. But we will add support for Binance (Spot and Futures), and Bitmex in the near future. These exchanges are already supported on the PHP version of Frostybot, which you can find on this Github
+Currently FTX, Deribit and Binance (Spot and Futures) are supported. But we will add support for others in the near future. 
 
 ## Scope      
 This bot is specifically designed to execute orders based on webhook or REST API requests. These can be from Tradingview, or any other software that can execute webhooks.
