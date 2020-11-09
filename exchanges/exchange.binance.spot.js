@@ -80,7 +80,13 @@ module.exports = class frostybot_exchange_binance_spot extends frostybot_exchang
                 const ask = ticker != null ? ticker.ask : null;
                 const expiration = (raw_market.expiration != null ? raw_market.expiration : null);
                 const contract_size = (raw_market.info.contractSize != null ? raw_market.info.contractSize : 1);
-                const precision = raw_market.precision;
+                //const precision = raw_market.precision;
+                const price_filter  = this.utils.filter_objects(raw_market.info.filters, {filterType: 'PRICE_FILTER'} );
+                const amount_filter = this.utils.filter_objects(raw_market.info.filters, {filterType: 'LOT_SIZE'} );
+                const precision = {
+                    price: (price_filter[0].tickSize * 1),
+                    amount: (amount_filter[0].stepSize * 1)
+                }
                 const raw = raw_market.info;
                 const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, raw)
                 this.data.markets.push(market);
