@@ -221,7 +221,6 @@ module.exports = class frostybot_exchange_base {
             return this.data.balances;
         }
         let results = await this.execute('fetch_balance');
-        console.log(results)
         await this.markets();
         if (results.result != 'error') {
             var raw_balances = results;

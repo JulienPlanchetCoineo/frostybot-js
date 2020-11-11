@@ -90,7 +90,6 @@ module.exports = class frostybot_exchange_binance_base extends frostybot_exchang
         var orders = await this.open_orders({symbol: symbol});
         if (id.toLowerCase() == 'all') {
             let cancel = await this.ccxt('cancel_all_orders',[symbol]);
-            console.log(cancel)
             orders.forEach((order, idx) => {
                 order.status = 'cancelled';
                 orders[idx] = order;

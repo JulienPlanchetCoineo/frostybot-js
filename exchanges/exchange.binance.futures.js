@@ -49,7 +49,6 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
                 const entry_price = (raw_position.entryPrice * 1);
                 const liquidation_price = this.utils.is_numeric(raw_position.liquidationPrice) ? (raw_position.liquidationPrice * 1) : null;
                 const raw = raw_position;
-                console.log(market)
                 const position = new this.classes.position_futures(market, direction, base_size, null, entry_price, liquidation_price, raw);
                 positions.push(position)
             })
@@ -138,7 +137,6 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         var orders = await this.open_orders({symbol: symbol});
         if (id.toLowerCase() == 'all') {
             let cancel = await this.ccxt('cancel_all_orders',[symbol]);
-            console.log(cancel)
             orders.forEach((order, idx) => {
                 order.status = 'cancelled';
                 orders[idx] = order;
