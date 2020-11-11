@@ -631,7 +631,7 @@ module.exports = {
                                 side = undefined;
                                 break;
         }
-        const stub = params[stub]
+        const stub = params.stub
         
         // Get parameters from the normalizer
         this.param_map = this.exchange[stub].get('param_map');
@@ -703,7 +703,7 @@ module.exports = {
 
     async create_order(type, params) {
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         params.market = await this.exchange[stub].get_market_by_symbol(params.symbol.toUpperCase());
         this.output.subsection('order_' + type);  
         var order_params = null;
@@ -765,7 +765,7 @@ module.exports = {
     
     // Process order queue (submit orders to the exchange)
 
-    async process_order_queue() {
+    async process_order_queue(stub) {
         this.order_results = [];
         var total_orders = this.order_queue.length;
         var success_orders = 0;
@@ -773,7 +773,7 @@ module.exports = {
         this.output.notice('processing_queue', total_orders); 
         //output.set_exitcode(0);
         for (const order of this.order_queue) {
-            let result = await this.submit_order(order);
+            let result = await this.submit_order(stub, order);
             if (result.result == 'success') {
                 success_orders++;
                 this.output.success('order_submit', this.utils.serialize(order)); 
@@ -799,8 +799,7 @@ module.exports = {
 
     // Submit order to the exchange
 
-    async submit_order(params) {
-        const stub = params[stub]
+    async submit_order(stub, params) {
         var result = await this.exchange[stub].create_order(params);
         return result;
     },    
@@ -810,8 +809,9 @@ module.exports = {
 
     async create_and_submit_order(type, params) {
         this.clear_order_queue();
+        const stub = params.stub
         await this.create_order(type, params);
-        return await this.process_order_queue();
+        return await this.process_order_queue(stub);
     },
 
 
@@ -970,7 +970,7 @@ module.exports = {
     
     async orders(params) {
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         let result = await this.exchange[stub].orders(params);
         if (this.utils.is_array(result)) {
             this.output.success('orders_retrieve', result.length)
@@ -995,7 +995,7 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         let result = await this.exchange[stub].cancel(params);
         if (this.utils.is_array(result) && result.length == 1) {
             this.output.success('order_cancel', params.id)
@@ -1018,7 +1018,7 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         let result = await this.exchange[stub].cancel_all(params);
         if (this.utils.is_array(result)) {
             this.output.success('orders_cancel', result.length)
@@ -1040,7 +1040,7 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         var result = await this.exchange[stub].position(params);
         if (!this.utils.is_array(result)) {
             this.output.success('position_retrieve', result.symbol)
@@ -1061,7 +1061,7 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         var result = await this.exchange[stub].positions(params);
         if (this.utils.is_array(result)) {
             this.output.success('positions_retrieve', result.length)
@@ -1082,7 +1082,7 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         var result = await this.exchange[stub].balances(params);
         if (this.utils.is_array(result)) {
             this.output.success('balances_retrieve', result.length)
@@ -1104,7 +1104,7 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         var result = await this.exchange[stub].market(params);
         if (!this.utils.is_array(result)) {
             this.output.success('market_retrieve', result.symbol)
@@ -1126,7 +1126,7 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        const stub = params[stub]
+        const stub = params.stub
         var result = await this.exchange[stub].markets(params);
         if (this.utils.is_array(result)) {
             this.output.success('markets_retrieve', result.length)
