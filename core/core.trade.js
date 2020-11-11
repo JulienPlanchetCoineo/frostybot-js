@@ -29,12 +29,20 @@ module.exports = {
 
     initialize_exchange(params) {
         this.initialize();
+        if (!this.hasOwnProperty('exchange')) {
+            this.exchange = {}
+        }
         if (params.stub != undefined) {
             const stub = params.stub;
-            this.exchange = new this.classes.exchange(stub);
+            this.exchange[stub] = new this.classes.exchange(stub);
         }
     },
 
+    // Call exchange handler method
+
+    async exchange_exec(stub, method, params) {
+
+    },
 
     // Check if an order is an advanced order (layered orders, relative pricing, etc)
 
@@ -123,9 +131,9 @@ module.exports = {
     
     // Get USD size of current position from exchange
 
-    async position_size_usd(symbol) {
+    async position_size_usd(stub, symbol) {
         var filter = {symbol: symbol}
-        var position = await this.exchange.position(filter);
+        var position = await this.exchange[stub].position(filter);
         if (!this.utils.is_empty(position)) {
             return position['usd_size'];
         }
@@ -134,9 +142,9 @@ module.exports = {
 
     // Get current position for symbol
 
-    async get_position(symbol) {
+    async get_position(stub, symbol) {
         var filter = {symbol: symbol}
-        var position = await this.exchange.position(filter);
+        var position = await this.exchange[stub].position(filter);
         if (!this.utils.is_empty(position)) {
             return position;
         }
@@ -162,8 +170,8 @@ module.exports = {
 
     // Get market price
 
-    async get_market_price(symbol, side) {
-        const market = await this.exchange.get_market_by_symbol(symbol);
+    async get_market_price(stub, symbol, side) {
+        const market = await this.exchange[stub].get_market_by_symbol(symbol);
         return (side == 'buy' ? market.ask : (side == 'sell' ? market.bid : market.avg));
     },
 
@@ -172,7 +180,7 @@ module.exports = {
     
     async get_amount(params, type = 'standard') {
 
-        var [market, symbol, side, size, base, quote, usd, price, stopsize, stopbase, stopquote, stopusd, stoptrigger, stopprice, profitsize, profitbase, profitquote, profitusd, profittrigger, profitprice] = this.utils.extract_props(params, ['market', 'symbol', 'side', 'size', 'base', 'quote', 'usd', 'price', 'stopsize', 'stopbase', 'stopquote', 'stopusd', 'stoptrigger', 'stopprice', 'profitsize', 'profitbase', 'profitquote', 'profitusd', 'profittrigger', 'profitprice']);
+        var [stub, market, symbol, side, size, base, quote, usd, price, stopsize, stopbase, stopquote, stopusd, stoptrigger, stopprice, profitsize, profitbase, profitquote, profitusd, profittrigger, profitprice] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'side', 'size', 'base', 'quote', 'usd', 'price', 'stopsize', 'stopbase', 'stopquote', 'stopusd', 'stoptrigger', 'stopprice', 'profitsize', 'profitbase', 'profitquote', 'profitusd', 'profittrigger', 'profitprice']);
 
         // Override sizing for stop loss and take profit orders
         switch(type) {
@@ -193,8 +201,8 @@ module.exports = {
 
         // Default size when no size provided for stoploss and takeprofit
         if ((['stoploss', 'takeprofit'].includes(type)) && (size == null) && (base == null) && (quote == null) && (usd == null)) {
-            var order_sizing = this.exchange.get('order_sizing');
-            var position = await this.get_position(symbol);
+            var order_sizing = this.exchange[stub].get('order_sizing');
+            var position = await this.get_position(stub, symbol);
             switch (order_sizing) {
                 case 'base'  :   base  = position.base_size;   break;
                 case 'quote' :   quote = position.quote_size;  break;
@@ -206,7 +214,7 @@ module.exports = {
 
         // Get market data for symbol
         if (market == undefined) {
-            const market = await this.exchange.get_market_by_symbol(symbol);
+            const market = await this.exchange[stub].get_market_by_symbol(symbol);
         }
 
         // Base and quote prices
@@ -214,7 +222,7 @@ module.exports = {
         var quotesize = (quote != undefined ? quote : null);
 
         // Get indicative market price and convert price if it is relative
-        var market_price = await this.get_market_price(symbol, side);
+        var market_price = await this.get_market_price(stub, symbol, side);
         if (price == undefined) price = market_price;
         if (this.is_relative(price)) {
             price = await this.get_relative_price(market, price);
@@ -330,7 +338,7 @@ module.exports = {
     // Get factored size (size provided in x or %)
 
     async get_factored_size(order_type, params) {
-        var [market, symbol, size] = this.utils.extract_props(params, ['market', 'symbol', 'size']);
+        var [stub, market, symbol, size] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'size']);
         var size = String(size).toLowerCase();
         var operator = this.get_operator(size);
         if (operator == undefined)
@@ -341,8 +349,8 @@ module.exports = {
             case '%' : var factor = size.replace('%','').replace(operator, '') / 100; break;
             default  : var factor = 1; break;
         }
-        var position_size = await this.position_size_usd(symbol);
-        var balance_size = await this.exchange.available_equity_usd(symbol);
+        var position_size = await this.position_size_usd(stub, symbol);
+        var balance_size = await this.exchange[stub].available_equity_usd(symbol);
         if (order_type == 'close') {
             var base = Math.abs(position_size)
             operator = '';  // Ignore operator on close orders
@@ -365,7 +373,7 @@ module.exports = {
     
     async convert_size(type, params) {
 
-        var [market, symbol, size, base, quote, usd, scale, maxsize] = this.utils.extract_props(params, ['market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize']);
+        var [stub, market, symbol, size, base, quote, usd, scale, maxsize] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize']);
         var side = null;
         var is_close = false;   // Report is order will result in position closure
         var is_flip = false;    // Report is order will result in position flip
@@ -419,7 +427,7 @@ module.exports = {
 
         // Determine current position size
         this.initialize_exchange(params)  // For some reason I have to reinitialize the exchange here, I'll have to fix this
-        var current_position = await this.get_position(symbol)
+        var current_position = await this.get_position(stub, symbol)
         if (current_position !== false) {
             var dir = current_position.direction
             var current = (dir == 'long' ? 1 : -1) * parseFloat(current_position[sizing + '_size'])
@@ -519,14 +527,14 @@ module.exports = {
         }
 
         // Ensure that when closing all of position and the exchange uses base sizing that the order size equals the current base size
-        if ((type == 'close') && (closeall) && (this.exchange.get('order_sizing') == 'base')) {
+        if ((type == 'close') && (closeall) && (this.exchange[stub].get('order_sizing') == 'base')) {
             sizing = 'base'
             current = this.floor_amount(market, current_position['base_size'])
             target = 0
         }
 
         // Ensure that when closing all of position and the exchange uses quote sizing that the order size equals the current quote size
-        if ((type == 'close') && (closeall) && (this.exchange.get('order_sizing') == 'quote')) {
+        if ((type == 'close') && (closeall) && (this.exchange[stub].get('order_sizing') == 'quote')) {
             sizing = 'quote'
             current = this.floor_amount(market, current_position['quote_size'])
             target = 0
@@ -572,12 +580,12 @@ module.exports = {
 
         // Extract params
         params = this.utils.lower_props(params);
-        var [symbol, side, price, post, ioc, tag] = this.utils.extract_props(params, ['symbol', 'side', 'price', 'post', 'ioc', 'tag']);
+        var [stub, symbol, side, price, post, ioc, tag] = this.utils.extract_props(params, ['stub', 'symbol', 'side', 'price', 'post', 'ioc', 'tag']);
         
         // Get parameters from the normalizer
-        this.param_map = this.exchange.get('param_map');
-        this.order_sizing = this.exchange.get('order_sizing');
-        this.stablecoins = this.exchange.get('stablecoins');
+        this.param_map = this.exchange[stub].get('param_map');
+        this.order_sizing = this.exchange[stub].get('order_sizing');
+        this.stablecoins = this.exchange[stub].get('stablecoins');
 
         //Check if an order is an advanced order (layered orders, relative pricing, etc)
         if (this.order_is_advanced(price)) {
@@ -623,14 +631,15 @@ module.exports = {
                                 side = undefined;
                                 break;
         }
+        const stub = params[stub]
         
         // Get parameters from the normalizer
-        this.param_map = this.exchange.get('param_map');
-        this.order_sizing = this.exchange.get('order_sizing');
-        this.stablecoins = this.exchange.get('stablecoins');
+        this.param_map = this.exchange[stub].get('param_map');
+        this.order_sizing = this.exchange[stub].get('order_sizing');
+        this.stablecoins = this.exchange[stub].get('stablecoins');
 
         // Get marker info
-        const market = await this.exchange.get_market_by_symbol(symbol);
+        const market = await this.exchange[stub].get_market_by_symbol(symbol);
 
         //Check if stoptrigger or stopprice is relative and convert if necessary
         if (this.is_relative(trigger)) {
@@ -642,7 +651,7 @@ module.exports = {
 
         // If side is undefined, assume side based on trigger above or below market price
         if (side == undefined) {
-            var market_price = await this.get_market_price(symbol);
+            var market_price = await this.get_market_price(stub, symbol);
             side = (trigger > market_price ? above : (trigger < market_price ? below : null));
             if (side == null) {
                 return this.output.error('order_side_unknown');
@@ -694,7 +703,8 @@ module.exports = {
 
     async create_order(type, params) {
         this.initialize_exchange(params);
-        params.market = await this.exchange.get_market_by_symbol(params.symbol.toUpperCase());
+        const stub = params[stub]
+        params.market = await this.exchange[stub].get_market_by_symbol(params.symbol.toUpperCase());
         this.output.subsection('order_' + type);  
         var order_params = null;
         switch (type) {
@@ -790,7 +800,8 @@ module.exports = {
     // Submit order to the exchange
 
     async submit_order(params) {
-        var result = await this.exchange.create_order(params);
+        const stub = params[stub]
+        var result = await this.exchange[stub].create_order(params);
         return result;
     },    
 
@@ -959,7 +970,8 @@ module.exports = {
     
     async orders(params) {
         this.initialize_exchange(params);
-        let result = await this.exchange.orders(params);
+        const stub = params[stub]
+        let result = await this.exchange[stub].orders(params);
         if (this.utils.is_array(result)) {
             this.output.success('orders_retrieve', result.length)
             return result;        
@@ -983,7 +995,8 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        let result = await this.exchange.cancel(params);
+        const stub = params[stub]
+        let result = await this.exchange[stub].cancel(params);
         if (this.utils.is_array(result) && result.length == 1) {
             this.output.success('order_cancel', params.id)
         } else {
@@ -1005,7 +1018,8 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        let result = await this.exchange.cancel_all(params);
+        const stub = params[stub]
+        let result = await this.exchange[stub].cancel_all(params);
         if (this.utils.is_array(result)) {
             this.output.success('orders_cancel', result.length)
         } else {
@@ -1026,7 +1040,8 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        var result = await this.exchange.position(params);
+        const stub = params[stub]
+        var result = await this.exchange[stub].position(params);
         if (!this.utils.is_array(result)) {
             this.output.success('position_retrieve', result.symbol)
         } else {
@@ -1046,7 +1061,8 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        var result = await this.exchange.positions(params);
+        const stub = params[stub]
+        var result = await this.exchange[stub].positions(params);
         if (this.utils.is_array(result)) {
             this.output.success('positions_retrieve', result.length)
         } else {
@@ -1066,7 +1082,8 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        var result = await this.exchange.balances(params);
+        const stub = params[stub]
+        var result = await this.exchange[stub].balances(params);
         if (this.utils.is_array(result)) {
             this.output.success('balances_retrieve', result.length)
         } else {
@@ -1087,7 +1104,8 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        var result = await this.exchange.market(params);
+        const stub = params[stub]
+        var result = await this.exchange[stub].market(params);
         if (!this.utils.is_array(result)) {
             this.output.success('market_retrieve', result.symbol)
         } else {
@@ -1108,7 +1126,8 @@ module.exports = {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         this.initialize_exchange(params);
-        var result = await this.exchange.markets(params);
+        const stub = params[stub]
+        var result = await this.exchange[stub].markets(params);
         if (this.utils.is_array(result)) {
             this.output.success('markets_retrieve', result.length)
         } else {
