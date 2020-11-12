@@ -107,7 +107,7 @@ module.exports = {
         symbolmap_delete:   'Failed to delete symbol mapping: {0}: {1}',
     
         convert_size_usd:   'Size provided in USD, but cannot find a pair to use for conversion',
-        order_submit:       'Order submittion failed: {0}, Order Parameters: {1}',
+        order_submit:       'Order submittion failed: {0}: {1}, Order Parameters: {2}',
         order_size_nan:     'Could not determine order size: {0}',
         order_size_unknown: 'Could not determine the size of the order',
         order_side_unknown: 'Unable to determine side for order',
@@ -152,7 +152,7 @@ module.exports = {
         symbolmap_add:      'Added symbol mapping: {0}: {1} => {2}',
         symbolmap_delete:   'Deleted symbol mapping: {0}: {1}',
 
-        order_submit:       'Order submitted successfully: {0}',
+        order_submit:       'Order submitted successfully: {0}: {1}',
         orders_retrieve:    '{0} Order(s) retrieved',
         order_cancel:       'Successfully cancelled order {0}',
         orders_cancel:      '{0} Order(s) cancelled',

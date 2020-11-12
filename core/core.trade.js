@@ -375,8 +375,8 @@ module.exports = {
 
         var [stub, market, symbol, size, base, quote, usd, scale, maxsize] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize']);
         var side = null;
-        var is_close = false;   // Report is order will result in position closure
-        var is_flip = false;    // Report is order will result in position flip
+        var is_close = false;   // Report this order will result in position closure
+        var is_flip = false;    // Report this order will result in position flip
 
         // Check for base and quote factored sizing
         if (this.is_factor(base) || this.is_factor(quote)) {
@@ -776,13 +776,13 @@ module.exports = {
             let result = await this.submit_order(stub, order);
             if (result.result == 'success') {
                 success_orders++;
-                this.output.success('order_submit', this.utils.serialize(order)); 
+                this.output.success('order_submit', [stub, this.utils.serialize(order)]); 
             } else {
                 //output.set_exitcode(-1);
                 var message = result.error.type + ': ' + result.error.message;
                 var params = this.utils.serialize(result.params);
                 var info = message + ': ' + params;
-                this.output.error('order_submit', [info, this.utils.serialize(order)]); 
+                this.output.error('order_submit', [stub, info, this.utils.serialize(order)]); 
             }
             this.order_results.push(result);
         };
