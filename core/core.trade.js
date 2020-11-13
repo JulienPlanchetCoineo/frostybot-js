@@ -726,7 +726,7 @@ module.exports = {
                                  break;
         }    
         if (order_params !== false)
-            this.queue_order(order_params);
+            this.queue_order(stub, order_params);
 
         // Order includes a stoploss or takeprofit component (long and short orders only)
         if (['long', 'short'].includes(type)) {
@@ -742,37 +742,52 @@ module.exports = {
 
     // Add orders to the order queue
     
-    queue_order(params) {
+    queue_order(stub, params) {
         if (this.order_queue == undefined) {
-            this.order_queue = [];
+            this.order_queue = {};
+        }
+        if (!this.order_queue.hasOwnProperty(stub)) {
+            this.order_queue[stub] = [];
         }
         if (!this.utils.is_array(params)) {
             params = [params];
         }
         params.forEach(order => {
             this.output.notice('order_queued', this.utils.serialize(order));
-            this.order_queue.push(order);
+            this.order_queue[stub].push(order);
         });
     },
 
     
     // Clear order queue
     
-    clear_order_queue() {
-        this.order_queue = [];
+    clear_order_queue(stub) {
+        if (this.order_queue == undefined) {
+            this.order_queue = {};
+        }
+        if (!this.order_queue.hasOwnProperty(stub)) {
+            this.order_queue[stub] = [];
+        }
+        this.order_queue[stub] = [];
     },
     
     
     // Process order queue (submit orders to the exchange)
 
     async process_order_queue(stub) {
-        this.order_results = [];
-        var total_orders = this.order_queue.length;
+        if (this.order_results == undefined) {
+            this.order_results = {};
+        }
+        if (!this.order_results.hasOwnProperty(stub)) {
+            this.order_results[stub] = [];
+        }
+        this.order_results[stub] = [];
+        var total_orders = this.order_queue[stub].length;
         var success_orders = 0;
         this.output.subsection('processing_queue', total_orders);
         this.output.notice('processing_queue', total_orders); 
         //output.set_exitcode(0);
-        for (const order of this.order_queue) {
+        for (const order of this.order_queue[stub]) {
             let result = await this.submit_order(stub, order);
             if (result.result == 'success') {
                 success_orders++;
@@ -784,12 +799,12 @@ module.exports = {
                 var info = message + ': ' + params;
                 this.output.error('order_submit', [stub, info, this.utils.serialize(order)]); 
             }
-            this.order_results.push(result);
+            this.order_results[stub].push(result);
         };
-        this.clear_order_queue();
-        var results = this.order_results;
+        this.clear_order_queue(stub);
+        var results = this.order_results[stub];
         this.output.notice('processed_queue', [success_orders, total_orders]);   
-        this.order_results = [];
+        this.order_results[stub] = [];
         if (success_orders == 0) {
             return false;
         }
