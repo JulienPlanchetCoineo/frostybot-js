@@ -29,7 +29,7 @@ module.exports = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance'],
+                oneof: ['ftx', 'deribit', 'binance','bitmex'],
             },
             symbol: {
                 optional: 'string',
@@ -71,7 +71,7 @@ module.exports = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance'],
+                oneof: ['ftx', 'deribit', 'binance','bitmex'],
             },
             symbol: {
                 required: 'string',
@@ -108,7 +108,7 @@ module.exports = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance'],
+                oneof: ['ftx', 'deribit', 'binance','bitmex'],
             },
             symbol: {
                 required: 'string',

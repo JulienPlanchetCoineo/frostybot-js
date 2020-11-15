@@ -693,7 +693,18 @@ module.exports = {
         }
 
         //order_params.params[this.param_map.tag]    = tag;
+
+        var custom_params = {
+            tag         :   tag,
+            trigger     :   trigger,
+            price       :   (price != undefined ? price : null),
+            triggertype :   triggertype == undefined ? 'mark' : triggertype,
+            reduce      :   String(reduce) == "true" ? true : false,
+        }
         
+        // Get normalizer custom params (if defined)
+        order_params = await this.exchange[stub].custom_params([type, order_params, custom_params])
+
         return this.utils.remove_values(order_params, [null, undefined]);
 
     },
@@ -794,7 +805,7 @@ module.exports = {
                 this.output.success('order_submit', [stub, this.utils.serialize(order)]); 
             } else {
                 //output.set_exitcode(-1);
-                var message = result.error.type + ': ' + result.error.message;
+                var message = result.error.type + ': ' + (this.utils.is_object(result.error.message) ? this.utils.serialize_object(result.error.message) : result.error.message);
                 var params = this.utils.serialize(result.params);
                 var info = message + ': ' + params;
                 this.output.error('order_submit', [stub, info, this.utils.serialize(order)]); 
@@ -842,10 +853,11 @@ module.exports = {
         var schema = {
             stub:   { required: 'string', format: 'lowercase', },
             symbol: { required: 'string', format: 'uppercase', },
-            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
-            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
-            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
-            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd', 'scale'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd', 'scale'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd', 'scale'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size', 'scale'], },
+            scale:  { requiredifnotpresent: ['base', 'quote', 'size', 'usd'], },
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
@@ -861,10 +873,11 @@ module.exports = {
         var schema = {
             stub:   { required: 'string', format: 'lowercase', },
             symbol: { required: 'string', format: 'uppercase', },
-            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
-            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
-            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
-            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd', 'scale'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd', 'scale'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd', 'scale'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size', 'scale'], },
+            scale:  { requiredifnotpresent: ['base', 'quote', 'size', 'usd'], },
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
@@ -881,10 +894,11 @@ module.exports = {
         var schema = {
             stub:   { required: 'string', format: 'lowercase', },
             symbol: { required: 'string', format: 'uppercase', },
-            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
-            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
-            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
-            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd', 'scale'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd', 'scale'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd', 'scale'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size', 'scale'], },
+            scale:  { requiredifnotpresent: ['base', 'quote', 'size', 'usd'], },
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
@@ -901,10 +915,11 @@ module.exports = {
         var schema = {
             stub:   { required: 'string', format: 'lowercase', },
             symbol: { required: 'string', format: 'uppercase', },
-            size:   { requiredifnotpresent: ['base', 'quote', 'usd'],  },
-            base:   { requiredifnotpresent: ['size', 'quote', 'usd'],  },
-            quote:  { requiredifnotpresent: ['base', 'size', 'usd'],   },
-            usd:    { requiredifnotpresent: ['base', 'quote', 'size'], },
+            size:   { requiredifnotpresent: ['base', 'quote', 'usd', 'scale'],  },
+            base:   { requiredifnotpresent: ['size', 'quote', 'usd', 'scale'],  },
+            quote:  { requiredifnotpresent: ['base', 'size', 'usd', 'scale'],   },
+            usd:    { requiredifnotpresent: ['base', 'quote', 'size', 'scale'], },
+            scale:  { requiredifnotpresent: ['base', 'quote', 'size', 'usd'], },
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 

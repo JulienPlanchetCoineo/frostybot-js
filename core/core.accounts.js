@@ -112,7 +112,7 @@ module.exports = {
 
         var schema = {
             stub: {        required: 'string', format: 'lowercase' },
-            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit', 'binance'] },
+            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit', 'binance', 'bitmex'] },
             description: { optional: 'string'  },
             apikey: {      required: 'string'  },
             secret: {      required: 'string'  },
