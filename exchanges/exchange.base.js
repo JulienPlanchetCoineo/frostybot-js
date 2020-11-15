@@ -22,6 +22,7 @@ module.exports = class frostybot_exchange_base {
             const exchangeId = this.account.exchange
             const exchangeClass = ccxtlib[exchangeId]
             this.ccxtobj = new exchangeClass (accountParams.parameters)
+            this.ccxtobj.options.adjustForTimeDifference = true
             this.ccxtobj.loadMarkets();
         }
     }
@@ -354,6 +355,8 @@ module.exports = class frostybot_exchange_base {
 
     async create_order(params) {
         var [symbol, type, side, amount, price, order_params] = this.utils.extract_props(params, ['symbol', 'type', 'side', 'amount', 'price', 'params']);
+        var market = await this.get_market_by_id_or_symbol(symbol);
+        symbol = market.symbol;
         let create_result = await this.ccxt('create_order',[symbol, type, side, amount, price, order_params]);
         if (create_result.result == 'error') {
             var errortype = create_result.data.name;

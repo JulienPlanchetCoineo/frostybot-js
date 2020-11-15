@@ -171,7 +171,7 @@ module.exports = {
     // Get market price
 
     async get_market_price(stub, symbol, side) {
-        const market = await this.exchange[stub].get_market_by_symbol(symbol);
+        const market = await this.exchange[stub].get_market_by_id_or_symbol(symbol);
         return (side == 'buy' ? market.ask : (side == 'sell' ? market.bid : market.avg));
     },
 
@@ -214,7 +214,7 @@ module.exports = {
 
         // Get market data for symbol
         if (market == undefined) {
-            const market = await this.exchange[stub].get_market_by_symbol(symbol);
+            const market = await this.exchange[stub].get_market_by_id_or_symbol(symbol);
         }
 
         // Base and quote prices
@@ -639,7 +639,7 @@ module.exports = {
         this.stablecoins = this.exchange[stub].get('stablecoins');
 
         // Get marker info
-        const market = await this.exchange[stub].get_market_by_symbol(symbol);
+        const market = await this.exchange[stub].get_market_by_id_or_symbol(symbol);
 
         //Check if stoptrigger or stopprice is relative and convert if necessary
         if (this.is_relative(trigger)) {
@@ -715,7 +715,7 @@ module.exports = {
     async create_order(type, params) {
         this.initialize_exchange(params);
         const stub = params.stub
-        params.market = await this.exchange[stub].get_market_by_symbol(params.symbol.toUpperCase());
+        params.market = await this.exchange[stub].get_market_by_id_or_symbol(params.symbol.toUpperCase());
         this.output.subsection('order_' + type);  
         var order_params = null;
         switch (type) {
