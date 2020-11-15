@@ -26,6 +26,14 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         };
     }
 
+
+    // Custom params
+
+    custom_params(type, order_params, custom_params) {
+        return order_params;
+    }    
+
+
     // Get available equity in USD for placing an order on a specific symbol using size as a factor of equity (size=1x)
 
     async available_equity_usd(symbol) {
