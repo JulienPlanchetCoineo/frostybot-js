@@ -197,6 +197,9 @@ module.exports = {
     async execute(request) {
         this.output.reset();
         var params = this.parse_request(request);
+        if (this.utils.is_object(params) && params.hasOwnProperty('0') && params['0'].hasOwnProperty('command')) {
+            params = Object.values(params);
+        }
         if (this.utils.is_array(params)) {                          
             var results = await this.execute_multiple(params);  // Multiple commands submitted
         } else {        
@@ -210,10 +213,15 @@ module.exports = {
 
     async execute_multiple(multi_params) {
         var results = [];
+        if (this.utils.is_object(multi_params)) {
+            multi_params = Object.values(multi_params)
+        }
         for (var i = 0; i < multi_params.length; i++) {
             var params = multi_params[i];
-            var result = await this.execute_single(params);
-            results.push(result);
+            if (this.utils.is_object(params)) {
+                var result = await this.execute_single(params);
+                results.push(result);    
+            }
         }
         return this.output.combine(results);
     },
