@@ -1,33 +1,20 @@
 
 // Whitelist Module for IP Access Control 
 
+const frostybot_module = require('./mod.base')
 
-module.exports = {  
+module.exports = class frostybot_whitelist_module extends frostybot_module {
 
+    // Constructor
 
-    // Initialize Module
-
-    initialize() {
-        if (this.initialized !== true) {
-            this.modules();
-        }
-        this.initialized = true;
-    },
-
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'whitelist') this[method] = module;
-        }
-    },
+    constructor() {
+        super()
+    }
     
 
     // Add TradingView IPs
 
     tradingview() {
-        this.initialize();
         var data = {
             ip: '52.32.178.7',
             description: 'TradingView Server Address',
@@ -43,13 +30,13 @@ module.exports = {
         data.ip = '127.0.0.1'
         data.description = 'localhost'
         this.settings.set('whitelist', data.ip, data)
-    },
+    }
     
 
     // Get whitelist
 
     get(params) {
-        
+
         var schema = {
             ip: {
                 optional: 'ip',
@@ -74,7 +61,7 @@ module.exports = {
             return result;
         } 
         return this.output.error('whitelist_get', ip);
-    },
+    }
 
 
     // Add IP to whitelist
@@ -103,13 +90,13 @@ module.exports = {
             return this.output.error('whitelist_add', ip);
         }
         return this.output.success('whitelist_add', ip);
-    },
+    }
 
 
     // Delete IP from whitelist
 
     delete(params) {
-
+        
         var schema = {
             ip: {
                 required: 'ip',
@@ -131,7 +118,7 @@ module.exports = {
             }
         }
         return this.output.error('whitelist_delete', ip + ' (not found)');
-    },
+    }
 
 
     // Enable whitelist verification
@@ -141,7 +128,7 @@ module.exports = {
             return this.output.success('whitelist_enable')
         }
         return this.output.error('whitelist_enable')
-    },
+    }
 
 
     // Disable whitelist verification
@@ -151,7 +138,7 @@ module.exports = {
             return this.output.success('whitelist_disable')
         }
         return this.output.error('whitelist_disable')
-    },
+    }
 
 
     // Check if whitelist is enabled
@@ -164,15 +151,13 @@ module.exports = {
         }
         this.output.notice('whitelist_disabled')
         return result
-    },
+    }
 
     // Verify IP in whitelist
 
     verify(ip) {
-        this.initialize()
         if (this.utils.is_object(ip) && ip.hasOwnProperty('ip')) 
             ip = ip.ip
-        this.initialize()
         if (this.is_enabled()) {
             var acl = this.settings.get('whitelist', ip);
             if (acl) {

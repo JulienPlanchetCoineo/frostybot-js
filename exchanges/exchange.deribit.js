@@ -175,6 +175,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
             .forEach(raw_market => {
                 const id = raw_market.id;
                 const symbol = raw_market.symbol;
+                const tvsymbol = 'DERIBIT:' + raw_market.symbol.replace('-','').replace('PERPETUAL', 'PERP')
                 const type = raw_market.type;
                 if (type != undefined) {
                     const base = raw_market.base;
@@ -186,7 +187,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
                     const contract_size = (raw_market.info.contract_size != null ? raw_market.info.contract_size : 1);
                     const precision = raw_market.precision;
                     const raw = raw_market.info;
-                    const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, raw)
+                    const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, tvsymbol, raw)
                     this.data.markets.push(market);
                 }
         });

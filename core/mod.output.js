@@ -5,39 +5,37 @@ const md5 = require('md5');         // Used to ensure that the same message is n
 const fs  = require('fs');          // Filesystem 
 const eol = require('os').EOL;      // Operating system end of line character(s)
 
-module.exports = {
+const frostybot_module = require('./mod.base')
 
-    // Initialize Module
+module.exports = class frostybot_output_module extends frostybot_module {
+
+    // Constructor
+
+    constructor() {
+        super()
+    }
+
+
+    // Initialize
 
     initialize() {
-        if (this.initialized !== true) {
-            this.reset();
-            this.modules();
-            this.load_language();
-            this.logfile = this.utils.base_dir() + '/log/frostybot.log'
-        }
-        this.initialized = true;
-    },
-
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'output') this[method] = module;
-        }
-    },
-
+        const base_dir = __dirname.substr(0, __dirname.lastIndexOf('/'))
+        this.logfile = base_dir + '/log/frostybot.log'
+        this.reset();
+        this.load_language();
+    }
 
     // Load language if required
 
     load_language() {
+        this.settings = global.frostybot._modules_.settings;
         if (this.language == undefined) {
             const language = this.settings.get('core', 'language', 'en');
-            this.language = require('./core.lang.' + language);
+            this.language = require('../lang/lang.' + language);
+            this.section('frostybot_startup');
             this.translate('notice', 'using_language', language);
         }
-    },
+    }
 
 
     // Check if message has been outputted
@@ -52,12 +50,12 @@ module.exports = {
             return false;
         }
         return true;
-    },
+    }
+
 
     // Translate message and add to output
 
     translate(type, id, params = []) {
-        this.initialize();
         params = this.utils.force_array(params);
         if ((this.language.hasOwnProperty(type)) && (this.language[type].hasOwnProperty(id))) {
             var str = this.language[type][id];
@@ -72,29 +70,30 @@ module.exports = {
             return (type == 'error' ? false : true);
         }
         return this.add_message('error', 'Translation not found: ' + type + '.' + id);
-    },
+    }
+
 
     // Some helper functions
 
     debug(id, params = []) {
         return this.translate('debug', id, params)
-    },
+    }
 
     notice(id, params = []) {
         return this.translate('notice', id, params)
-    },
+    }
 
     warning(id, params = []) {
         return this.translate('warning', id, params)
-    },
+    }
 
     error(id, params = []) {
         return this.translate('error', id, params)
-    },
+    }
 
     success(id, params = []) {
         return this.translate('success', id, params)
-    },
+    }
 
     // Start a new section
 
@@ -102,7 +101,7 @@ module.exports = {
         this.add_blank();
         this.translate('section', id, params);
         this.add_blank();
-    },
+    }
 
 
     // Start a New Subsection
@@ -111,12 +110,12 @@ module.exports = {
         this.add_blank();
         this.translate('subsection', id, params);
         this.add_blank();
-    },
+    }
 
 
     // Reset output object
 
-    reset: function() {
+    reset() {
         this.output_obj = {
             result: 'success',
             type: null,
@@ -125,7 +124,7 @@ module.exports = {
             messages: []
         }
         this.once = [];
-    },    
+    }
 
 
     // Get class of an object
@@ -151,7 +150,7 @@ module.exports = {
             }
         }
         return undefined;
-    },
+    }
 
 
     // Add data to the output
@@ -164,14 +163,14 @@ module.exports = {
         }
         this.output_obj.type = type;
         this.output_obj.data = data;
-    },
+    }
 
 
     // Create a blank line in the output log
 
     add_blank() {
         this.add_message('blank','')
-    },
+    }
 
 
     // Add a message to the output
@@ -238,7 +237,7 @@ module.exports = {
         if (type.toLowerCase() == 'error') {
             this.output_obj.result = 'error'
         }
-    },    
+    }
 
 
     // Parse raw output into a frostybot_output object
@@ -248,7 +247,7 @@ module.exports = {
         var output = new this.classes.output(...this.utils.extract_props(this.output_obj, ['command', 'params', 'result', 'type', 'data', 'messages']));
         this.reset();
         return output;
-    },
+    }
 
 
     // Combine multiple command outputs into a single command output

@@ -1,21 +1,33 @@
+// Database Abstraction Layer
+
 const sqlite3 = require('better-sqlite3');
+const db = new sqlite3(__dirname.replace('core','database') + '/database.db');
+const frostybot_module = require('./mod.base')
 
-var db = new sqlite3(__dirname.replace('core','database') + '/database.db');
+module.exports = class frostybot_database_module extends frostybot_module {
 
-module.exports = { 
+    // Constructor
+
+    constructor() {
+        super()
+    }
 
     // Query data from the database
-    query: function(sql) {
+
+    query(sql) {
         return db.prepare(sql).all();
-    },
+    }
 
     // Execute a SQL statement
-    exec: function(sql) {
+
+    exec(sql) {
         return db.prepare(sql).run();
-    },
+    }
+
 
     // Select data from the database
-    select: function(table, where = []) {
+
+    select(table, where = []) {
         var sql = '';
         var whereList = [];
         for (var key in where) {
@@ -24,10 +36,12 @@ module.exports = {
         }
         var sql = "SELECT * FROM `" + table + "`" + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
         return this.query(sql);
-    },
+    }
+
 
     // Insert into table
-    insert: function(table, data) {
+
+    insert(table, data) {
         var sql = '';
         var colList = [];
         var valList = [];
@@ -38,10 +52,12 @@ module.exports = {
         }
         sql = "INSERT INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES ('" + valList.join("','") + "');";
         return this.exec(sql);
-    },
+    }
+
 
     // Select data from the database
-    update: function(table, data, where = []) {
+
+    update(table, data, where = []) {
         var sql = '';
         var dataList = [];
         for (var key in data) {
@@ -55,10 +71,12 @@ module.exports = {
         }
         var sql = "UPDATE `" + table + "` SET " + dataList.join(",") + " " + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
         return this.exec(sql);
-    },
+    }
+
 
     // Delete data from the database
-    delete: function(table, where = []) {
+
+    delete(table, where = []) {
         var sql = '';
         var whereList = [];
         for (var key in where) {
@@ -67,20 +85,24 @@ module.exports = {
         }
         var sql = "DELETE FROM `" + table + "`" + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
         return this.exec(sql);
-    },
+    }
+
 
     // Insert or update
-    insertOrUpdate: function(table, data, where = []) {
+
+    insertOrUpdate(table, data, where = []) {
         var data  = this.select(table, where);
         if (data.count > 0) {
             return this.update(table, data, where);
         } else {
             return this.insert(table, data);
         }
-    },    
+    }
 
+    
     // Insert or Replace
-    insertOrReplace: function(table, data) {
+
+    insertOrReplace(table, data) {
         var sql = '';
         var colList = [];
         var valList = [];
@@ -91,6 +113,7 @@ module.exports = {
         }
         sql = "INSERT OR REPLACE INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES ('" + valList.join("','") + "');";
         return this.exec(sql);       
-    },
+    }
+
 
 }

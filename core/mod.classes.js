@@ -39,10 +39,11 @@ class frostybot_balance extends frostybot_base {
 
 class frostybot_market extends frostybot_base {
 
-    constructor(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, raw) {
+    constructor(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, tvsymbol, raw) {
         super();
         this.id = id;
         this.symbol = symbol;
+        this.tvsymbol = tvsymbol;
         this.type = type;
         this.base = base;
         this.quote = quote;
@@ -55,6 +56,7 @@ class frostybot_market extends frostybot_base {
         this.precision = precision;
         //this.raw = raw;
     }
+    
 
 }
 
@@ -67,7 +69,7 @@ class frostybot_position extends frostybot_base {
 
         var usdbase = market.usd.hasOwnProperty('base') ? market.usd.base : market.usd;
         var usdquote = market.usd.hasOwnProperty('quote') ? market.usd.quote : market.usd;
-        //this.raw = raw;
+        this.raw = raw;
         
         this.symbol = market.symbol;
         this.type = market.type;
@@ -98,9 +100,10 @@ class frostybot_position_futures extends frostybot_position {
         this.entry_price = entry_price;
         this.entry_value = this.base_size * this.entry_price;
         this.current_price = (market.avg != null ? market.avg : (market.bid + market.ask) / 2)
-        this.current_value = base_size * this.current_price;
+        this.current_value = this.base_size * this.current_price;
         this.liquidation_price = liquidation_price;
         this.pnl = (this.current_value - this.entry_value); // Calculate PNL is not supplied by exchange
+
     }
 
 }
@@ -225,15 +228,20 @@ class frostybot_exchange extends frostybot_base {
     // Create module shortcuts
 
     load_modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            this[method] = module
-        }
+        Object.keys(global.frostybot._modules_).forEach(module => {
+            if (!['core','classes'].includes(module)) {
+                this[module] = global.frostybot._modules_[module];
+            }
+        })
     }
 
 
     // Load exchange handler for stub
 
     load_handler(stub) {
+        this.load_modules();
+        //this['accounts'] = global.frostybot._modules_['accounts'];
+        //console.log(global.frostybot._modules_['accounts'].getaccount(stub));
         this.handler = null;
         var account = this.accounts.getaccount(stub)
         if (account) {

@@ -29,10 +29,12 @@ module.exports = class frostybot_exchange_base {
 
     // Create module shortcuts
 
-    load_modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            this[method] = module;
-        }
+    load_modules() { 
+        Object.keys(global.frostybot._modules_).forEach(module => {
+            if (!['core'].includes(module)) {
+                this[module] = global.frostybot._modules_[module];
+            }
+        })
     }
 
     // Execute method
@@ -224,7 +226,7 @@ module.exports = class frostybot_exchange_base {
         let results = await this.execute('fetch_balance');
         await this.markets();
         if (results.result != 'error') {
-            var raw_balances = results;
+            var raw_balances = results.hasOwnProperty('data') ? results.data : results;
             delete raw_balances.info;
             delete raw_balances.free;
             delete raw_balances.used;

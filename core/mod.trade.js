@@ -1,37 +1,19 @@
 // Trade Handling Module
 
+const frostybot_module = require('./mod.base')
 
-module.exports = {  
+module.exports = class frostybot_trade_module extends frostybot_module {
 
+    // Constructor
 
-    // Initialize Module
-
-    initialize() {
-        if (this.initialized !== true) {
-            this.modules();
-            this['utils'] = require('./core.utils')
-            this['settings'] = require('./core.settings')
-            this['output'] = require('./core.output')
-            this['queue'] = require('./core.queue')
-//            this['encryption'] = require('./core.encryption')
-        }
-        this.initialized = true;
-    },
-
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'trade') this[method] = module;
-        }
-    },
+    constructor() {
+        super()
+    }
 
 
     // Initialize exchange handler
 
     initialize_exchange(params) {
-        this.initialize();
         if (!this.hasOwnProperty('exchange')) {
             this.exchange = {}
         }
@@ -39,28 +21,29 @@ module.exports = {
             const stub = params.stub;
             this.exchange[stub] = new this.classes.exchange(stub);
         }
-    },
+    }
 
 
     // Check if an order is an advanced order (layered orders, relative pricing, etc)
 
     order_is_advanced(price) {
         return this.price_is_layered(price) || this.is_relative(price);
-    },
+    }
 
 
     // Check if order pricing is layered
 
     price_is_layered(price) {
         return (String(price).indexOf(',') > 0 ? true : false);
-    },
+    }
 
 
     // Check if number is relative (starts with + or -)
 
     is_relative(num) {
         return (['+','-'].includes(String(num).substr(0,1)) ? true : false);
-    },
+    }
+
 
     // Flip relative price
     flip_relative(num) {
@@ -69,42 +52,42 @@ module.exports = {
         var operator = this.get_operator(num)
         flip = operator == '+' ? '-' : '+';
         return num.replace(operator, flip);
-    },
+    }
 
     
     // Round a number to a given precision
 
     round_num(num, precision) {
         return (Math.round(num / precision) * precision).toFixed(this.utils.num_decimals(precision));
-    },
+    }
 
     
     // Floor a number to a given precision
 
     floor_num(num, precision) {
         return (Math.floor(num / precision) * precision).toFixed(this.utils.num_decimals(precision));
-    },
+    }
 
 
     // Round a price to the supported market precision
 
     round_price(market, price) {
         return this.round_num(price, market.precision.price);
-    },
+    }
 
 
     // Round an order amount to the supported market precision
 
     round_amount(market, amount) {
         return this.round_num(amount, market.precision.amount);
-    },
+    }
 
 
     // Floor an order amount to the supported market precision
 
     floor_amount(market, amount) {
         return this.floor_num(amount, market.precision.amount);
-    },
+    }
 
 
     // Get relative price
@@ -124,7 +107,7 @@ module.exports = {
         var relative_price = this.round_price(market, market_price + variance);
         this.output.debug('convert_rel_price', [original_price, relative_price]);
         return relative_price;
-    },
+    }
 
     
     // Get USD size of current position from exchange
@@ -136,7 +119,8 @@ module.exports = {
             return position['usd_size'];
         }
         return 0;  
-    },
+    }
+
 
     // Get current position for symbol
 
@@ -147,13 +131,15 @@ module.exports = {
             return position;
         }
         return false;  
-    },
+    }
+
 
     // Get relative numbers operator (+ or -)
 
     get_operator(num) {
         return ['+','-'].includes(String(num).substr(0,1)) ? String(num).substr(0,1) : undefined;
-    },
+    }
+
 
     // Apply operator to number
 
@@ -164,14 +150,15 @@ module.exports = {
             return num
         }
         return num
-    },
+    }
+
 
     // Get market price
 
     async get_market_price(stub, symbol, side) {
         const market = await this.exchange[stub].get_market_by_id_or_symbol(symbol);
         return (side == 'buy' ? market.ask : (side == 'sell' ? market.bid : market.avg));
-    },
+    }
 
     
     // Convert base, quote or USD order size to order amount
@@ -262,7 +249,7 @@ module.exports = {
 
         return this.round_amount(market, amount);
 
-    },
+    }
 
     
     // Get order parameters for layered pricing and sizing
@@ -325,13 +312,15 @@ module.exports = {
             return order_params;        
         }
 
-    },
+    }
+
 
     // Check if sizing is a factor
 
     is_factor(size) {
         return (['x', '%'].includes(String(size).slice(-1))) ? true : false;
-    },
+    }
+
 
     // Get factored size (size provided in x or %)
 
@@ -357,14 +346,15 @@ module.exports = {
         }
         size = operator + String(this.round_num(base * factor, 0.05)); 
         return size
-    },
+    }
+
 
     // Get relative size
     
     get_relative_size(current, size) {
         var operator = this.get_operator(size);
         return current + ((operator == '+' ? 1 : -1) * size.replace(operator, ''));
-    },
+    }
 
     
     // Get target position size
@@ -557,7 +547,8 @@ module.exports = {
         // Return result
         return [sizing, order_size, order_side, {is_close : is_close, is_flip: is_flip}];
         
-    },
+    }
+
 
     // Generate order parameters for standard orders (market, limit)
     
@@ -608,7 +599,7 @@ module.exports = {
 
         return this.utils.remove_values(order_params, [null, undefined]);
 
-    },
+    }
 
     
     // Generate paramaters for conditional orders (stop loss or take profit)
@@ -705,7 +696,7 @@ module.exports = {
 
         return this.utils.remove_values(order_params, [null, undefined]);
 
-    },
+    }
 
 
     // Parse params and create an order
@@ -747,7 +738,7 @@ module.exports = {
                 await this.create_order('takeprofit', params);
             }    
         }
-    },
+    }
     
     
     // Clear order queue, create orders, and process the queue (submit orders to the exchange)
@@ -758,7 +749,7 @@ module.exports = {
         this.queue.clear(stub, symbol)
         await this.create_order(type, params);
         return await this.queue.process(stub, symbol)
-    },
+    }
 
 
     // ------------------------------------------------------------------------------------------- //
@@ -784,7 +775,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('long', params);
-    },
+    }
 
     // Short Order
 
@@ -804,7 +795,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('short', params);
-    },
+    }
 
 
     // Buy Order
@@ -825,7 +816,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('buy', params);
-    },
+    }
 
 
     // Sell Order
@@ -846,7 +837,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('sell', params);
-    },
+    }
 
 
     // Stoploss Order
@@ -863,7 +854,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('stoploss', params);
-    },
+    }
 
 
     // Takeprofit Order
@@ -880,7 +871,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('takeprofit', params);
-    },
+    }
 
 
     // Trailstop Order
@@ -897,7 +888,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('trailstop', params);
-    },
+    }
 
 
     // Close Order
@@ -913,7 +904,7 @@ module.exports = {
 
         this.initialize_exchange(params);
         return await this.create_and_submit_order('close', params);
-    },
+    }
 
 
     // Get list of orders
@@ -929,7 +920,7 @@ module.exports = {
             this.output.error('orders_retrieve')
             return false;
         }
-    },
+    }
 
     
     // Cancel orders
@@ -953,7 +944,7 @@ module.exports = {
             this.output.error('order_cancel', params.id)
         }
         return result;
-    },
+    }
 
 
     // Cancel all orders
@@ -976,7 +967,7 @@ module.exports = {
             this.output.error('orders_cancel')
         }
         return result;
-    },    
+    }
 
     // Get position
     
@@ -998,7 +989,8 @@ module.exports = {
             this.output.error('position_retrieve', this.utils.serialize( this.utils.remove_props(params, ['stub']) ))
         }
         return result;
-    },
+    }
+
     
     // Get positions
     
@@ -1019,7 +1011,8 @@ module.exports = {
             this.output.error('positions_retrieve')
         }
         return result;
-    },
+    }
+
 
     // Get balances
     
@@ -1040,7 +1033,8 @@ module.exports = {
             this.output.error('balances_retrieve')
         }
         return result;
-    },    
+    }
+
     
     // Get market
     
@@ -1062,7 +1056,7 @@ module.exports = {
             this.output.error('market_retrieve', this.utils.serialize( this.utils.remove_props(params, ['stub']) ))
         }
         return result;        
-    },
+    }
 
 
     // Get markets
@@ -1084,6 +1078,7 @@ module.exports = {
             this.output.error('markets_retrieve')
         }
         return result;
-    },    
+    }
+        
 
 }

@@ -80,6 +80,7 @@ module.exports = class frostybot_exchange_binance_spot extends frostybot_exchang
             .forEach(raw_market => {
                 const id = raw_market.id;
                 const symbol = raw_market.symbol;
+                const tvsymbol = 'BINANCE:' + raw_market.symbol.replace('-','').replace('/','');
                 const type = 'spot';
                 const base = raw_market.base;
                 const quote = raw_market.quote;
@@ -96,7 +97,7 @@ module.exports = class frostybot_exchange_binance_spot extends frostybot_exchang
                     amount: (amount_filter[0].stepSize * 1)
                 }
                 const raw = raw_market.info;
-                const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, raw)
+                const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, tvsymbol, raw)
                 this.data.markets.push(market);
             });
         await this.index_markets();

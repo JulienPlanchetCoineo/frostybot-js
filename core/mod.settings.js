@@ -1,35 +1,21 @@
 // Module to manage program settings in the database settings table
 
-const db = require('./core.database');
+const frostybot_module = require('./mod.base')
 
-module.exports = {  
+module.exports = class frostybot_settings_module extends frostybot_module {
 
+    // Constructor
 
-    // Initialize Module
-
-    initialize() {
-        if (this.initialized !== true) {
-            this.modules();
-        }
-        this.initialized = true;
-    },
-
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'settings') this[method] = module;
-        }
-    },
-
+    constructor() {
+        super()
+    }
 
     // Get settings(s)
 
-    get: function(mainkey = null, subkey = null, defval = null) {
-        this.initialize();
+    get(mainkey = null, subkey = null, defval = null) {
+        //this.link('database')
         if (mainkey == null) {
-            result = db.select('settings' )
+            result = this.database.select('settings' )
             var obj = {}
             result.forEach(function(setting) {
                 var mainkey = setting.mainkey
@@ -42,7 +28,7 @@ module.exports = {
             return obj    
         } else {
             if (subkey == null) {
-                result = db.select('settings', { mainkey: mainkey } )
+                result = this.database.select('settings', { mainkey: mainkey } )
                 var obj = {}
                 result.forEach(function(setting) {
                     var subkey = setting.subkey;
@@ -51,7 +37,7 @@ module.exports = {
                 });
                 return obj    
             } else {
-                var result = db.select('settings', { mainkey: mainkey, subkey: subkey } )
+                var result = this.database.select('settings', { mainkey: mainkey, subkey: subkey } )
                 if (result.length == 0) {
                     if (defval != undefined) {
                         this.set(mainkey, subkey, defval);
@@ -74,40 +60,38 @@ module.exports = {
                 } 
             }
         }
-    },
+    }
 
 
     // Set Settings(s)
 
-    set: function(mainkey, subkey, value) {
-        this.initialize();
-
+    set(mainkey, subkey, value) {
         if (value != null && typeof value === 'object' && value.value !== null && Object.keys(value).length == 1) {
             value = JSON.stringify(value.value)
         } else {
             value = JSON.stringify(value)
         }
-        if (db.insert('settings',  { mainkey: mainkey, subkey: subkey, value: value }).changes == 1) {
+        if (this.database.insert('settings',  { mainkey: mainkey, subkey: subkey, value: value }).changes == 1) {
             return true;
         }    
         return false;
-    },
+    }
 
     
     // Delete Settings(s)
 
-    delete: function(mainkey, subkey) {
-        this.initialize();
+    delete(mainkey, subkey) {
         if (subkey == null) {
-            if (db.delete('settings', { mainkey: mainkey }).changes > 0) {
+            if (this.database.delete('settings', { mainkey: mainkey }).changes > 0) {
                 return true;
             }
         } else {
-            if (db.delete('settings', { mainkey: mainkey, subkey: subkey }).changes > 0) {
+            if (this.database.delete('settings', { mainkey: mainkey, subkey: subkey }).changes > 0) {
                 return true;
             }
         }
         return false;
-    },
+    }
+
 
 }

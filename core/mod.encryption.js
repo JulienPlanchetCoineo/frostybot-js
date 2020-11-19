@@ -3,29 +3,25 @@
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 md5 = require('md5');
+const frostybot_module = require('./mod.base')
 
-module.exports = {
+module.exports = class frostybot_encryption_module extends frostybot_module {
 
-    // Initialize Module
+    // Constructor
+
+    constructor() {
+        super()
+    }
+
+    // Initialize
 
     initialize() {
-        if (this.initialized !== true)
-            this.modules();
-            this.algorithm = 'aes-256-ctr';
-        this.initialized = true;
-    },
-
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'encryption') this[method] = module;
-        }
-    },
+        this.algorithm = 'aes-256-ctr';
+    }
 
 
     // Get UUID
+
     md5_uuid() {
         var key = this.settings.get('core', 'uuid');
         if (key === null) {
@@ -36,18 +32,19 @@ module.exports = {
             return false
         }
         return md5(key)
-    },
+    }
+
 
     // Check is value is encrypted
 
     is_encrypted(val) {
         return (this.utils.is_object(val) && val.hasOwnProperty('iv') && val.hasOwnProperty('content')) ? true : false
-    },
+    }
+
 
     // Encrypt a String
 
     encrypt(str) {
-        this.initialize()
         if (this.is_encrypted(str))
             return str
         var uuid = this.md5_uuid();
@@ -61,13 +58,12 @@ module.exports = {
             };
         }
         return this.output.error('encryption_failed')
-    },
+    }
 
 
     // Decrypt a String
 
     decrypt(hash) {
-        this.initialize()
         if (!this.is_encrypted(hash))
             return hash
         var uuid = this.md5_uuid();
@@ -77,7 +73,7 @@ module.exports = {
             return decrypted.toString();
         }
         return this.output.error('decryption_failed')
-    },
+    }
 
 
 }

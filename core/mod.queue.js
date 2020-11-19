@@ -1,35 +1,18 @@
 // Order processing queue
 
+const frostybot_module = require('./mod.base')
 
-module.exports = {
+module.exports = class frostybot_queue_module extends frostybot_module {
 
-    // Initialize Module
+    // Constructor
 
-    initialize() {
-        if (this.initialized !== true) {
-            this.modules();
-            this['utils'] = require('./core.utils')
-            this['settings'] = require('./core.settings')
-            this['output'] = require('./core.output')
-            this['classes'] = require('./core.classes')
-        }
-        this.initialized = true;
-    },
-
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'queue') this[method] = module;
-        }
-    },
-
+    constructor() {
+        super()
+    }
 
     // Initialize a queue
     
     create(stub, symbol) {
-        this.initialize()
         if (!this.hasOwnProperty('queue'))
             this.queue = {}
         if (!this.queue.hasOwnProperty(stub))
@@ -42,7 +25,7 @@ module.exports = {
             this.results[stub] = {}
         if (!this.results[stub].hasOwnProperty(symbol))
             this.results[stub][symbol] = []            
-    },
+    }
 
 
     // Clear order queue
@@ -51,7 +34,7 @@ module.exports = {
         this.create(stub, symbol)
         this.queue[stub][symbol] = []
         this.results[stub][symbol] = []
-    },
+    }
 
 
     // Add order to queue
@@ -65,7 +48,7 @@ module.exports = {
             this.output.notice('order_queued', this.utils.serialize(order))
             this.queue[stub][symbol].push(order)
         });
-    },
+    }
 
 
     // Process order queue (submit orders to the exchange)
@@ -99,7 +82,7 @@ module.exports = {
             return false;
         }
         return results;
-    },
+    }
 
 
 }
