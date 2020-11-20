@@ -459,7 +459,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
             case 'long'  :  target = requested;                   break;
             case 'short' :  target = -1 * Math.abs(requested);    break;
             case 'close' :  if (dir == 'flat') return this.output.error('position_none', symbol)
-                            target = closeall ? 0 : ((dir == 'long') ? current - requested : current + requested)
+                            target = closeall ? 0 : ((dir == 'long') ? current - Math.abs(requested) : current + Math.abs(requested))
                             is_close = true
         }
 
@@ -517,14 +517,16 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         // Ensure that when closing all of position and the exchange uses base sizing that the order size equals the current base size
         if ((type == 'close') && (closeall) && (this.exchange[stub].get('order_sizing') == 'base')) {
             sizing = 'base'
-            current = this.floor_amount(market, current_position['base_size'])
+            var dir = current_position.direction
+            current = (dir == 'long' ? 1 : -1) * current_position['base_size']
             target = 0
         }
 
         // Ensure that when closing all of position and the exchange uses quote sizing that the order size equals the current quote size
         if ((type == 'close') && (closeall) && (this.exchange[stub].get('order_sizing') == 'quote')) {
             sizing = 'quote'
-            current = this.floor_amount(market, current_position['quote_size'])
+            var dir = current_position.direction
+            current = (dir == 'long' ? 1 : -1) * current_position['quote_size']
             target = 0
         }
 
