@@ -8,6 +8,7 @@ cd "$SCRIPTPATH" &
 cd ../ &
 
 echo "Checking for updates..."
+sudo git checkout stable > /dev/null 2>&1
 sudo git fetch > /dev/null 2>&1
 CHECK=`sudo git status | grep "up to date" | wc -l`
 
@@ -28,6 +29,7 @@ else
   fi
   echo "Frostybot server stopped successfully, upgrading now"
   echo "Updating Frostybot files from Github"
+  sudo git checkout stable > /dev/null 2>&1
   sudo git pull -f
   echo "Installing outstanding NodeJS modules"
   sudo npm install --unsafe-perm > /dev/null 2>&1
