@@ -1,0 +1,147 @@
+<html lang="en">
+    <head>
+        <title id="Description">Frostybot UI</title>
+        <meta name="description" content="Frostybot User Interface" />
+        <link rel="stylesheet" href="jqwidgets/styles/jqx.base.css" type="text/css" />
+        <link rel="stylesheet" href="jqwidgets/styles/jqx.dark.css" type="text/css" />
+        <link rel="stylesheet" href="css/style.css" type="text/css" />
+        <link rel="stylesheet" href="css/jquery.toast.css" type="text/css" />
+        <link rel="icon" href="favicon.ico">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="jqwidgets/jqx-all.js"></script>
+        <script type="text/javascript" src="js/jquery.toast.js"></script>
+        <script type="text/javascript" src="js/frostybot-ui.js"></script>
+    </head>
+    <body class="default" bgcolor="#4A4A4A">
+        <div id="masterContainer">
+            <div id="masterHeader" class="maxWidth">
+                <span><img id="logo" src="img/logo.png" /></span>
+                <span id="title">Frostybot UI</span>
+            </div>
+            <div id="masterLayout">
+                <!--left tabbedGroup-->
+                <div data-container="longshortOrder">
+                    <form id="lsForm" class="orderForm">
+                        <div class="orderForm_row">
+                            <div class="orderForm_label">Symbol:</div>
+                            <div class="orderForm_field" id="lsSymbol"></div>
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label">Base:</div>
+                            <div class="orderForm_field"><span id="lsBase"></span></div> 
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label">Quote:</div>
+                            <div class="orderForm_field"><span id="lsQuote"></span></div> 
+                        </div>
+                        <!--div class="orderForm_row">
+                            <div class="orderForm_label">Position:</div>
+                            <div class="orderForm_field" id="lsPosition">blah</div>
+                        </div-->
+                        <div class="orderForm_row">
+                            <hr>
+                        </div>
+                        <!--div class="orderForm_row">
+                            <div class="orderForm_label">Size:</div>
+                            <div class="orderForm_field">
+                                <div id="lsSizeType">
+                                    <button class="orderForm_radioButton" id="lsSizeTypeBase">Base</button>
+                                    <button class="orderForm_radioButton" id="lsSizeTypeQuote">Quote</button>
+                                    <button class="orderForm_radioButton" id="lsSizeTypeUSD">USD</button>
+                                    <button class="orderForm_radioButton" id="lsSizeTypeSize">Size</button>
+                                    <button class="orderForm_radioButton" id="lsSizeTypeScale">Scale</button>
+                                </div>
+                            </div>
+                        </div-->
+                        <div class="orderForm_row">
+                            <div class="orderForm_label" style="padding-top: 7px">Size:</div>
+                            <div class="orderForm_field"><span style="vertical-align: middle;"><input id="lsSizeAmount" /></span><span style="padding-left: 5px; vertical-align: middle;"><div style="display: inline-block; margin-top: 5px;" id="lsSizeType"></div></span></div>
+                        </div>
+                        <div class="orderForm_row" id="lsMaxSizeRow">
+                            <div class="orderForm_label" style="padding-top: 3px">Max Size:</div>
+                            <div class="orderForm_field"></span><span><input id="lsMaxSizeAmount" /></span><span style="padding-left: 5px" id="lsMaxSizeSuffix"></span></div>
+                        </div>
+                        <div class="orderForm_row">
+                            <hr>
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label" style="padding-top: 5px">Price:</div>
+                            <div class="orderForm_field"><span style="vertical-align: middle;"><div style="display: inline-block; " id="lsOrderQty"></div></span></div>
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label">&nbsp;</div>
+                            <div class="orderForm_field" style="vertical-align: middle;"><span style="vertical-align: middle;" id="lsPriceOrdersLabel">Create a single order at</span></div>
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label">&nbsp;</div>
+                            <div class="orderForm_field" style="vertical-align: middle;"><span style="vertical-align: middle; "><input id="lsPriceAmountMin" /></span><span style="vertical-align: middle; " id="lsPriceMaxField"> and <input id="lsPriceAmountMax" /></span><span style="vertical-align: middle; padding-left: 5px;"><div style="display: inline-block; margin-top: 5px;" id="lsPriceType"></div></span><!--span style="padding-left: 5px; vertical-align: middle;"><div style="display: inline-block; margin-top: 5px;" id="lsRelativePriceAboveBelow"></div></span--></div>
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label">&nbsp;</div>
+                            <div class="orderForm_field" style="vertical-align: middle;"><span style="vertical-align: middle;"><div style="display: inline-block;" id="lsPriceRelAbs"></div></span><!--span style="padding-left: 5px; vertical-align: middle;"><div style="display: inline-block; margin-top: 5px;" id="lsRelativePriceAboveBelow"></div></span--></div>
+                        </div>
+                        <div class="orderForm_row">
+                            <hr>
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label" style="padding-top: 3px">Post Only:</div>
+                            <div class="orderForm_field"><div id="lsPostOnlyButton"></div></div>
+                        </div>
+                        <!--div class="orderForm_row">
+                            <div class="orderForm_label">Stop Loss:</div>
+                            <div class="orderForm_field">&nbsp;</div>
+                        </div>
+                        <div class="orderForm_row">
+                            <div class="orderForm_label">Take Profit:</div>
+                            <div class="orderForm_field">&nbsp;</div>
+                        </div-->
+                        <div class="orderForm_row">
+                            <hr>
+                        </div>
+                        <div class="orderForm_row" style="text-align: center;">
+                            <span style="display: inline-block; vertical-align: right; width: 120px"><button id="lsLongOrderButton" style="border-radius: 10px;">Long</button></span>&nbsp;<span style="display: inline-block; vertical-align: left; width: 120px"><button id="lsShortOrderButton" style="border-radius: 10px;">Short</button></span>
+                        </div>
+                    </form>
+                </div>
+                <div data-container="buysellOrder"></div>
+                <div data-container="sltptsOrder"></div>
+                <div data-container="closeOrder"></div>
+                <!--The panel content divs can have a flat structure-->
+                <!--documentGroup-->
+                <div data-container="chartPanel">
+                    <div class="noscroll">
+                        <!-- TradingView Widget BEGIN -->
+                        <div class="tradingview-widget-container" style="overflow:vhidden;">
+                            <div id="tradingview_da0a4" style="overflow:vhidden;"></div>
+                            <!--div class="tradingview-widget-copyright" style="overflow:vhidden;"><a href="https://www.tradingview.com/symbols/BTCUSD/?exchange=BITSTAMP" rel="noopener" target="_blank"><span class="blue-text">BTCUSD Chart</span></a> by TradingView</div-->
+                            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                        </div>
+                        <!-- TradingView Widget END -->
+                    </div>
+                </div>
+                <div data-container="reportsPanel">
+                    reports content</div>
+                <!--bottom tabbedGroup-->
+                <div data-container="positionsPanel">
+                    <div class="noscroll"><div id="positionsGrid"></div></div>
+                </div>
+                <div data-container="ordersPanel">
+                    <div class="noscroll"><div id="ordersGrid"></div></div>
+                </div>
+                <div data-container="logPanel">
+                    <div class="noscroll"><div id="logGrid"></div></div>
+                </div>
+                <!--right tabbedGroup-->
+                <div data-container="stubPanel">
+                    <div class="noscroll"></div><div id="stubSelectorGrid"></div>
+                </div>
+                <div data-container="balancesPanel">
+                    <div class="noscroll"></div><div id="balancesGrid"></div>
+                </div>
+                <div data-container="symbolsPanel">
+                    <div class="noscroll"></div><div id="symbolSelectorGrid"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

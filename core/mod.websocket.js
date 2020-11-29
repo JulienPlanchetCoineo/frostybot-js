@@ -34,18 +34,20 @@ module.exports = class frostybot_websocket_module extends frostybot_module {
         await this.connect_stub(stub)
       }
       var account = this.accounts.getaccount('deribit');
-      var params = this.accounts.ccxtparams(account);
-      var conf = {
-        exchange: 'deribit',
-        stub: 'deribit',
-        apikey: params.parameters.apiKey,
-        secret: params.parameters.secret,
-        url: 'wss://' + params.parameters.urls.api.replace ('https://', '') + '/ws/api/v2',
+      if (account != false) {
+        var params = this.accounts.ccxtparams(account);
+        var conf = {
+          exchange: 'deribit',
+          stub: 'deribit',
+          apikey: params.parameters.apiKey,
+          secret: params.parameters.secret,
+          url: 'wss://' + params.parameters.urls.api.replace ('https://', '') + '/ws/api/v2',
+        }
+        const frostybot_wss_client_deribit = require('../exchanges/wss.client.deribit')
+        this.ws['test'] = new frostybot_wss_client_deribit(conf)
+        await this.ws['test'].connect()
+        this.ws['test'].subscribe('trades','BTC-PERPETUAL')
       }
-      const frostybot_wss_client_deribit = require('../exchanges/wss.client.deribit')
-      this.ws['test'] = new frostybot_wss_client_deribit(conf)
-      await this.ws['test'].connect()
-      this.ws['test'].subscribe('trades','BTC-PERPETUAL')
   }
 
 

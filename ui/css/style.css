@@ -1,0 +1,178 @@
+.maxWidth {
+    width: 100%
+}
+
+.maxHeight {
+    height: 100%
+}
+
+#masterContainer {
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    height: -webkit-calc(100% - 70px);
+    height:    -moz-calc(100% - 70px);
+    height:         calc(100% - 70px);
+}
+
+#masterLayout {
+    background-color: #444444;
+}
+
+#logo {
+    width: 200px;
+    top: 20px;
+    left: 20px;
+    margin-bottom: 10px 
+}
+
+#title {
+    float: right;
+    right: 20px;
+    padding-top: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16pt;
+    font-weight: bold;
+    color: #EEEEEE;
+}
+
+#wssLog {
+    white-space: nowrap;
+}
+
+
+#wssPanel {
+    overflow-x : hidden;
+}
+
+.noscroll:nth-child(1) {
+    overflow: hidden;
+}
+
+.orderForm {
+    margin-top: 20px;
+}
+
+.orderForm_label {
+    float: left;
+    padding-top: 1px;
+    width: 25%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+.orderForm_field {
+    float: left;
+    width: 75%;
+    padding-top: 2px;
+}
+.orderForm_row {
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.orderForm_row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.orderForm_radioButton {
+    /*padding: 2px 0px;*/
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+}
+
+.tabcontent {
+    padding: 10px;
+}
+
+
+
+.form_row {
+    vertical-align: middle;
+    /*margin-top: 10px;*/
+}
+
+.form_col {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.formlabel {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    font-weight: bold;
+    padding-right: 5px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.formcontent {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    padding-right: 5px;
+    vertical-align: middle;
+}
+
+.forminput {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 2px;
+}
+
+
+.formbutton {
+    padding: none;    
+}
+
+.formpanel {
+    padding: 10px;
+}
+
+#tabs {
+    height: 400px;
+}
+
+#inputformcontainer {
+     /* height: 630px;
+    width: 1040px;
+     /* */
+    /* border: solid black 1px;
+    border-radius: 10px; 
+    padding: 10px;*/
+    margin: 10px;
+}
+
+.red {
+    color: #BB0000;
+}
+
+.green {
+    color: #008800;
+}
+
+#stubspanel {
+    margin-top: 10px;
+    padding: 10px;
+}
+
+#stubsnewbutton {
+    margin-bottom: 5px;
+    padding-left: 50px;
+}
+
+.formbutton {
+    display: inline-block;
+}
+
+.formbutton > span {
+    padding-left: 20px;
+}
+.stubsformlabel {
+    display: inline-block;
+    width: 80px;
+}
+
