@@ -41,6 +41,8 @@ module.exports = {
         order_sizing_tar:   'Target position {0} size is:  {1} {2}',
         order_sizing_ord:   'Order required to reach target: {0} {1} {2}',
         close_exceeds_pos:  'The closing order size of {0} exceeds your current position, adjusting order size to {1}.',
+        ws_subscribe:       'Subscribed to websocket channel: {0}',
+        ws_unsubscribe:     'Unsubscribed from websocket channel: {0}',
 
     },
 

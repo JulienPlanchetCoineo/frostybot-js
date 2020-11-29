@@ -216,6 +216,16 @@ module.exports = class frostybot_output_module extends frostybot_module {
         if (!['section', 'subsection','blank'].includes(type)) {
             var logmessage = datetime + ' | ' + type.toUpperCase().padEnd(7) + ' | ' + message + eol
             fs.appendFileSync(this.logfile, logmessage);
+            var logentry = {
+                message_type : 'log',
+                timestamp: ts,
+                datetime: dateobj.toJSON(),
+                type: type,
+                message: message
+            }
+            if (global.hasOwnProperty('frostybot'))
+                if (global.frostybot.hasOwnProperty('wss'))
+                    global.frostybot.wss.emit('proxy', logentry)
         }
 
         switch(type) {

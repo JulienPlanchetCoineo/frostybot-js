@@ -9,16 +9,17 @@
   "dependencies": {
     "better-sqlite3": "^7.1.1",
     "body-parser": "^1.19.0",
-    "ccxt": "^1.34.53",
+    "ccxt": "^1.37.70",
     "cli-color": "^2.0.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "fs": "0.0.1-security",
     "md5": "^2.3.0",
     "morgan": "~1.9.1",
     "node-cache": "^5.1.2",
     "trim-newlines": "^3.0.0",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.1",
+    "ws": "^7.4.0"
   }
 }

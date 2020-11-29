@@ -57,6 +57,11 @@ const api_methods = {
         'disable', 
     ],
 
+    websocket: [
+        'subscribe',
+        'unsubscribe',
+    ],
+
 }
 
 const frostybot_module = require('./mod.base')
@@ -79,7 +84,6 @@ module.exports = class frostybot_core_module extends frostybot_module {
 
     verify_whitelist(ip) {
         return this.whitelist.verify(ip);
-
     }
 
     // Parse request
@@ -166,9 +170,6 @@ module.exports = class frostybot_core_module extends frostybot_module {
     method_exists(module, method) {
         const loader = require('./core.loader');
         loader.map_all();
-//        console.log(this[module])
-
-        //if (api_methods[module].includes(method) && this[module].hasOwnProperty(method) && typeof this[module][method] === 'function') {
         if (api_methods[module].includes(method)) {
             return true;
         }
@@ -223,7 +224,6 @@ module.exports = class frostybot_core_module extends frostybot_module {
             if (this.load_module(module)) {
             //if (typeof(this[module] == 'function')) {
                 this.output.notice('loaded_module', module)    
-                //console.log(this[module])
                 var method = this.utils.is_array(method.split(':')) ? method.split(':')[0] : method;
                 if (this.method_exists(module, method)) {
                     var start = (new Date).getTime();
