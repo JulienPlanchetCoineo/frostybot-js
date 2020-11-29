@@ -1,8 +1,5 @@
 var express = require('express');
 var router = express.Router();
-
-//const core = require('../core/mod.core');
-//const core = global.frostybot._modules_.core
 const api = require('../core/core.api');
 
 // Create routes
@@ -35,10 +32,6 @@ Object.keys(api).forEach(baseapi => {
                 var command = {command: routes[routeinfo]}
             }
 
-            //const loader = require('../core/core.loader');
-            //loader.load_all();
-            //core.initialize();
-
             if (req.rawBody !== undefined) {
                 var body = core.parse_raw(req.rawBody)
             } else {
@@ -48,7 +41,6 @@ Object.keys(api).forEach(baseapi => {
             var params = {
                 body: {...command, ...req.params, ...req.query, ...body}
             }
-            
             
             var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).replace('::ffff:','').replace('::1, ','');
 

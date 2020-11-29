@@ -35,7 +35,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
                 for (const [stub, account] of Object.entries(accounts)) {
                     accounts[stub] = this.utils.lower_props(account)
                 }
-                this.output.success('account_retrieve');
+                //this.output.success('account_retrieve');
                 return this.censored(accounts);
             }
             return this.output.error('account_retrieve');

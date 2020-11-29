@@ -295,6 +295,8 @@ module.exports = class frostybot_exchange_base {
     // Merge orders
 
     merge_orders(orders1, orders2) {
+        if (!this.utils.is_array(orders1)) orders1 = [];
+        if (!this.utils.is_array(orders2)) orders2 = [];
         var merged = [...orders1, ...orders2];
         return merged.sort((a, b) => (a.timestamp < b.timestamp) ? 1 : -1);
     }

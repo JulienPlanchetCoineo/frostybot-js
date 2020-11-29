@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('frostybot-js-dev:server');
 var http = require('http');
+const ws = require('ws');
 
 /**
  * Get port from environment and store in Express.
@@ -14,6 +15,27 @@ var http = require('http');
 
 var port = normalizePort(process.env.PORT || '80');
 app.set('port', port);
+
+/**
+ *  Create WebSocker Server
+ */
+
+global.frostybot.wss = new ws.Server({ noServer: true });
+
+global.frostybot.wss.on('connection', function connection(socket) {
+  socket.on('message', function(msg) {
+    //if (msg == 'PING') {
+    //  socket.send('PONG');
+    //}
+  });
+  
+});
+
+global.frostybot.wss.on('proxy', function (result) {
+  global.frostybot.wss.clients.forEach(function each(client) {
+    client.send(JSON.stringify(result));
+  });
+});
 
 /**
  * Create HTTP server.
@@ -28,6 +50,12 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+server.on('upgrade', (request, socket, head) => {
+  global.frostybot.wss.handleUpgrade(request, socket, head, socket => {
+    global.frostybot.wss.emit('connection', socket, request);
+  });
+});
+
 
 /**
  * Normalize a port into a number, string, or false.
