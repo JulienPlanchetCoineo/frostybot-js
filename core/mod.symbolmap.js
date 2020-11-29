@@ -1,24 +1,14 @@
 // Symbol Mapping Module
 
+const frostybot_module = require('./mod.base')
 
-module.exports = {  
+module.exports = class frostybot_symbolmap_module extends frostybot_module {
 
-    // Initialize Module
+    // Constructor
 
-    initialize() {
-        if (this.initialized !== true)
-            this.modules();
-        this.initialized = true;
-    },
-
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'symbolmap') this[method] = module;
-        }
-    },
+    constructor() {
+        super()
+    }
     
 
     // Get mappings
@@ -60,7 +50,7 @@ module.exports = {
             }
             return this.output.error('symbolmap_get', [exchange, symbol]);
         }
-    },
+    }
 
 
     // Add symbol mapping
@@ -97,7 +87,7 @@ module.exports = {
             return this.get({exchange: exchange, symbol: symbol});
         }
         return this.output.error('symbolmap_add', [exchange, symbol, mapping]);
-    },
+    }
 
 
     // Delete symbol mapping
@@ -127,13 +117,12 @@ module.exports = {
         }
         this.output.error('symbolmap_delete', [exchange, symbol]);
         return false;
-    },
+    }
 
 
     // Map symbol
 
     async map(exchange, symbol) {
-        this.initialize()
         var result = await this.settings.get('symbolmap:' + exchange, symbol.toUpperCase())
         return (result === null ? false : result)
     }

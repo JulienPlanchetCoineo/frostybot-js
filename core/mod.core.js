@@ -1,4 +1,4 @@
-// Main Frostybot module. All other modules are accessed via this module
+// Frostybot core module
 
 const fs = require('fs');
 
@@ -57,52 +57,34 @@ const api_methods = {
         'disable', 
     ],
 
+    websocket: [
+        'subscribe',
+        'unsubscribe',
+    ],
+
 }
 
-module.exports = {
+const frostybot_module = require('./mod.base')
 
-    // Import Core Modules
+module.exports = class frostybot_core_module extends frostybot_module {
+
+
+    // Constructor
+
+    constructor() {
+        super()
+    }
+
+    // Initalize
+
     initialize() {
-        // Load General Modules
-        const dir = __dirname.substr(0, __dirname.lastIndexOf( '/' ) ) + '/core';
-        global.frostybot = {
-            modules  : {},
-            settings : {},
-        };
-        fs.readdirSync( dir ).forEach( file => {
-            if ((file != 'core.frostybot.js') && (file != 'core.api.js') && (file.indexOf('core.lang') < 0)) {
-                var module = file.split('.')[1];
-                global.frostybot.modules[module] = require('./' + file);
-            }
-        });
-        this.modules();
-    },
-
-    
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            this[method] = module;
-        }
-    },
-
+    }
 
     // Verify whitelist
 
     verify_whitelist(ip) {
         return this.whitelist.verify(ip);
-        if (result === null) {
-            return true;
-        }
-        return result
-        var acl = this.settings.get('whitelist', ip);
-        if (acl) {
-            this.output.debug('whitelist_verify', ip);
-            return true;
-        }
-        return this.output.error('whitelist_verify', ip);
-    },
+    }
 
     // Parse request
 
@@ -113,7 +95,7 @@ module.exports = {
         if (this.utils.is_array(request.body) && request.body[0].hasOwnProperty('command')) return request.body;
         // Raw request body
         return this.parse_raw(request.rawBody);
-    },
+    }
     
 
     // Parse raw text into parameter object
@@ -141,7 +123,7 @@ module.exports = {
             }
         }
         return (commands.length == 1 ? commands[0] : commands);
-    },
+    }
 
 
 
@@ -167,29 +149,32 @@ module.exports = {
         }
         delete params.command;
         return [mod, cmd, params];
-    },
+    }
 
 
     // Check if module exists and initialize it
 
     load_module(module) {
         if (api_methods.hasOwnProperty(module) && this.hasOwnProperty(module)) {
-            this[module].initialize();
+            var mod = require('./mod.'+module)
+            this[module] = new mod();
             return true;
         } else {
             return false;
         }
-    },
+    }
 
 
     // Check if a given method exists in a given module
 
     method_exists(module, method) {
-        if (api_methods[module].includes(method) && this[module].hasOwnProperty(method) && typeof this[module][method] === 'function') {
+        const loader = require('./core.loader');
+        loader.map_all();
+        if (api_methods[module].includes(method)) {
             return true;
         }
         return false;
-    },
+    }
     
 
     // Execute Frostybot Command(s)
@@ -197,26 +182,34 @@ module.exports = {
     async execute(request) {
         this.output.reset();
         var params = this.parse_request(request);
+        if (this.utils.is_object(params) && params.hasOwnProperty('0') && params['0'].hasOwnProperty('command')) {
+            params = Object.values(params);
+        }
         if (this.utils.is_array(params)) {                          
             var results = await this.execute_multiple(params);  // Multiple commands submitted
         } else {        
             var results = await this.execute_single(params);     // Single command submitted
         }
         return results;
-    },
+    }
 
 
     // Execute Multiple Commands
 
     async execute_multiple(multi_params) {
         var results = [];
+        if (this.utils.is_object(multi_params)) {
+            multi_params = Object.values(multi_params)
+        }
         for (var i = 0; i < multi_params.length; i++) {
             var params = multi_params[i];
-            var result = await this.execute_single(params);
-            results.push(result);
+            if (this.utils.is_object(params)) {
+                var result = await this.execute_single(params);
+                results.push(result);    
+            }
         }
         return this.output.combine(results);
-    },
+    }
 
 
     // Execute a Single Command
@@ -229,6 +222,7 @@ module.exports = {
             this.output.notice('executing_command', [module, method]);
             this.output.notice('command_params', this.utils.serialize(params));
             if (this.load_module(module)) {
+            //if (typeof(this[module] == 'function')) {
                 this.output.notice('loaded_module', module)    
                 var method = this.utils.is_array(method.split(':')) ? method.split(':')[0] : method;
                 if (this.method_exists(module, method)) {
@@ -267,7 +261,8 @@ module.exports = {
                         } 
                         params.stub = stub
                     }
-                    let result = await this[module][method](params);
+                    //let result = await this[module][method](params);
+                    let result = await global.frostybot._modules_[module][method](params);
                     var end = (new Date).getTime();
                     var duration = (end - start) / 1000;            
                     this.output.notice('command_completed', duration);
@@ -280,7 +275,7 @@ module.exports = {
             }
         }
         return this.output.parse(this.output.error('malformed_param', parsed));
-    }, 
+    } 
 
 
 

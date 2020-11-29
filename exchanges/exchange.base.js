@@ -29,10 +29,12 @@ module.exports = class frostybot_exchange_base {
 
     // Create module shortcuts
 
-    load_modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            this[method] = module;
-        }
+    load_modules() { 
+        Object.keys(global.frostybot._modules_).forEach(module => {
+            if (!['core'].includes(module)) {
+                this[module] = global.frostybot._modules_[module];
+            }
+        })
     }
 
     // Execute method
@@ -224,7 +226,7 @@ module.exports = class frostybot_exchange_base {
         let results = await this.execute('fetch_balance');
         await this.markets();
         if (results.result != 'error') {
-            var raw_balances = results;
+            var raw_balances = results.hasOwnProperty('data') ? results.data : results;
             delete raw_balances.info;
             delete raw_balances.free;
             delete raw_balances.used;
@@ -293,6 +295,8 @@ module.exports = class frostybot_exchange_base {
     // Merge orders
 
     merge_orders(orders1, orders2) {
+        if (!this.utils.is_array(orders1)) orders1 = [];
+        if (!this.utils.is_array(orders2)) orders2 = [];
         var merged = [...orders1, ...orders2];
         return merged.sort((a, b) => (a.timestamp < b.timestamp) ? 1 : -1);
     }

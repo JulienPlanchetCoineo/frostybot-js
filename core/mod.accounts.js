@@ -1,40 +1,33 @@
 // Accounts Handling Module
 
-module.exports = {  
+const frostybot_module = require('./mod.base')
 
+module.exports = class frostybot_accounts_module extends frostybot_module {
 
-    // Initialize Module
+    // Constructor
 
-    initialize() {
-        if (this.initialized !== true) {
-            this.modules();
-        }
-        this.initialized = true;
-    },
+    constructor() {
+        super()
+    }
 
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'accounts') this[method] = module;
-        }
-    },
 
     // Get account silently (no log output, used internally)
 
     getaccount(stub) {
-        this.initialize();
         var account = this.settings.get('accounts', stub);
         if (account !== null) {
             return this.utils.decrypt_props( this.utils.lower_props(account), ['apikey', 'secret'])
         }
         return false;
-    },    
+    }
+
 
     // Get account(s)
 
     async get(params) {
+        if (params == undefined) {
+            params = []
+        }
         var stub = this.utils.extract_props(params, 'stub');
         if (stub == null) {
             var accounts = this.settings.get('accounts');
@@ -42,7 +35,7 @@ module.exports = {
                 for (const [stub, account] of Object.entries(accounts)) {
                     accounts[stub] = this.utils.lower_props(account)
                 }
-                this.output.success('account_retrieve');
+                //this.output.success('account_retrieve');
                 return this.censored(accounts);
             }
             return this.output.error('account_retrieve');
@@ -56,7 +49,8 @@ module.exports = {
             }
             return this.output.error('account_retrieve', stub);
         }
-    },
+    }
+
 
     // Censor account output
 
@@ -72,7 +66,7 @@ module.exports = {
             }
             return result;
         }
-    },
+    }
 
 
     // Check if account stub exists
@@ -83,7 +77,7 @@ module.exports = {
             return true;
         }
         return false;
-    },
+    }
 
 
     // Extract CCXT Test Parameters 
@@ -104,7 +98,8 @@ module.exports = {
             parameters: params,
         }
         return [stub, data];
-    },
+    }
+
 
     // Create new account
 
@@ -138,14 +133,14 @@ module.exports = {
             this.output.error('account_create', stub);
         }
         return false;
-    },
+    }
 
 
     // Alias for create
 
     async add(params) {
         return await this.create(params);
-    },
+    }
 
 
     // Update account
@@ -163,7 +158,7 @@ module.exports = {
         }
         this.output.error('account_test', stub);
         return false;
-    },
+    }
 
 
     // Delete account
@@ -186,14 +181,14 @@ module.exports = {
         }
         this.output.error('account_delete', stub);
         return false;
-    },
+    }
 
 
     // Alias for delete
 
     async remove(params) {
         return await this.delete(params);
-    },
+    }
 
 
     // Get account connection info
@@ -249,7 +244,7 @@ module.exports = {
             }
         }
         return result;
-    },
+    }
 
 
     // Test account
@@ -276,7 +271,7 @@ module.exports = {
         } 
         this.output.success('account_test');
         return true;
-    },
+    }
 
 
     // Get exchange ID from stub

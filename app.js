@@ -1,29 +1,29 @@
 var express     = require('express');
 var bodyParser  = require('body-parser');
 
-
 // Set App Title
+
 process.title = "frostybot-js";
 
-// Import core library
-const frostybot   = require('./core/core.frostybot');
+// Load Modules
 
-// Initialize 
-
-frostybot.initialize();
-global.frostybot.modules.output.initialize();
-global.frostybot.modules.output.section('frostybot_startup');
+const loader      = require('./core/core.loader');
+loader.load_all()
 
 // API Router
 
 var apiRouter = require('./routes/routes.api');  
 
+// Load Express
+
 var app = express();
 
 // Trust reverse proxy if used
+
 app.set('trust proxy', true);
 
 // Save raw buffer for command parsing
+
 function rawBufferSaver (req, res, buf, encoding) {
     if (buf && buf.length) {
       req.rawBody = buf.toString(encoding || 'utf8')
@@ -31,12 +31,19 @@ function rawBufferSaver (req, res, buf, encoding) {
 }
 
 // Body parsers
+
 app.use(bodyParser.raw({ type: 'text/plain', verify: rawBufferSaver }));
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Map to API router
+// Map to Main API router
 
 app.use('/', apiRouter);
+
+// Map to UI
+
+app.use('/ui', express.static('ui'))
+
+// Export app
 
 module.exports = app;

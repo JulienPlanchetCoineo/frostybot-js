@@ -1,100 +1,68 @@
 // Commonly used utility and helper functions
 
-module.exports = {
+const frostybot_module = require('./mod.base')
 
-    // Initialize Module
+module.exports = class frostybot_utils_module extends frostybot_module {
 
-    initialize() {
-        if (this.initialized !== true)
-            this.modules();
-        this.initialized = true;
-    },
+    // Constructor
 
-
-    // Create module shortcuts
-
-    modules() {
-        for (const [method, module] of Object.entries(global.frostybot.modules)) {
-            if (method != 'utils') this[method] = module;
-        }
-    },
+    constructor() {
+        super()
+    }
 
 
-    // Module linker
-    
-    methods() {
-        return Object.getOwnPropertyNames(this).filter(item => typeof this[item] === 'function')
-    },
+     // Check if value is JSON
 
-
-    // Method executor
-
-    execute(method, params) {
-        if (typeof this[method] === 'function') {
-            return this[method(...params)];
-        }
-    },
-
-
-    // Get currently running module and method
-    
-    get_current_command() {
-        return global.frostybot.command.module + ':' + global.frostybot.command.method;
-    },
-
-
-    // Check if value is JSON
-
-    is_json(str) {
+     is_json(str) {
         try {
             JSON.parse(str);
         } catch (e) {
             return false;
         }
         return true;
-    },
+    }
 
 
     // Check if value is boolean
 
     is_bool(val) {
         return this.is_true(val) || this.is_false(val);
-    },
+    }
 
 
     // Check if value is numeric
 
     is_numeric(val) {
         return !isNaN(parseFloat(val)) && isFinite(val);
-    },
+    }
 
 
     // Check if value is true
 
     is_true(val) {
         return ['true', 'yes', '1', 1, true].includes(val);
-    },
+    }
 
     
     // Check if value is false
 
     is_false(val) {
         return ['false', 'no', '0', 0, false].includes(val);
-    },
+    }
 
 
     // Check if value is an object
 
     is_object(val) {
         return (typeof val === 'object');
-    },
+    }
 
 
     // Check if value is an array
 
     is_array(val) {
         return Array.isArray(val);
-    },
+    }
 
 
     // Check if a value is empty
@@ -105,20 +73,22 @@ module.exports = {
             (value.hasOwnProperty('length') && value.length === 0) ||
             (value.constructor === Object && Object.keys(value).length === 0)
         )
-    },
+    }
+
 
     // Check if a value is an IP address
 
     is_ip(value) {
         const net = require('net')
         return (net.isIPv4(value) || net.isIPv6(value));
-    },
+    }
+
 
     // Force a value to be an array if it not already an array
 
     force_array(val) {
         return this.is_array(val) ? val : [val];
-    },
+    }
 
 
     // Check if the object is missing anty of the supplied properties
@@ -137,7 +107,7 @@ module.exports = {
             return result;
         else
             return false;
-    },
+    }
 
 
     // Change all of an objects properties to lowercase
@@ -161,7 +131,7 @@ module.exports = {
             }
             return obj;
         }
-    },
+    }
 
 
     // Walk over object and encrypt properties with the names provided in the props array element
@@ -179,7 +149,7 @@ module.exports = {
                 } 
     }
         return obj;
-    },
+    }
 
 
     // Walk over object and decrypt properties with the names provided in the props array element
@@ -197,7 +167,7 @@ module.exports = {
                 } 
         }
         return obj;
-    },
+    }
 
 
     // Trim whitespace from object properties recursively
@@ -217,7 +187,7 @@ module.exports = {
             }
         }
         return obj;
-    },
+    }
 
 
     // Walk over object and remove properties with the names provided in the props array element
@@ -233,7 +203,7 @@ module.exports = {
                     delete obj[key];
         }
         return obj;
-    },
+    }
 
 
     // Walk over object and remove properties that have the values provided in the vals array element
@@ -249,14 +219,15 @@ module.exports = {
                     delete obj[key];
         }
         return obj;
-    },    
+    }    
+
 
 
     // Recursively trim object properties and change the property names to lowercase
 
     clean_props(obj) {
         return this.lower_props(this.trim_props(obj));
-    },
+    }
 
 
     // Walk over object and censor properties that match provided array elements
@@ -272,7 +243,7 @@ module.exports = {
                     obj[key] = this.censor_props(obj[key], props);
         }
         return obj;
-    },
+    }
 
 
     // Filter array of objects by field values
@@ -294,7 +265,7 @@ module.exports = {
             })
         }
         return results;
-    },    
+    }    
 
 
     // Extract given object properties into an array
@@ -316,14 +287,14 @@ module.exports = {
             return result[0];
         }
         return result;
-    },    
+    }    
 
 
     // Get base directory
 
     base_dir() {
         return __dirname.substr(0, __dirname.lastIndexOf('/'))
-    },
+    }
 
 
     // Count the number of decimals in a number
@@ -338,7 +309,7 @@ module.exports = {
         }
         let index = text.indexOf(".")
         return index == -1 ? 0 : (text.length - index - 1)
-    },
+    }
 
 
     // Serialize object (and strip out any api keys or secrets)
@@ -354,14 +325,14 @@ module.exports = {
             props.push(prop + ': ' + newval);
         }
         return '{' + props.join(', ') + '}';
-    },
+    }
 
 
     // Serialize array
 
     serialize_array(arr) {
         return JSON.stringify(arr).replace(/"/g,'').replace(/,/g,', ');
-    },
+    }
 
 
     // Serialize a value for output to the log
@@ -375,7 +346,7 @@ module.exports = {
                 case 'array'    :   return this.serialize_array(val);
             }
         } else return 'Unable to serialize object';
-    },
+    }
 
 
     // Capitilize first letter in a word
@@ -383,7 +354,7 @@ module.exports = {
     uc_first(str) {
         if (typeof str !== 'string') return '';
         return str.charAt(0).toUpperCase() + str.slice(1);
-    },
+    }
 
 
     // Capitilize first letter of every word in a sentence
@@ -395,13 +366,17 @@ module.exports = {
             words[idx] = this.uc_first(word);
         });
         return words.join(' ');
-    },
+    }
 
+    // Get currently running module and method
+    
+    get_current_command() {
+        return global.frostybot.command.module + ':' + global.frostybot.command.method;
+    }
 
     // Method parameter validator
 
     validator(params, schema) {
-        this.initialize();
         params = this.lower_props(params);
         schema = this.lower_props(schema);
         for (var prop in schema) {
@@ -418,7 +393,7 @@ module.exports = {
 
             if (requiredifnotpresent != null) {
                 var found = false;
-                requiredoneof = this.force_array(requiredifnotpresent);
+                var requiredoneof = this.force_array(requiredifnotpresent);
                 requiredoneof.push(prop)
                 Object.getOwnPropertyNames(params).forEach(propname => {
                     if (requiredoneof.includes(propname)) {
@@ -476,7 +451,7 @@ module.exports = {
             }
         }
         return params;
-    },
+    }
 
 
 

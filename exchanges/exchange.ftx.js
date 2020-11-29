@@ -104,7 +104,8 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
                 const contract_size = (raw_market.info.contractSize != null ? raw_market.info.contractSize : 1);
                 const precision = raw_market.precision;
                 const raw = raw_market.info;
-                const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, raw)
+                const tvsymbol = 'FTX:' + symbol.replace('-','').replace('/','');
+                const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, tvsymbol, raw)
                 this.data.markets.push(market);
             });
         await this.index_markets();
