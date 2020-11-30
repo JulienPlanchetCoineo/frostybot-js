@@ -183,7 +183,7 @@ class frostybot_order extends frostybot_base {
 // Output Object
 
 class frostybot_output extends frostybot_base {
-  constructor (command, params, result, type, data, messages) {
+  constructor (command, params, result, type, data, message, messages) {
     super ();
     this.command = command;
     this.params = params != null
@@ -192,6 +192,7 @@ class frostybot_output extends frostybot_base {
     this.result = result;
     this.type = type;
     this.data = data;
+    this.message = message;
     this.messages = messages;
   }
 }

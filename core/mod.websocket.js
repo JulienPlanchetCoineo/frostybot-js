@@ -33,7 +33,8 @@ module.exports = class frostybot_websocket_module extends frostybot_module {
         var stub = stubs[i];
         await this.connect_stub(stub)
       }
-      var account = this.accounts.getaccount('deribit');
+      //var account = this.accounts.getaccount('deribit');
+      var account = false
       if (account != false) {
         var params = this.accounts.ccxtparams(account);
         var conf = {
@@ -46,7 +47,7 @@ module.exports = class frostybot_websocket_module extends frostybot_module {
         const frostybot_wss_client_deribit = require('../exchanges/wss.client.deribit')
         this.ws['test'] = new frostybot_wss_client_deribit(conf)
         await this.ws['test'].connect()
-        this.ws['test'].subscribe('trades','BTC-PERPETUAL')
+        //this.ws['test'].subscribe('trades','BTC-PERPETUAL')
       }
   }
 

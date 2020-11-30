@@ -71,6 +71,7 @@ module.exports = {
         // Telegram Bot
 
         'post|/telegram/token'              :   'telegram:settoken',    // Set Telegram bot token
+        'get|/telegram/token'               :   'telegram:gettoken',    // Get Telegram bot token
 
         // Websocket Management
 

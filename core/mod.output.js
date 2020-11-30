@@ -67,7 +67,13 @@ module.exports = class frostybot_output_module extends frostybot_module {
             });
             if (!this.checkonce(str))
                 this.add_message(type, str);
-            return (type == 'error' ? false : true);
+            if (type == 'success') 
+                this.output_obj.message = str.trim();
+            if (type == 'error') {
+                this.output_obj.message = str.trim();
+                return false;
+            }
+            return true;
         }
         return this.add_message('error', 'Translation not found: ' + type + '.' + id);
     }
@@ -121,6 +127,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
             type: null,
             data: null,
             cache: null,
+            message: null,
             messages: []
         }
         this.once = [];
@@ -254,7 +261,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
 
     parse(result) {
         this.add_data(result);
-        var output = new this.classes.output(...this.utils.extract_props(this.output_obj, ['command', 'params', 'result', 'type', 'data', 'messages']));
+        var output = new this.classes.output(...this.utils.extract_props(this.output_obj, ['command', 'params', 'result', 'type', 'data', 'message', 'messages']));
         this.reset();
         return output;
     }
@@ -273,7 +280,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
                 result = (output_result.result == 'error' ? 'error' : (result == 'error' ? 'error' : 'success'));
             }
         }
-        return new this.classes.output('<multiple>', null, result, type, data, messages);
+        return new this.classes.output('<multiple>', null, result, type, data, message, messages);
     }
 
 }

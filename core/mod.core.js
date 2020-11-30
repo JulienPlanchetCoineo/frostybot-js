@@ -18,6 +18,12 @@ const api_methods = {
         'stats', 
     ],
 
+    telegram: [
+        'settoken',
+        'gettoken',
+        'start',
+    ],
+
     trade: [
         'long', 
         'short', 
@@ -89,12 +95,22 @@ module.exports = class frostybot_core_module extends frostybot_module {
     // Parse request
 
     parse_request(request) {
-        // Single pre-parsed command parameter
-        if (request.body.hasOwnProperty('command')) return request.body;
-        // Multiple pre-parsed command parameters
-        if (this.utils.is_array(request.body) && request.body[0].hasOwnProperty('command')) return request.body;
-        // Raw request body
-        return this.parse_raw(request.rawBody);
+        if (request.hasOwnProperty('body')) {
+            // Single pre-parsed command parameter
+            if (request.body.hasOwnProperty('command')) {
+                return request.body;
+            }
+            // Multiple pre-parsed command parameters
+            if (this.utils.is_array(request.body) && request.body[0].hasOwnProperty('command')) {
+                return request.body;
+            }
+        }
+        if (request.hasOwnProperty('rawBody')) {
+            // Raw request body
+            return this.parse_raw(request.rawBody);
+        }
+        // Plain text failback
+        return this.parse_raw(request);
     }
     
 
@@ -106,20 +122,20 @@ module.exports = class frostybot_core_module extends frostybot_module {
         for (var l = 0; l < lines.length; l++) {
             var line = lines[l];
             if (line.trim() != '') {
-                var params = line.split(' ');
+                var params = line.match(/(?:[^\s"]+|"[^"]*")+/g);
                 var paramObj = {};
                 if (Array.isArray(params)) {
                     for(var i = 0; i < params.length; i++) {
                         var param = params[i].trim();
-                        if (param.toLowerCase() != 'frostybot') {  // In case user included the "frostybot" in the webhook command
+                        if (param.toLowerCase() != 'frostybot')   // In case user included the "frostybot" in the webhook command
                             if (param.indexOf('=') < 0)
-                            param = param.indexOf(':') >= 0 ? 'command=' + param : param;
-                            var [key, val] = param.split('=');
-                            paramObj[key] = val;
-                        } 
-                    }
+                                param = param.indexOf(':') >= 0 ? 'command=' + param : param;
+                        var [key, val] = param.split('=');
+                        paramObj[key] = val != undefined ? val.replace(/"/g, "") : undefined;                         
+                    }    
                     commands.push(paramObj);
-                }    
+                }
+
             }
         }
         return (commands.length == 1 ? commands[0] : commands);
@@ -231,9 +247,14 @@ module.exports = class frostybot_core_module extends frostybot_module {
                         module: module,
                         method: method
                     };
+
+                    // If the tenant is not supplied, add it
+                    if (!params.hasOwnProperty('tenant'))
+                        params['tenant'] = null;
+                
                     // If no symbol is supplied, use the default symbol
                     if (module != 'symbolmap' && !params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
-                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
+                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub, params.tenant);
                         if (exchangeid !== false) {
                             var mapping = await this.symbolmap.map(exchangeid, 'DEFAULT');
                             if (mapping !== false) {
@@ -244,7 +265,8 @@ module.exports = class frostybot_core_module extends frostybot_module {
                     }
                     // Check for symbol mapping and use it
                     if (module != 'symbolmap' && params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
-                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
+                        var tenant = params.hasOwnProperty('tenant') ? params.tenant : null;
+                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub, params.tenant);
                         if (exchangeid !== false) {
                             var mapping = await this.symbolmap.map(exchangeid, params.symbol);
                             if (mapping !== false) {

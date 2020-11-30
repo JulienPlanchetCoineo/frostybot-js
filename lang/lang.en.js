@@ -60,7 +60,7 @@ module.exports = {
         whitelist_disabled: 'Whitelist verification is disabled',
         whitelist_enabled:  'Whitelist verification is enabled',
         whitelist_verify:   'IP Address {0} is whitelisted. Allowing access to the API',
-
+        telegram_bot_start: 'Telegram bot started (Token: {0})',
 
     },
 
