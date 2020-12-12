@@ -25,7 +25,7 @@ The way it works is simple:
 All documentation can be found on our [Wiki](https://github.com/CryptoMF/frostybot-js/wiki)
 
 ## Authors
-Developers listed below can normally be found on the [FrostyBot Discord Server](https://discord.gg/yK4U93s). They are also known to frequent #the-lab channel on [Krown's Crypto Cave Discord Server](https://discordapp.com/invite/hzKU7qe):
+Developers listed below can normally be found on the [FrostyBot Discord Server](https://discord.gg/txPew7ntmn). They are also known to frequent #the-lab channel on [Krown's Crypto Cave Discord Server](https://discordapp.com/invite/hzKU7qe):
 
 * FrostyAF
 * Barnz
