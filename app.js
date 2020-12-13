@@ -22,7 +22,7 @@ var app = express();
 // Get Listen Port
 
 const portfile = __dirname + '/.port';
-const port = fs.readFileSync(portfile) || (process.env.FROSTYBOT_PORT || 80)
+const port = fs.readFileSync(portfile, {encoding:'utf8', flag:'r'}) || (process.env.FROSTYBOT_PORT || 80);
 app.set('port', port);
 fs.writeFileSync(portfile, port)
 
