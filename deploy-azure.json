@@ -4,7 +4,7 @@
     "parameters": {
         "botName": {
             "type": "string",
-            "defaultValue": "[toLower( concat( 'frostybot', uniqueString(resourceGroup().id) ) )]"
+            "defaultValue": "frostybot"
         },
         "frostybotPort": {
             "type": "int",
@@ -85,7 +85,7 @@
                             "protocol": "TCP"
                         }
                     ],
-                    "dnsNameLabel": "[parameters('botName')]"
+                    "dnsNameLabel": "[toLower(replace(concat(parameters('botName'),'-',uniqueString(resourceGroup().id)), ' ', ''))]"
                 }
             },
             "tags": {}
