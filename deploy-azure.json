@@ -5,6 +5,10 @@
         "botName": {
             "type": "string"
         },
+        "location": {
+            "type": "string",
+            "defaultValue": "westeurope"
+        },
         "frostybotPort": {
             "type": "int",
             "value": 80
@@ -18,11 +22,12 @@
             "value": "frostybot"
         },
         "sshPassword": {
-            "type": "secureString"
+            "type": "securestring"
         }       
     },
     "resources": [
         {
+            "location": "[parameters('location')]",
             "name": "[parameters('botName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2019-12-01",
