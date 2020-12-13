@@ -28,11 +28,11 @@
             "type": "array",
             "value": [
                 {
-                    "port": "80",
+                    "port": "[parameters('frostybotPort')]",
                     "protocol": "TCP"
                 },
                 {
-                    "port": "22",
+                    "port": "[parameters('sshPort')]",
                     "protocol": "TCP"
                 }
             ]
@@ -74,7 +74,16 @@
                                     "value": "[parameters('frostybotPort')]"
                                 }
                             ],
-                            "ports": "[parameters('ports')]"
+                            "ports": [
+                                {
+                                    "port": "[parameters('frostybotPort')]",
+                                    "protocol": "TCP"
+                                },
+                                {
+                                    "port": "[parameters('sshPort')]",
+                                    "protocol": "TCP"
+                                }
+                            ]
                         }
                     }
                 ],
@@ -82,7 +91,16 @@
                 "osType": "Linux",
                 "ipAddress": {
                     "type": "Public",
-                    "ports": "[parameters('ports')]",
+                    "ports": [
+                        {
+                            "port": "[parameters('frostybotPort')]",
+                            "protocol": "TCP"
+                        },
+                        {
+                            "port": "[parameters('sshPort')]",
+                            "protocol": "TCP"
+                        }
+                    ],
                     "dnsNameLabel": "[parameters('containerName')]"
                 }
             },
