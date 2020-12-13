@@ -21,9 +21,10 @@ var app = express();
 
 // Get Listen Port
 
-const port = global.frostybot._modules_.settings.get('core', 'port', (process.env.FROSTYBOT_PORT || 80) );
+const portfile = __dirname.substr(0, __dirname.lastIndexOf('/')) + '/.port';
+const port = fs.readFileSync(portfile) || (process.env.FROSTYBOT_PORT || 80)
 app.set('port', port);
-fs.writeFileSync( __dirname.substr(0, __dirname.lastIndexOf('/')) + '/.port', port)
+fs.writeFileSync(portfile, port)
 
 // Trust reverse proxy if used
 
