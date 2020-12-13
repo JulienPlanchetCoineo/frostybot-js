@@ -1,5 +1,6 @@
 var express     = require('express');
 var bodyParser  = require('body-parser');
+const fs        = require('fs'); 
 
 // Set App Title
 
@@ -17,6 +18,12 @@ var apiRouter = require('./routes/routes.api');
 // Load Express
 
 var app = express();
+
+// Get Listen Port
+
+const port = global.frostybot._modules_.settings.get('core', 'port', (process.env.FROSTYBOT_PORT || 80) );
+app.set('port', port);
+fs.writeFileSync( __dirname.substr(0, __dirname.lastIndexOf('/')) + '/.port', port)
 
 // Trust reverse proxy if used
 

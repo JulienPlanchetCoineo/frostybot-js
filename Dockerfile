@@ -9,6 +9,7 @@ WORKDIR /usr/local/frostybot-js
 COPY package*.json ./
 RUN npm install
 RUN ln -s /usr/local/frostybot-js/frostybot /usr/bin/frostybot
+COPY .gitignore ./
 COPY entrypoint.sh ./
 RUN chmod +x ./entrypoint.sh
 EXPOSE $SSH_PORT $FROSTYBOT_PORT

@@ -1,11 +1,17 @@
 #!/bin/bash
 
-URL="http://127.0.0.1/frostybot"
 COMMAND="$@"
 CURRENTPATH=`pwd`
 SCRIPTPATH=`dirname "$(readlink -f "$0")"`
+PORTCFG="$SCRIPTPATH/.port"
 
-#echo "$SCRIPTPATH"
+if [ -f "$PORTCFG" ]; then
+    PORT=`cat $PORTCFG`
+else
+    PORT=80
+fi
+
+URL="http://127.0.0.1:$PORT/frostybot"
 
 for x in "autostart" "start" "stop" "status" "debug" "upgrade"; do
     if [ "$COMMAND" == "$x" ]; then
