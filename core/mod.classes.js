@@ -74,7 +74,7 @@ class frostybot_position extends frostybot_base {
     var usdquote = market.usd.hasOwnProperty ('quote')
       ? market.usd.quote
       : market.usd;
-    this.raw = raw;
+    //this.raw = raw;
 
     this.symbol = market.symbol;
     this.type = market.type;
