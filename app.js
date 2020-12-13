@@ -21,7 +21,7 @@ var app = express();
 
 // Get Listen Port
 
-const portfile = __dirname.substr(0, __dirname.lastIndexOf('/')) + '/.port';
+const portfile = __dirname + '/.port';
 const port = fs.readFileSync(portfile) || (process.env.FROSTYBOT_PORT || 80)
 app.set('port', port);
 fs.writeFileSync(portfile, port)
