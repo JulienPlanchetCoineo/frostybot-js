@@ -24,6 +24,7 @@ module.exports = class frostybot_websocket_module extends frostybot_module {
   // Load all account stubs and connect to the relevant websocket APIs
 
   async connect_all() {
+      /* 
       var accounts = await this.accounts.get()
       var stubs = Object.keys(accounts);
       if (!this.hasOwnProperty('ws')) {
@@ -48,6 +49,7 @@ module.exports = class frostybot_websocket_module extends frostybot_module {
         await this.ws['test'].connect()
         this.ws['test'].subscribe('trades','BTC-PERPETUAL')
       }
+      */
   }
 
 

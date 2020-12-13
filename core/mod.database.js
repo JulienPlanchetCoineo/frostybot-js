@@ -10,6 +10,7 @@ module.exports = class frostybot_database_module extends frostybot_module {
 
     constructor() {
         super()
+        db.pragma('journal_mode = wal');
     }
 
     // Query data from the database
