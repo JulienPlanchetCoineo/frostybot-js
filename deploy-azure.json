@@ -23,6 +23,19 @@
         },
         "sshPassword": {
             "type": "secureString"
+        },
+        "ports": {
+            "type": "array",
+            "value": [
+                {
+                    "port": "80",
+                    "protocol": "TCP"
+                },
+                {
+                    "port": "22",
+                    "protocol": "TCP"
+                }
+            ]
         }        
     },
     "resources": [
@@ -46,23 +59,22 @@
                             "environmentVariables": [
                                 {
                                     "name": "SSH_USER",
-                                    "secureValue": "[parameters('sshUsername')]"
+                                    "value": "[parameters('sshUsername')]"
                                 },
                                 {
                                     "name": "SSH_PASS",
                                     "secureValue": "[parameters('sshPassword')]"
+                                },
+                                {
+                                    "name": "SSH_PORT",
+                                    "value": "[parameters('sshPort')]"
+                                },
+                                {
+                                    "name": "FROSTYBOT_PORT",
+                                    "value": "[parameters('frostybotPort')]"
                                 }
                             ],
-                            "ports": [
-                                {
-                                    "port": "[parameters('frostybotPort')]",
-                                    "protocol": "TCP"
-                                  },
-                                  {
-                                    "port": "[parameters('sshPort')]",
-                                    "protocol": "TCP"
-                                  }
-                            ]
+                            "ports": "[parameters('ports')]"
                         }
                     }
                 ],
@@ -70,16 +82,7 @@
                 "osType": "Linux",
                 "ipAddress": {
                     "type": "Public",
-                    "ports": [
-                        {
-                            "port": "[parameters('frostybotPort')]",
-                            "protocol": "TCP"
-                          },
-                          {
-                            "port": "[parameters('sshPort')]",
-                            "protocol": "TCP"
-                          }
-                    ],
+                    "ports": "[parameters('ports')]",
                     "dnsNameLabel": "[parameters('containerName')]"
                 }
             },
