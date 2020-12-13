@@ -61,7 +61,7 @@ If you would like to monitor the install progress, you can tail the installer lo
 
 ## Docker Image
 
-If you would prefer to use Docker, the latest docker image is available at frostyio/frostybot-js:latest
+If you would prefer to use Docker, the latest docker image is available at **frostyio/frostybot-js:latest**
 
 The following Docker environment variables are available:
 
@@ -71,6 +71,10 @@ The following Docker environment variables are available:
 | SSH_PORT  |  The port that SSH should listen on  |  22   |
 | SSH_USER  |  SSH Username |  frostybot  |
 | SSH_PASS  |  SSH Password **(NEVER leave this as default)**  |  \_\_frostybot123\_\_  |
+
+If you would like to use Azure, click the Deploy to Azure button below to easily deploy the Docker container to your Azure account.
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCryptoMF%2Ffrostybot-js%2Fstable%2Fdeploy-azure.json)
 
 ## Post-Install Configuration
 
