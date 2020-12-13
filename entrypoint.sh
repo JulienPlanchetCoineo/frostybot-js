@@ -18,4 +18,5 @@ chmod +x /etc/cron.daily/cron.motd
 service ssh start
 frostybot start
 
+cat /etc/motd
 tail -f ./log/frostybot.log
