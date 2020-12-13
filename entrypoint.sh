@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir -p /var/run/sshd
 useradd -s /bin/bash -d /usr/local/frostybot-js $SSH_USER
 adduser $SSH_USER sudo
 echo $SSH_USER:$SSH_PASS | chpasswd
