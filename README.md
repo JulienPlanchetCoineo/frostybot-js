@@ -59,7 +59,18 @@ sudo /tmp/install.sh
 ````
 If you would like to monitor the install progress, you can tail the installer log file at /tmp/install.log
 
-Alternatively, the latest docker image is available at frostyio/frostybot-js:latest
+## Docker Image
+
+If you would prefer to use Docker, the latest docker image is available at frostyio/frostybot-js:latest
+
+The following Docker environment variables are available:
+
+| Variable | Description | Default Value |
+| --- | --- | --- |
+| FROSTYBOT_PORT  |  The port that Frostybot should listen on  |  80  |
+| SSH_PORT  |  The port that SSH should listen on  |  22   |
+| SSH_USER  |  SSH Username |  frostybot  |
+| SSH_PASS  |  SSH Password **(NEVER leave this as default)**  |  \_\_frostybot123\_\_  |
 
 ## Post-Install Configuration
 
