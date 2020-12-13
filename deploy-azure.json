@@ -2,11 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "type": "string",
-            "value": "westeurope"
-        },
-        "containerName": {
+        "botName": {
             "type": "string"
         },
         "frostybotPort": {
@@ -23,25 +19,11 @@
         },
         "sshPassword": {
             "type": "secureString"
-        },
-        "ports": {
-            "type": "array",
-            "value": [
-                {
-                    "port": "[parameters('frostybotPort')]",
-                    "protocol": "TCP"
-                },
-                {
-                    "port": "[parameters('sshPort')]",
-                    "protocol": "TCP"
-                }
-            ]
-        }        
+        }       
     },
     "resources": [
         {
-            "location": "[parameters('location')]",
-            "name": "[parameters('containerName')]",
+            "name": "[parameters('botName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2019-12-01",
             "properties": {
@@ -101,7 +83,7 @@
                             "protocol": "TCP"
                         }
                     ],
-                    "dnsNameLabel": "[parameters('containerName')]"
+                    "dnsNameLabel": "[parameters('botName')]"
                 }
             },
             "tags": {}
