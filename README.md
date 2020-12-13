@@ -45,11 +45,24 @@ This bot is specifically designed to execute orders based on webhook or REST API
 While it may seem a little complicated to setup and configure for novices, the point of Frostybot is that it's entirely free. You retain total control over your API keys and trading engine. It is perfect for integration projects where you have a trading engine (like a Tradingview strategy or some custom Python script) that you want to integrate it with your exchange.
 
 ## Requirements
-In order to use Frostybot, you will need the following:
+Frostybot can be deployed in 3 supported ways. Depending on your personal deployment preference, you will need the following:
+
+#### Option 1 - Run Your Own Server (Like Amazon Lightsail VPS)
 * A Linux server, preferably running Ubuntu 20.04 LTS  (we recommend Amazon Lightsail for this purpose)
 * A public static IP address
 
+#### Option 2 - Use Docker
+
+* A Docker Server
+
+#### Option 3 - Microsoft Azure (Easiest)
+
+* A [Microsoft Azure](https://postal.azure.com) account 
+* [Putty client](https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.74-installer.msi) to connect to your Frostybot console
+
 ## Installation
+
+#### Option 1 - Run Your Own Server
 
 To install Frostybot-JS on Ubuntu 20.04 LTS, run these commands:
 ```
@@ -59,7 +72,7 @@ sudo /tmp/install.sh
 ````
 If you would like to monitor the install progress, you can tail the installer log file at /tmp/install.log
 
-## Docker Image
+#### Option 2 - Use Docker
 
 If you would prefer to use Docker, the latest docker image is available at **frostyio/frostybot-js:latest**
 
@@ -71,6 +84,8 @@ The following Docker environment variables are available:
 | SSH_PORT  |  The port that SSH should listen on  |  22   |
 | SSH_USER  |  SSH Username |  frostybot  |
 | SSH_PASS  |  SSH Password **(NEVER leave this as default)**  |  \_\_frostybot123\_\_  |
+
+#### Option 3 - Microsoft Azure (Easiest)
 
 If you would like to use Azure, click the Deploy to Azure button below to easily deploy the Docker container to your Azure account.
 
