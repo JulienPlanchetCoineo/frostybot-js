@@ -3,23 +3,20 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "botName": {
-            "type": "string"
-        },
-        "location": {
             "type": "string",
-            "defaultValue": "westeurope"
+            "defaultValue": "[toLower( concat( 'frostybot', uniqueString(resourceGroup().id) ) )]"
         },
         "frostybotPort": {
             "type": "int",
-            "value": 80
+            "defaultValue": 80
         },
         "sshPort": {
             "type": "int",
-            "value": 22
+            "defaultValue": 22
         },
         "sshUsername": {
             "type": "string",
-            "value": "frostybot"
+            "defaultValue": "frostybot"
         },
         "sshPassword": {
             "type": "securestring"
@@ -27,7 +24,7 @@
     },
     "resources": [
         {
-            "location": "[parameters('location')]",
+            "location": "westeurope",
             "name": "[parameters('botName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2019-12-01",
