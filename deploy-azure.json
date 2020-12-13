@@ -4,7 +4,7 @@
     "parameters": {
         "location": {
             "type": "string",
-            "value": "westeurope",
+            "value": "westeurope"
         },
         "containerName": {
             "type": "string"
