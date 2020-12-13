@@ -118,7 +118,7 @@ class frostybot_position_futures extends frostybot_position {
       : (market.bid + market.ask) / 2;
     this.current_value = Math.abs(this.base_size * this.current_price);
     this.liquidation_price = liquidation_price;
-    this.pnl = this.current_value - this.entry_value; // Calculate PNL is not supplied by exchange
+    this.pnl = (this.direction == "short" ? -1 : 1) * (this.current_value - this.entry_value); // Calculate PNL is not supplied by exchange
   }
 }
 
