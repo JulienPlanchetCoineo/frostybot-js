@@ -31,7 +31,7 @@
             "properties": {
                 "containers": [
                     {
-                        "name": "[parameters('containerName')]",
+                        "name": "[parameters('botName')]",
                         "properties": {
                             "image": "frostyio/frostybot-js:latest",
                             "resources": {
