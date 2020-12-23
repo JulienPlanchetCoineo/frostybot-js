@@ -247,7 +247,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
 
 
-        return this.round_amount(market, amount);
+        return market.type == 'spot' ? this.floor_amount(market, amount) : this.round_amount(market, amount);
 
     }
 
