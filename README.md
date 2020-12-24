@@ -57,7 +57,7 @@ Frostybot can be deployed in 3 supported ways. Depending on your personal deploy
 
 #### Option 3 - Microsoft Azure (Easiest)
 
-* A [Microsoft Azure](https://postal.azure.com) account 
+* A [Microsoft Azure](https://portal.azure.com) account 
 * [Putty client](https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.74-installer.msi) to connect to your Frostybot console
 
 ## Installation
