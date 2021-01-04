@@ -1,6 +1,8 @@
 var express     = require('express');
 var bodyParser  = require('body-parser');
 const fs        = require('fs'); 
+const { v4: uuidv4 } = require('uuid');
+var context     = require('express-http-context');
 
 // Set App Title
 
@@ -48,6 +50,15 @@ function rawBufferSaver (req, res, buf, encoding) {
 app.use(bodyParser.raw({ type: 'text/plain', verify: rawBufferSaver }));
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Unique Request ID (HTTP Context)
+
+app.use(context.middleware);
+app.use(function(req, res, next) {
+    context.set('reqId', uuidv4());
+    var reqId = context.get('reqId');
+    next();
+});
 
 // Map to Main API router
 
