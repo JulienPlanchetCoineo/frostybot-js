@@ -91,6 +91,8 @@ If you would like to use Azure, click the Deploy to Azure button below to easily
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCryptoMF%2Ffrostybot-js%2Fstable%2Fdeploy-azure.json)
 
+**Important:** Do not use the word "frostybot" in your Azure server name, as this will make your bot easier to find.
+
 ## Post-Install Configuration
 
 #### Start the Frostybot server
