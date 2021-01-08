@@ -42,7 +42,10 @@ Object.keys(api).forEach(baseapi => {
                 body: {...command, ...req.params, ...req.query, ...body}
             }
             
-            var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).replace('::ffff:','').replace('::1, ','');
+            // Uncomment the second line below if using Frostybot behind a reverse proxy
+            // Current commented out to prevent source address spoofing using x-forwarded-for headers
+            var ip = req.connection.remoteAddress.replace('::ffff:','').replace('::1, ','');
+            //var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).replace('::ffff:','').replace('::1, ','');
 
             if (core.verify_whitelist(ip)) {
                 let result = await core.execute(params);

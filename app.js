@@ -34,8 +34,9 @@ app.set('port', port);
 fs.writeFileSync(portfile, port)
 
 // Trust reverse proxy if used
-
-app.set('trust proxy', true);
+// Only use this if you are configuring Frostybot behind a reverse proxy
+// Currently disabled to prevent source address spoofing using X-Forward-For headers
+// app.set('trust proxy', true); 
 
 // Save raw buffer for command parsing
 
