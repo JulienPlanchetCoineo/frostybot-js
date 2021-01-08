@@ -50,7 +50,7 @@ module.exports = class frostybot_database_module extends frostybot_module {
             valList.push('?');
         }
         sql = "INSERT INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES (" + valList.join(",") + ");";
-        return this.exec(sql, Object.values(where));
+        return this.exec(sql, Object.values(data));
     }
 
 
