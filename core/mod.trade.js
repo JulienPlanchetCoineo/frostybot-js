@@ -362,6 +362,13 @@ module.exports = class frostybot_trade_module extends frostybot_module {
     async convert_size(type, params) {
 
         var [stub, market, symbol, size, base, quote, usd, scale, maxsize] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize']);
+
+        // Check market symbol
+        if (market == null) {
+            this.output.error('market_retrieve', symbol)
+            return false
+        }
+
         var side = null;
         var is_close = false;   // Report this order will result in position closure
         var is_flip = false;    // Report this order will result in position flip
