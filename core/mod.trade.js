@@ -1092,6 +1092,35 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
         return result;
     }
+
+    // Set leverage for symbol
+    
+    async leverage(params) {
+
+        if (!params.hasOwnProperty('leverage')) {
+            params['leverage'] = "20";
+        }
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+            symbol:      { required: 'string', format: 'uppercase', },
+            type:        { required: 'string', format: 'lowercase', oneof: ['cross', 'isolated'] },
+            leverage:    { required: 'string', format: 'lowercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
+        this.initialize_exchange(params);
+        const stub = params.stub
+        var result = await this.exchange[stub].leverage(params);
+        if ((result !== false) && (result.result !== 'error')) {
+            this.output.success('leverage_set', [params.symbol, params.leverage.toLowerCase().replace('x',''), params.type])
+        } else {
+            this.output.error('leverage_set', params.symbol)
+        }
+
+    }
         
+    
 
 }

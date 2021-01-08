@@ -35,6 +35,7 @@ const api_methods = {
         'orders', 
         'cancel', 
         'cancelall',
+        'leverage',
     ],
 
     settings: [
