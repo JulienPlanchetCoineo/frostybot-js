@@ -15,28 +15,27 @@ module.exports = class frostybot_database_module extends frostybot_module {
 
     // Query data from the database
 
-    query(sql) {
-        return db.prepare(sql).all();
+    query(sql, values = []) {
+        return db.prepare(sql).all(values);
     }
 
     // Execute a SQL statement
 
-    exec(sql) {
-        return db.prepare(sql).run();
+    exec(sql, values = []) {
+        return db.prepare(sql).run(values);
     }
 
 
     // Select data from the database
 
-    select(table, where = []) {
+    select(table, where = {}) {
         var sql = '';
         var whereList = [];
         for (var key in where) {
-            var val = where[key];
-            whereList.push("`" + key + "`='" + val + "'");
+            whereList.push("`" + key + "` = ?");
         }
         var sql = "SELECT * FROM `" + table + "`" + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
-        return this.query(sql);
+        return this.query(sql, Object.values(where));
     }
 
 
@@ -47,12 +46,11 @@ module.exports = class frostybot_database_module extends frostybot_module {
         var colList = [];
         var valList = [];
         for (var key in data) {
-            var val = data[key];
             colList.push(key);
-            valList.push(val);
+            valList.push('?');
         }
-        sql = "INSERT INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES ('" + valList.join("','") + "');";
-        return this.exec(sql);
+        sql = "INSERT INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES (" + valList.join(",") + ");";
+        return this.exec(sql, Object.values(where));
     }
 
 
@@ -61,17 +59,20 @@ module.exports = class frostybot_database_module extends frostybot_module {
     update(table, data, where = []) {
         var sql = '';
         var dataList = [];
+        var values = [];
         for (var key in data) {
             var val = data[key];
-            dataList.push("`" + key + "`='" + val + "'");
+            dataList.push("`" + key + "`= ?");
+            values.push(val);
         }
         var whereList = [];
         for (var key in where) {
             var val = where[key];
-            whereList.push("`" + key + "`='" + val + "'");
+            whereList.push("`" + key + "` = ?");
+            values.push(val);
         }
         var sql = "UPDATE `" + table + "` SET " + dataList.join(",") + " " + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
-        return this.exec(sql);
+        return this.exec(sql, values);
     }
 
 
@@ -82,10 +83,10 @@ module.exports = class frostybot_database_module extends frostybot_module {
         var whereList = [];
         for (var key in where) {
             var val = where[key];
-            whereList.push("`" + key + "`='" + val + "'");
+            whereList.push("`" + key + "`= ?");
         }
         var sql = "DELETE FROM `" + table + "`" + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
-        return this.exec(sql);
+        return this.exec(sql, Object.values(where));
     }
 
 
@@ -110,10 +111,10 @@ module.exports = class frostybot_database_module extends frostybot_module {
         for (var key in data) {
             var val = data[key];
             colList.push(key);
-            valList.push(val);
+            valList.push("?");
         }
-        sql = "INSERT OR REPLACE INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES ('" + valList.join("','") + "');";
-        return this.exec(sql);       
+        sql = "INSERT OR REPLACE INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES (" + valList.join(",") + ");";
+        return this.exec(sql, Object.values(data));       
     }
 
 
