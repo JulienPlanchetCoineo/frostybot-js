@@ -18,7 +18,8 @@ module.exports = class frostybot_output_module extends frostybot_module {
 
     // Initialize
 
-    initialize() {
+    initialize(mode = 'normal') {
+        this.mode = mode;
         const base_dir = __dirname.substr(0, __dirname.lastIndexOf('/'))
         this.logfile = base_dir + '/log/frostybot.log'
         this.reset();
@@ -209,13 +210,15 @@ module.exports = class frostybot_output_module extends frostybot_module {
         var splitter2 = type == 'section' ? clc.whiteBright('═╪═') : (type == 'subsection' ? (message.trim().length == 0 ? ' │ ' : ' ├─') : clc.white(' │ '));
         let datetime = (['section', 'subsection','blank'].includes(type) ? ''.padEnd(19,(type == 'section' ? '═' : ' ')) : year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second);
         
-        if (typeof type_color_map[type] !== 'function') {
+        if ((this.mode == 'normal') && (typeof type_color_map[type] !== 'function')) {
             console.log(type);
         }
 
         if (!['section', 'subsection','blank'].includes(type)) {
             var logmessage = datetime + ' | ' + type.toUpperCase().padEnd(7) + ' | ' + message + eol
-            fs.appendFileSync(this.logfile, logmessage);
+            if (this.mode == 'normal') {
+                fs.appendFileSync(this.logfile, logmessage);
+            }
             var logentry = {
                 message_type : 'log',
                 timestamp: ts,
@@ -243,7 +246,9 @@ module.exports = class frostybot_output_module extends frostybot_module {
             default             : var message_type = type.toUpperCase(); 
         }
         var output = datetime /*+ splitter + code*/ + splitter1 + message_type.padEnd(7) + splitter2 + (message.padEnd(maxwidth,' ').slice(0,maxwidth));
-        console.log(type_color_map[type](output));
+        if (this.mode == 'normal') {
+            console.log(type_color_map[type](output));
+        }
         if (type.toLowerCase() == 'error') {
             this.output_obj.result = 'error'
         }

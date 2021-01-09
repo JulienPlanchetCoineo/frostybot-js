@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "stop": "pkill --signal SIGINT frostybot-js"
+    "stop": "pkill --signal SIGINT frostybot-js",
+    "test": "mocha"
   },
   "dependencies": {
     "better-sqlite3": "7.1.1",
     "body-parser": "^1.19.0",
     "ccxt": "^1.37.70",
+    "chai": "^4.2.0",
     "cli-color": "^2.0.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
@@ -17,6 +19,7 @@
     "express-http-context": "^1.2.4",
     "fs": "0.0.1-security",
     "md5": "^2.3.0",
+    "mocha": "^8.2.1",
     "morgan": "~1.9.1",
     "node-cache": "^5.1.2",
     "trim-newlines": "^3.0.0",
