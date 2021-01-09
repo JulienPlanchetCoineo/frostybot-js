@@ -115,15 +115,12 @@ module.exports = class frostybot_utils_module extends frostybot_module {
             for (var key in obj) {
                 if (!obj.hasOwnProperty(key))
                     continue;
-                if (typeof obj[key] === 'object' && obj[key] !== null) {
-                    obj[key.toLowerCase()] = this.lower_props(obj[key]);
-                    delete obj[key];
-                } else {
+                if (typeof obj[key] === 'object' && obj[key] !== null)
+                    obj[key] = this.lower_props(obj[key]);
+                else
                     if (key != key.toLowerCase()) {
-                        var val = obj[key];
-                        if (typeof(val) === 'string') {
-                            val = val.replace(/^\s+|\s+$/g, '');
-                        }
+                    var val = obj[key];
+                    if (typeof(val) === 'string') {
                         delete obj[key];
                         obj[key.toLowerCase()] = val;
                     }
