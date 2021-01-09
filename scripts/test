@@ -24,7 +24,7 @@ sudo npm test
 if [ "$DOSTART" == "true" ]; then
   ./scripts/start
   while [ "$PID" == "" ]; do
-    sleep 2
+    sleep 3
     PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
   done
   echo "Frostybot server started"
