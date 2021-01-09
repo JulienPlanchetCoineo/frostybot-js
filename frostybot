@@ -11,6 +11,7 @@ else
     PORT=80
 fi
 
+
 URL="http://127.0.0.1:$PORT/frostybot"
 
 for x in "autostart" "start" "stop" "status" "debug" "upgrade" "test"; do
