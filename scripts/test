@@ -27,7 +27,6 @@ if [ "$DOSTART" == "true" ]; then
     sleep 2
     PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
   done
-  echo "Frostybot server started"
 fi
 echo "Unit tests completed"
 
