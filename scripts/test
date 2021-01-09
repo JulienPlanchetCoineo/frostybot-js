@@ -1,0 +1,34 @@
+#!/bin/bash
+
+PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+CURRENTPATH=`pwd`
+SCRIPTPATH=`dirname "$(readlink -f "$0")"`
+
+cd "$SCRIPTPATH" &
+cd ../ &
+
+echo "Starting Frostybot unit testing"
+if [ ! "$PID" == "" ]; then
+  ./scripts/stop
+  while [ ! "$PID" == "" ]; do
+    sleep 2
+    PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+  done
+  cd "$CURRENTPATH" &
+  DOSTART="true"
+else
+  DOSTART="false"
+fi
+echo "Frostybot server stopped successfully, proceeding with tests"
+sudo npm test
+if [ "$DOSTART" == "true" ]; then
+  ./scripts/start
+  while [ "$PID" == "" ]; do
+    sleep 2
+    PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+  done
+  echo "Frostybot server started"
+fi
+echo "Unit tests completed"
+
+cd "$CURRENTPATH" &
