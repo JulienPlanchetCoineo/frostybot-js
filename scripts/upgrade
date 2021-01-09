@@ -28,8 +28,6 @@ else
     DOSTART="false"
   fi
   echo "Frostybot server stopped successfully, upgrading now"
-  echo "Stashing local changes (if any)"
-  sudo git stash
   echo "Updating Frostybot files from Github"
   sudo git checkout stable > /dev/null 2>&1
   sudo git pull -f
