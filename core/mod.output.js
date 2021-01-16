@@ -28,10 +28,11 @@ module.exports = class frostybot_output_module extends frostybot_module {
 
     // Load language if required
 
-    load_language() {
+    async load_language() {
         this.settings = global.frostybot._modules_.settings;
         if (this.language == undefined) {
-            const language = this.settings.get('core', 'language', 'en');
+            var language = await this.settings.get('core', 'language', 'en');
+            if (language == undefined) language = 'en';
             this.language = require('../lang/lang.' + language);
             this.section('frostybot_startup');
             this.translate('notice', 'using_language', language);

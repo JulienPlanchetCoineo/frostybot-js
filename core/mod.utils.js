@@ -137,16 +137,16 @@ module.exports = class frostybot_utils_module extends frostybot_module {
 
     // Walk over object and encrypt properties with the names provided in the props array element
 
-    encrypt_props(obj, props = []) {
+    async encrypt_props(obj, props = []) {
         if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
             if (typeof obj[key] === 'object' && obj[key] !== null)
-                obj[key] = this.encrypt_props(obj[key], props);
+                obj[key] = await this.encrypt_props(obj[key], props);
             else
                 if (props.includes(key)) {
-                    var val = this.encryption.encrypt(obj[key])
+                    var val = await this.encryption.encrypt(obj[key])
                     obj[key] = val
                 } 
         }
@@ -156,17 +156,17 @@ module.exports = class frostybot_utils_module extends frostybot_module {
 
     // Walk over object and decrypt properties with the names provided in the props array element
 
-    decrypt_props(obj, props = []) {
+    async decrypt_props(obj, props = []) {
         if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
             if (props.includes(key)) {
-                var val = this.encryption.decrypt(obj[key])
+                var val = await this.encryption.decrypt(obj[key])
                 obj[key] = val
             } else 
                 if (typeof obj[key] === 'object' && obj[key] !== null)
-                    obj[key] = this.decrypt_props(obj[key], props);
+                    obj[key] = await this.decrypt_props(obj[key], props);
         }
         return obj;
     }

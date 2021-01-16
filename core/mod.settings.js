@@ -12,10 +12,10 @@ module.exports = class frostybot_settings_module extends frostybot_module {
 
     // Get settings(s)
 
-    get(mainkey = null, subkey = null, defval = null) {
+    async get(mainkey = null, subkey = null, defval = null) {
         //this.link('database')
         if (mainkey == null) {
-            result = this.database.select('settings' )
+            result = await this.database.select('settings' )
             var obj = {}
             result.forEach(function(setting) {
                 var mainkey = setting.mainkey
@@ -28,7 +28,7 @@ module.exports = class frostybot_settings_module extends frostybot_module {
             return obj    
         } else {
             if (subkey == null) {
-                result = this.database.select('settings', { mainkey: mainkey } )
+                result = await this.database.select('settings', { mainkey: mainkey } )
                 var obj = {}
                 result.forEach(function(setting) {
                     var subkey = setting.subkey;
@@ -37,7 +37,7 @@ module.exports = class frostybot_settings_module extends frostybot_module {
                 });
                 return obj    
             } else {
-                var result = this.database.select('settings', { mainkey: mainkey, subkey: subkey } )
+                var result = await this.database.select('settings', { mainkey: mainkey, subkey: subkey } )
                 if (result.length == 0) {
                     if (defval != undefined) {
                         this.set(mainkey, subkey, defval);
@@ -65,13 +65,14 @@ module.exports = class frostybot_settings_module extends frostybot_module {
 
     // Set Settings(s)
 
-    set(mainkey, subkey, value) {
+    async set(mainkey, subkey, value) {
         if (value != null && typeof value === 'object' && value.value !== null && Object.keys(value).length == 1) {
             value = JSON.stringify(value.value)
         } else {
             value = JSON.stringify(value)
         }
-        if (this.database.insert('settings',  { mainkey: mainkey, subkey: subkey, value: value }).changes == 1) {
+        var result = await this.database.insertOrReplace('settings',  { mainkey: mainkey, subkey: subkey, value: value });
+        if (result.changes > 0) {
             return true;
         }    
         return false;
@@ -80,16 +81,15 @@ module.exports = class frostybot_settings_module extends frostybot_module {
     
     // Delete Settings(s)
 
-    delete(mainkey, subkey) {
+    async delete(mainkey, subkey) {
         if (subkey == null) {
-            if (this.database.delete('settings', { mainkey: mainkey }).changes > 0) {
-                return true;
-            }
+            var result = await this.database.delete('settings', { mainkey: mainkey });
         } else {
-            if (this.database.delete('settings', { mainkey: mainkey, subkey: subkey }).changes > 0) {
-                return true;
-            }
+            var result = await this.database.delete('settings', { mainkey: mainkey, subkey: subkey });
         }
+        if (result.changes > 0) {
+            return true;
+        }    
         return false;
     }
 

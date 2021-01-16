@@ -1,5 +1,5 @@
 // ================================================================================
-//  Frostybot Unit Tests: Core Helper Functions (mod.utils.js)
+//  Frostybot Unit Tests: Helper Functions (mod.utils.js)
 // ================================================================================
 
 // Load all modules
@@ -216,30 +216,30 @@ describe(test.title('Helper Functions (mod.utils.js)'), function() {
     // encrypt_props()
 
     describe(test.function('encrypt_props'), function() {
-        it('should return supplied object with specified values encrypted', function() {
+        it('should return supplied object with specified values encrypted', async function() {
             var val = {id: 1, username: 'test', password: 'encrypt this'};
-            var encrypt = test.utils.encrypt_props(val, ['password']);
+            var encrypt = await test.utils.encrypt_props(val, ['password']);
             expect(encrypt.password).to.have.property('iv')
         });
-        it('should return false if supplied value is not an object', function() {
+        it('should return false if supplied value is not an object', async function() {
             var val = [1, 2, 3];
-            expect(test.utils.encrypt_props(val)).to.equal(false);
+            expect(await test.utils.encrypt_props(val)).to.equal(false);
         });        
     });
 
     // decrypt_props()
 
     describe(test.function('decrypt_props'), function() {
-        it('should return supplied object with specified values decrypted', function() {
+        it('should return supplied object with specified values decrypted', async function() {
             var password = 'encrypt this';
             var val = {id: 1, username: 'test', password: password};
-            var encrypt = test.utils.encrypt_props(val, ['password']);
-            var decrypt = test.utils.decrypt_props(encrypt, ['password'])
+            var encrypt = await test.utils.encrypt_props(val, ['password']);
+            var decrypt = await test.utils.decrypt_props(encrypt, ['password'])
             expect(decrypt.password).to.equal(password);
         });
-        it('should return false if supplied value is not an object', function() {
+        it('should return false if supplied value is not an object', async function() {
             var val = [1, 2, 3];
-            expect(test.utils.decrypt_props(val)).to.equal(false);
+            expect(await test.utils.decrypt_props(val)).to.equal(false);
         });
     });
 

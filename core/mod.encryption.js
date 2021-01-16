@@ -22,9 +22,9 @@ module.exports = class frostybot_encryption_module extends frostybot_module {
 
     // Get UUID
 
-    md5_uuid() {
-        var key = this.settings.get('core', 'uuid');
-        if (key === null) {
+    async md5_uuid() {
+        var key = await this.settings.get('core', 'uuid');
+        if ([null, undefined].includes(key)) {
             key = uuidv4()
             if (this.settings.set('core', 'uuid', key)) {
                 return md5(key)
@@ -44,10 +44,10 @@ module.exports = class frostybot_encryption_module extends frostybot_module {
 
     // Encrypt a String
 
-    encrypt(str) {
+    async encrypt(str) {
         if (this.is_encrypted(str))
             return str
-        var uuid = this.md5_uuid();
+        var uuid = await this.md5_uuid();
         if (uuid !== false) {
             var iv = crypto.randomBytes(16);
             const cipher = crypto.createCipheriv(this.algorithm, uuid, iv);
@@ -63,10 +63,10 @@ module.exports = class frostybot_encryption_module extends frostybot_module {
 
     // Decrypt a String
 
-    decrypt(hash) {
+    async decrypt(hash) {
         if (!this.is_encrypted(hash))
             return hash
-        var uuid = this.md5_uuid();
+        var uuid = await this.md5_uuid();
         if (uuid !== false) {
             const decipher = crypto.createDecipheriv(this.algorithm, uuid, Buffer.from(hash.iv, 'hex'));
             const decrypted = Buffer.concat([decipher.update(Buffer.from(hash.content, 'hex')), decipher.final()]);

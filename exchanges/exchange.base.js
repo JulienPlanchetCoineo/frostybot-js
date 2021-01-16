@@ -16,14 +16,20 @@ module.exports = class frostybot_exchange_base {
             markets_by_symbol: {},
         }
         this.stub = stub;
-        this.account = this.accounts.getaccount(stub);
+        this.load_account();
+    }
+
+    // Load account
+
+    async load_account() {
+        this.account = await this.accounts.getaccount(this.stub);
         if (this.account) {
-            const accountParams = this.accounts.ccxtparams(this.account);
+            const accountParams = await this.accounts.ccxtparams(this.account);
             const exchangeId = this.account.exchange
             const exchangeClass = ccxtlib[exchangeId]
             this.ccxtobj = new exchangeClass (accountParams.parameters)
             this.ccxtobj.options.adjustForTimeDifference = true
-            this.ccxtobj.loadMarkets();
+            await this.ccxtobj.loadMarkets();
         }
     }
 
@@ -63,6 +69,8 @@ module.exports = class frostybot_exchange_base {
     // CCXT Wrapper
 
     async ccxt(method, params = []) {
+        if (this.ccxtobj == undefined) 
+            await this.load_account()
         try {
             if (!this.utils.is_array(params)) {
                 params = [params];

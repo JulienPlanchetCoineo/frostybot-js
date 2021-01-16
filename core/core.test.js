@@ -15,9 +15,6 @@ module.exports = class frostybot_core_test {
             global['motd'] = true;
         }
 
-
-        const dir = __dirname.substr(0, __dirname.lastIndexOf( '/' ) ) + '/core';
-
         // Load and link modules
 
         global.frostybot = {
@@ -27,7 +24,22 @@ module.exports = class frostybot_core_test {
             method     : 'run'
         };
 
-        fs.readdirSync( dir ).forEach( file => {
+        const dir = __dirname.substr(0, __dirname.lastIndexOf( '/' ) );
+
+        const dbcfgfile = dir + '/.dbcfg';
+        var dbcfgjson = fs.readFileSync(dbcfgfile, {encoding:'utf8', flag:'r'}); 
+        if (dbcfgjson.length > 0) {
+            var dbcfg = JSON.parse(dbcfgjson);
+            var dbtype = (dbcfg.hasOwnProperty('type') ? dbcfg.type : 'sqlite').toLowerCase();
+            if (!global.hasOwnProperty('frostybot')) global.frostybot = {}
+            if (!global.frostybot.hasOwnProperty('_modules_')) global.frostybot._modules_ = {}
+            var mod = require(dir + '/core/core.database.' + dbtype)
+            var obj = (typeof(mod) == 'function') ? new mod() : mod
+            global.frostybot._modules_['database'] = obj
+
+        }
+
+        fs.readdirSync( dir + '/core/' ).forEach( file => {
             if ((file.indexOf('mod.') == 0) && (file.indexOf('mod.base.') < 0)) {
                 var module = file.split('.')[1];
                 var mod = require('../core/mod.' + module)

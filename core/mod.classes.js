@@ -260,11 +260,11 @@ class frostybot_exchange extends frostybot_base {
 
   // Load exchange handler for stub
 
-  load_handler (stub) {
+  async load_handler (stub) {
     this.load_modules ();
     //this['accounts'] = global.frostybot._modules_['accounts'];
     this.handler = null;
-    var account = this.accounts.getaccount (stub);
+    var account = await this.accounts.getaccount (stub);
     if (account) {
       account = this.utils.lower_props (account);
       if (account && account.hasOwnProperty (stub)) {
@@ -273,9 +273,7 @@ class frostybot_exchange extends frostybot_base {
       const exchange_id = account.exchange;
       this.exchange_id = exchange_id;
       var type = account.hasOwnProperty ('type') ? account.type : null;
-      this.exchanges[exchange_id] = require ('../exchanges/exchange.' +
-        exchange_id +
-        (type != null ? '.' + type : ''));
+      this.exchanges[exchange_id] = require ('../exchanges/exchange.' + exchange_id + (type != null ? '.' + type : ''));
       const exchange_class = this.exchanges[exchange_id];
       this.handler = new exchange_class (stub);
     }
@@ -294,7 +292,7 @@ class frostybot_exchange extends frostybot_base {
   // Cache method
 
   async cache_method (method, params) {
-    if (this.handler == undefined) this.load_handler (params.stub);
+    if (this.handler == undefined) await this.load_handler (params.stub);
 
     if (this.cached_methods.hasOwnProperty (method)) {
       var cachetime = this.cached_methods[method];
