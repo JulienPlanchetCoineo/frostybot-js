@@ -133,6 +133,9 @@ module.exports = {
         market_retrieve:     'Could not retrieve market info for {0}',
         markets_retrieve:    'There was an error retrieving markets',
 
+        leverage_set:        'Unable to set leverage for symbol {0}',
+        leverage_unsupported:'Setting leverage on this exchange is not currently supported',
+
     },
 
     success: {
@@ -166,6 +169,8 @@ module.exports = {
 
         market_retrieve:    'Successfully retrieved market info for {0}',
         markets_retrieve:   '{0} Markets(s) retrieved',
+
+        leverage_set:        'Successfully set leverage for symbol {0} to {1}x ({2})',
 
     }
     

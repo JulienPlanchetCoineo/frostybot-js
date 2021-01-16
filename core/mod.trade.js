@@ -247,7 +247,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
 
 
-        return this.round_amount(market, amount);
+        return market.type == 'spot' ? this.floor_amount(market, amount) : this.round_amount(market, amount);
 
     }
 
@@ -362,6 +362,13 @@ module.exports = class frostybot_trade_module extends frostybot_module {
     async convert_size(type, params) {
 
         var [stub, market, symbol, size, base, quote, usd, scale, maxsize] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize']);
+
+        // Check market symbol
+        if (market == null) {
+            this.output.error('market_retrieve', symbol)
+            return false
+        }
+
         var side = null;
         var is_close = false;   // Report this order will result in position closure
         var is_flip = false;    // Report this order will result in position flip
@@ -571,7 +578,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
 
         // Extract params
         params = this.utils.lower_props(params);
-        var [stub, symbol, side, price, post, ioc, tag] = this.utils.extract_props(params, ['stub', 'symbol', 'side', 'price', 'post', 'ioc', 'tag']);
+        var [stub, symbol, side, price, post, ioc, reduce, tag] = this.utils.extract_props(params, ['stub', 'symbol', 'side', 'price', 'post', 'ioc', 'reduce', 'tag']);
         
         // Get parameters from the normalizer
         this.param_map = this.exchange[stub].get('param_map');
@@ -598,6 +605,10 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         order_params.params[this.param_map.post]   = (String(post)   == "true" ? true : undefined);
         order_params.params[this.param_map.ioc]    = (String(ioc)    == "true" ? true : undefined);
         order_params.params[this.param_map.tag]    = tag;
+
+        if (type == 'close') {
+            order_params.params[this.param_map.reduce] = (String(reduce) == "true" ? true : undefined);
+        }
 
         return this.utils.remove_values(order_params, [null, undefined]);
 
@@ -1081,6 +1092,35 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
         return result;
     }
+
+    // Set leverage for symbol
+    
+    async leverage(params) {
+
+        if (!params.hasOwnProperty('leverage')) {
+            params['leverage'] = "20";
+        }
+
+        var schema = {
+            stub:        { required: 'string', format: 'lowercase', },
+            symbol:      { required: 'string', format: 'uppercase', },
+            type:        { required: 'string', format: 'lowercase', oneof: ['cross', 'isolated'] },
+            leverage:    { required: 'string', format: 'lowercase', },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
+        this.initialize_exchange(params);
+        const stub = params.stub
+        var result = await this.exchange[stub].leverage(params);
+        if ((result !== false) && (result.result !== 'error')) {
+            this.output.success('leverage_set', [params.symbol, params.leverage.toLowerCase().replace('x',''), params.type])
+        } else {
+            this.output.error('leverage_set', params.symbol)
+        }
+
+    }
         
+    
 
 }

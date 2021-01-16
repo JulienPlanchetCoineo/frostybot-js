@@ -224,6 +224,7 @@ class frostybot_exchange extends frostybot_base {
       'get_market_by_id_or_symbol',
       'create_order',
       'custom_params',
+      'leverage',
     ];
 
     // Methods to cache and how many seconds they should be cached for

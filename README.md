@@ -57,7 +57,7 @@ Frostybot can be deployed in 3 supported ways. Depending on your personal deploy
 
 #### Option 3 - Microsoft Azure (Easiest)
 
-* A [Microsoft Azure](https://postal.azure.com) account 
+* A [Microsoft Azure](https://portal.azure.com) account 
 * [Putty client](https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.74-installer.msi) to connect to your Frostybot console
 
 ## Installation
@@ -90,6 +90,8 @@ The following Docker environment variables are available:
 If you would like to use Azure, click the Deploy to Azure button below to easily deploy the Docker container to your Azure account.
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCryptoMF%2Ffrostybot-js%2Fstable%2Fdeploy-azure.json)
+
+**Important:** Do not use the word "frostybot" in your Azure server name, as this will make your bot easier to find.
 
 ## Post-Install Configuration
 

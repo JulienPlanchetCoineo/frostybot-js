@@ -65,6 +65,7 @@ module.exports = {
         'post|/trade/:stub/stoploss'        :   'trade:stoploss',   // Create stoploss order
         'post|/trade/:stub/takeprofit'      :   'trade:takeprofit', // Create takeprofit order
         'post|/trade/:stub/trailstop'       :   'trade:trailstop',  // Create trailstop order
+        'post|/trade/:stub/leverage'        :   'trade:leverage',   // Configure leverage settings for symbol (Binance Futures only)
         'delete|/trade/:stub/order/:id'     :   'trade:cancel',     // Cancel specific order ID
         'delete|/trade/:stub/orders'        :   'trade:cancelall',  // Cancel all orders
 

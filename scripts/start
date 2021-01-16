@@ -10,8 +10,8 @@ else
         echo "Starting Frostybot Server..."
         cd "$SCRIPTPATH" &
         cd ../ &
-        echo "Checking for required NodeJS modules..."
-        sudo npm install > /dev/null 2>&1
+        # echo "Checking for required NodeJS modules..."
+        # sudo npm install > /dev/null 2>&1
 	sudo npm start > /dev/null 2>&1 &
         while [ "$PID" == "" ]; do
         sleep 2
