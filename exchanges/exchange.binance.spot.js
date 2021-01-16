@@ -44,10 +44,20 @@ module.exports = class frostybot_exchange_binance_spot extends frostybot_exchang
 
     async positions() { 
         // Emulate spot "positions" against USD for non-stablecoin balances
-        await this.markets();
+        var markets = await this.markets();
         var positions = []; 
         var balances = await this.balances();
-        this.stablecoins.forEach(async (stablecoin) => {
+        balances.forEach(async (balance) => {
+            markets.forEach(market => {
+                if (market.base == balance.currency) {
+                    const direction = 'long';
+                    const base_size = balance.base.total;
+                    const position = new this.classes.position_spot(market, direction, base_size);
+                    positions.push(position)
+                }
+            })
+        });
+        /*this.stablecoins.concat('BTC').forEach(async (stablecoin) => {
             balances.forEach(async (balance) => {
                 if (!this.stablecoins.includes(balance.currency)) {
                     const symbol = balance.currency + '/' + stablecoin;
@@ -61,6 +71,7 @@ module.exports = class frostybot_exchange_binance_spot extends frostybot_exchang
                 }
             });
         });
+        */
         this.positions = positions;
         return this.positions;
     }
