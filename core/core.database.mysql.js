@@ -9,6 +9,7 @@ module.exports = class frostybot_database_mysql_module extends frostybot_databas
 
     constructor() {
         super()
+        this.type = 'mysql';
         const fs = require('fs');
         const dir = __dirname.substr(0, __dirname.lastIndexOf( '/' ) );
         const dbcfgfile = dir + '/.dbcfg';
@@ -23,7 +24,8 @@ module.exports = class frostybot_database_mysql_module extends frostybot_databas
                 "password"        : dbcfg.pass,
                 "database"        : dbcfg.name
             }
-            this.db = mysql.createConnection( concfg );
+            this.name = dbcfg.name;
+            this.db = mysql.createConnection( concfg );    
         }
     }
 

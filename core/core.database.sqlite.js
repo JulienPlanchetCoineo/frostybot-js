@@ -9,6 +9,7 @@ module.exports = class frostybot_database_sqlite_module extends frostybot_databa
 
     constructor() {
         super()
+        this.type = 'sqlite';
         const fs = require('fs');
         const dir = __dirname.substr(0, __dirname.lastIndexOf( '/' ) );
         const dbcfgfile = dir + '/.dbcfg';
@@ -19,6 +20,7 @@ module.exports = class frostybot_database_sqlite_module extends frostybot_databa
         }
         this.db = new sqlite3(dbfile);
         this.db.pragma('journal_mode = wal');
+        this.name = dbfile;
     }
 
     // Query data from the database
