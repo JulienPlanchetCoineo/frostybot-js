@@ -144,13 +144,15 @@ module.exports = {
         leverage_unsupported:'Setting leverage on this exchange is not currently supported',
 
         multitenant_mysql_req: 'Multi-tenant mode requires MySQL/MariaDB database',
+        multitenant_enable:  'Failed to enable multi-tenant support',
+        multitenant_add:     'Failed to add tenant with UUID: {0}',
+        multitenant_delete:  'Failed to delete tenant with UUID: {0}',
 
         config_invalid_key:  'Invalid config key: {0}',
         config_invalid_value:'Invalid JSON value format: {0}',
         config_get:          'Setting not configured: {0}',
         config_set:          'Failed to configure setting: {0}: {1}',
-
-
+        
     },
 
     success: {
@@ -189,6 +191,10 @@ module.exports = {
 
         config_get:         'Successfully retrieved setting: {0}',
         config_set:         'Successfully configured setting: {0}: {1}',
+
+        multitenant_enable:  'Successfully enabled multi-tenant support',
+        multitenant_add:     'Added tenant with UUID: {0}',
+        multitenant_delete:  'Deleted tenant with UUID: {0}',
 
     }
     

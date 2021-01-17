@@ -55,7 +55,7 @@ module.exports = {
 
         // Multi-Tenant Handling
 
-        //'post|/multitenant/enable'          :   'multitenant:enable',// Enable Multi-Tenant Mode (MySQL Required)
+        'post|/multitenant/enable'          :   'multitenant:enable',// Enable Multi-Tenant Mode (MySQL Required)
 
         // Trading
 

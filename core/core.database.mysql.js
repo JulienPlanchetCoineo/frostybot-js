@@ -65,20 +65,19 @@ module.exports = class frostybot_database_mysql_module extends frostybot_databas
         var sql = '';
         var colList = [];
         var valList = [];
-        var updList = [];
+        var actList = [];
+        var vals = [];
+        //var updList = [];
         for (var key in data) {
             colList.push(key);
             valList.push("?");
-            updList.push("`" + key + "`= ?");
+            vals.push(this.utils.is_object(data[key]) ? JSON.stringify(data[key]) : data[key]);
+            //actList.push(val);
+            //updList.push("`" + key + "`= ?");
         }
 //        sql = "INSERT INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES (" + valList.join(",") + ") ON DUPLICATE KEY UPDATE " + updList.join(",") + ";";
         sql = "REPLACE INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES (" + valList.join(",") + ");";
-        var vals = [];
-        for (var key in data) {
-            vals.push(data[key]);
-        }
-        var dupVals = vals.concat(vals);
-        return await this.exec(sql, dupVals);       
+        return await this.exec(sql, vals);       
     }
 
 

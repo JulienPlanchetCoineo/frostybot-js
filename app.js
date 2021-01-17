@@ -57,6 +57,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(context.middleware);
 app.use(function(req, res, next) {
     context.set('reqId', uuidv4());
+    var ip = (req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
+    context.set('srcIp', ip);
     var reqId = context.get('reqId');
     next();
 });

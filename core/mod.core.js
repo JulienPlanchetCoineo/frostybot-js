@@ -64,9 +64,9 @@ const api_methods = {
         'disable', 
     ],
 
-    //multitenant: [
-    //    'enable',
-    //],
+    multitenant: [
+        'enable',
+    ],
 
     websocket: [
         'subscribe',
@@ -93,8 +93,8 @@ module.exports = class frostybot_core_module extends frostybot_module {
 
     // Verify whitelist
 
-    verify_whitelist(ip) {
-        return this.whitelist.verify(ip);
+    async verify_whitelist(ip) {
+        return await this.whitelist.verify(ip);
     }
 
     // Parse request
@@ -252,6 +252,19 @@ module.exports = class frostybot_core_module extends frostybot_module {
                         module: module,
                         method: method
                     };
+                    // If multitenancy is enabled, require a tenant parameter if not accessing from localhost
+                    if (this.multitenant.is_enabled()) {
+                        if (context.get('srcIp') !== '127.0.0.1') {
+                                if (!params.hasOwnProperty('tenant')) {
+                                    return this.output.parse(this.output.error('required_param', ['tenant']));
+                                } else {
+                                    context.set('tenant', params.tenant);
+                                }
+                        }
+    
+                    } else {
+
+                    }
                     // If no symbol is supplied, use the default symbol
                     if (module != 'symbolmap' && !params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
                         var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
@@ -288,7 +301,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
                             if (exchange != undefined) {
                                 let result = await exchange.market({symbol: params.symbol});
                                 if (this.utils.is_empty(result)) {
-                                    return this.output.error('unknown_market', params.symbol)
+                                    return this.output.parse(this.output.error('unknown_market', params.symbol));
                                 }
                             }
                         }

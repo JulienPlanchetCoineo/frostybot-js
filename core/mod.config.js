@@ -1,4 +1,4 @@
-// Symbol Mapping Module
+// Config Handling Module
 
 const frostybot_module = require('./mod.base')
 
