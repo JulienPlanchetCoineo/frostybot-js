@@ -30,6 +30,35 @@ describe(test.title('Helper Functions (mod.utils.js)'), function() {
         });
     });
 
+    // is_string()
+
+    describe(test.function('is_string'), function() {
+        it('should return true if value is a string', function() {
+            var val = "This is a string";
+            expect(test.utils.is_string(val)).to.equal(true);
+        });
+        it('should return false if value is an object', function() {
+            var val = {a: 1, b: 2, c: 3 };
+            expect(test.utils.is_string(val)).to.equal(false);
+        });
+        it('should return false if value is an array', function() {
+            var val = [1, 2, 3];
+            expect(test.utils.is_string(val)).to.equal(false);
+        });
+        it('should return false if value is boolean', function() {
+            var val = false;
+            expect(test.utils.is_string(val)).to.equal(false);
+        });
+        it('should return false if value is null', function() {
+            var val = null;
+            expect(test.utils.is_string(val)).to.equal(false);
+        });
+        it('should return false if value is undefined', function() {
+            var val = undefined;
+            expect(test.utils.is_string(val)).to.equal(false);
+        });
+    });
+
     // is_bool()
 
     describe(test.function('is_bool'), function() {
@@ -213,47 +242,47 @@ describe(test.title('Helper Functions (mod.utils.js)'), function() {
         });
     });
 
-    // encrypt_props()
+    // encrypt_values()
 
-    describe(test.function('encrypt_props'), function() {
+    describe(test.function('encrypt_values'), function() {
         it('should return supplied object with specified values encrypted', async function() {
             var val = {id: 1, username: 'test', password: 'encrypt this'};
-            var encrypt = await test.utils.encrypt_props(val, ['password']);
+            var encrypt = await test.utils.encrypt_values(val, ['password']);
             expect(encrypt.password).to.have.property('iv')
         });
-        it('should return false if supplied value is not an object', async function() {
+        it('should return given value if it is not an object', async function() {
             var val = [1, 2, 3];
-            expect(await test.utils.encrypt_props(val)).to.equal(false);
-        });        
+            expect(await test.utils.encrypt_values(val)).to.equal(val);
+        });
     });
 
-    // decrypt_props()
+    // decrypt_values()
 
-    describe(test.function('decrypt_props'), function() {
+    describe(test.function('decrypt_values'), function() {
         it('should return supplied object with specified values decrypted', async function() {
             var password = 'encrypt this';
             var val = {id: 1, username: 'test', password: password};
-            var encrypt = await test.utils.encrypt_props(val, ['password']);
-            var decrypt = await test.utils.decrypt_props(encrypt, ['password'])
+            var encrypt = await test.utils.encrypt_values(val, ['password']);
+            var decrypt = await test.utils.decrypt_values(encrypt, ['password'])
             expect(decrypt.password).to.equal(password);
         });
-        it('should return false if supplied value is not an object', async function() {
+        it('should return given value if it is not an object', async function() {
             var val = [1, 2, 3];
-            expect(await test.utils.decrypt_props(val)).to.equal(false);
+            expect(await test.utils.decrypt_values(val)).to.equal(val);
         });
     });
 
-    // trim_props()
+    // trim_values()
 
-    describe(test.function('trim_props'), function() {
+    describe(test.function('trim_values'), function() {
         it('should return supplied object with trimmed values', function() {
             var val = {a: '  abc  ', b: ' abc', c: 'abc ', d: 'abc'};
-            var result = test.utils.trim_props(val);
+            var result = test.utils.trim_values(val);
             expect(result).to.include({a: 'abc', b: 'abc', c: 'abc', d: 'abc'});
         });
-        it('should return false if supplied value is not an object', function() {
+        it('should return given value if it is not an object', async function() {
             var val = [1, 2, 3];
-            expect(test.utils.trim_props(val)).to.equal(false);
+            expect(await test.utils.trim_values(val)).to.equal(val);
         });
     });
 
@@ -285,17 +314,17 @@ describe(test.title('Helper Functions (mod.utils.js)'), function() {
         });
     });
 
-    // clean_props()
+    // clean_object()
 
-    describe(test.function('clean_props'), function() {
-        it('should return supplied object with given properties trimmed and lowercased', function() {
+    describe(test.function('clean_object'), function() {
+        it('should return supplied object with given properties lowercased and values trimmed', function() {
             var val = {A: ' abc ', b: ' 123', C: 'abc ', d: '123'};
-            var result = test.utils.clean_props(val);
+            var result = test.utils.clean_object(val);
             expect(result).to.include({a: 'abc', b: '123', c: 'abc', d: '123'});
         });
-        it('should return false if supplied value is not an object', function() {
+        it('should return given value if it is not an object', async function() {
             var val = [1, 2, 3];
-            expect(test.utils.clean_props(val, ['123'])).to.equal(false);
+            expect(await test.utils.clean_object(val)).to.equal(val);
         });
     });
     
@@ -432,6 +461,49 @@ describe(test.title('Helper Functions (mod.utils.js)'), function() {
             var val = false;
             expect(test.utils.serialize(val)).to.equal(false);
         });
+    });
+
+
+    // uppercase_values()
+
+    describe(test.function('uppercase_values'), function() {
+        it('should return object with all values uppercased if no filter supplied', function() {
+            var val = {a: 'abc', b: '123', c: 'def', d: '123', e: 'ghi', f: {g: 'jkl', h: 456, i: 'mno'}};
+            var result = test.utils.uppercase_values(val);
+            expect(result).to.include({a: 'ABC', b: '123', c: 'DEF', d: '123', e: 'GHI'}).and.to.have.property('f').that.includes({g: 'JKL', h: 456, i: 'MNO'});
+        });
+        it('should return object with given values uppercased if filter supplied', function() {
+            var val = {a: 'abc', b: '123', c: 'def', d: '123', e: 'ghi', f: {g: 'jkl', h: 456, i: 'mno'}};
+            var result = test.utils.uppercase_values(val, ['a', 'e', 'i']);
+            expect(result).to.include({a: 'ABC', b: '123', c: 'def', d: '123', e: 'GHI'}).and.to.have.property('f').that.includes({g: 'jkl', h: 456, i: 'MNO'});
+        });
+        it('should just return given value if it is not an object', function() {
+            var str = "This is a string";
+            var result = test.utils.uppercase_values(str);
+            expect(result).to.equal(str);
+        });
+
+    });
+
+    // lowercase_values()
+
+    describe(test.function('lowercase_values'), function() {
+        it('should return object with all values lowercased if no filter supplied', function() {
+            var val = {a: 'ABC', b: '123', c: 'DEF', d: '123', e: 'GHI', f: {g: 'JKL', h: 456, i: 'MNO'}};
+            var result = test.utils.lowercase_values(val);
+            expect(result).to.include({a: 'abc', b: '123', c: 'def', d: '123', e: 'ghi'}).and.to.have.property('f').that.includes({g: 'jkl', h: 456, i: 'mno'});
+        });
+        it('should return object with given values lowercased if filter supplied', function() {
+            var val = {a: 'ABC', b: '123', c: 'DEF', d: '123', e: 'GHI', f: {g: 'JKL', h: 456, i: 'MNO'}};
+            var result = test.utils.lowercase_values(val, ['a', 'e', 'i']);
+            expect(result).to.include({a: 'abc', b: '123', c: 'DEF', d: '123', e: 'ghi'}).and.to.have.property('f').that.includes({g: 'JKL', h: 456, i: 'mno'});
+        });
+        it('should just return given value if it is not an object', function() {
+            var str = "This is a string";
+            var result = test.utils.lowercase_values(str);
+            expect(result).to.equal(str);
+        });
+
     });
 
     // uc_first()
