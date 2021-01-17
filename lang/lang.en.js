@@ -25,7 +25,9 @@ module.exports = {
 
     debug: {
 
-        whitelist_verify:   'Address is whitelisted: {0}. Allowing access to the API.',
+        custom_object:      '{0}: {+1}',
+        trade_cmd_shortcut: 'Converting command shortcut \'{0}:{1}\' to \'trade:{0}:{1}\'',
+        whitelist_verify:   'API Access Granted: {0} is whitelisted: {0}',
         whitelist_get:      'Retrieved IP address from the whitelist: {0}: {1}',
         symbolmap_get:      'Retrieved symbol mapping: {0}: {1} => {2}',
         convert_rel_price:  'Converted relative price: {0} => {1}',
@@ -37,17 +39,16 @@ module.exports = {
         order_side_assumed: 'Order side not provided, assuming {0} order.',
         order_size_factor:  'The size of {0} has been converted to {1}',
         order_sizing_type:  'Order size provided in {0} ({1} size)',
-        order_sizing_cur:   'Current position {0} size is: {1} {2}',
-        order_sizing_tar:   'Target position {0} size is:  {1} {2}',
-        order_sizing_ord:   'Order required to reach target: {0} {1} {2}',
         close_exceeds_pos:  'The closing order size of {0} exceeds your current position, adjusting order size to {1}.',
         ws_subscribe:       'Subscribed to websocket channel: {0}',
         ws_unsubscribe:     'Unsubscribed from websocket channel: {0}',
-
+        multitenant_createdb: 'Creating multi-tenant database tables (if required)',
+        debug_noexecute:    'Order execution disabled, clearing queue',
     },
 
     notice: {
 
+        output_debug:       'Debug Output: {0}',
         using_language:     'Using Language: {0}',
         executing_command:  'Executing Command: {0}:{1}', 
         command_params:     'Command Parameters: {0}', 
@@ -55,12 +56,16 @@ module.exports = {
         loaded_module:      'Loaded module: {0}',
         processing_queue:   'Processing order queue: {0} order(s) queued',
         processed_queue:    'Processed order queue:  {0}/{1} order(s) submitted successfully.',
-        order_queued:       'Order queued: {0}',
+        order_sizing_cur:   'Current position {0} size is: {1} {2}',
+        order_sizing_tar:   'Target position {0} size is:  {1} {2}',
+        order_sizing_ord:   'Order required to reach target: {0} {1} {2}',
+        order_queued:       'Order added to queue: {0}',
         symbol_mapping:     'Using symbol mapping: {0}: {1} => {2}',
         whitelist_disabled: 'Whitelist verification is disabled',
         whitelist_enabled:  'Whitelist verification is enabled',
-        whitelist_verify:   'IP Address {0} is whitelisted. Allowing access to the API',
-
+        whitelist_verify:   'API Access Granted: {0} is whitelisted',
+        database_type:      'Database Type:  {0}',
+        database_name:      'Database Name:  {0}',
 
     },
 
@@ -71,6 +76,7 @@ module.exports = {
         order_rel_close:    'The relative decrease requested is greater than your current position, closing position.',
         order_will_flip:    'The provided order sizing results in a position flip from {0} to {1}',
         order_flip_price:   'The {0} parameter was changed from {1} to {2}',
+        maxsize_disabled:   'Warning ({0}/{1}): You have disabled the maxsize parameter requirement. You do so at your own risk!',
 
     },
 
@@ -83,7 +89,8 @@ module.exports = {
         malformed_param:    'Malformed Parameter: {0}', 
         unknown_module:     'Unknown Module: {0}',
         unknown_method:     'Unknown Command: {0}',
-        unknown_stub:       'Unknown account stub: {0}. Please use accounts:add to add the account.',      
+        unknown_stub:       'Unknown Account: {0}. Please use accounts:add to add the account.',      
+        unknown_market:     'Unknown Market: {0}. Please ensure that the market symbol is listed in \'trade:<stub>:markets\'.',      
 
         account_retrieve:   'Failed to retrieve account(s): {0}',
         account_create:     'Failed to create account: {0}',
@@ -100,7 +107,7 @@ module.exports = {
         whitelist_get:      'Failed to get IP address(es) from the whitelist: {0}',
         whitelist_add:      'Failed to add IP address to the whitelist: {0}',
         whitelist_delete:   'Cannot delete IP address from the whitelist: {0}',
-        whitelist_verify:   'Address is not whitelisted: {0}. Blocking access to the API.',
+        whitelist_verify:   'API Access Denied: {0} is not whitelisted',
         whitelist_enable:   'Failed to enable whitelist verification',
         whitelist_disable:  'Failed to disabled whitelist verification',
 
@@ -109,7 +116,7 @@ module.exports = {
         symbolmap_delete:   'Failed to delete symbol mapping: {0}: {1}',
     
         convert_size_usd:   'Size provided in USD, but cannot find a pair to use for conversion',
-        order_submit:       'Order submittion failed: {0}: {1}, Order Parameters: {2}',
+        order_submit:       'Order submission failed: {0}',
         order_size_nan:     'Could not determine order size: {0}',
         order_size_unknown: 'Could not determine the size of the order',
         order_side_unknown: 'Unable to determine side for order',
@@ -136,6 +143,14 @@ module.exports = {
         leverage_set:        'Unable to set leverage for symbol {0}',
         leverage_unsupported:'Setting leverage on this exchange is not currently supported',
 
+        multitenant_mysql_req: 'Multi-tenant mode requires MySQL/MariaDB database',
+
+        config_invalid_key:  'Invalid config key: {0}',
+        config_invalid_value:'Invalid JSON value format: {0}',
+        config_get:          'Setting not configured: {0}',
+        config_set:          'Failed to configure setting: {0}: {1}',
+
+
     },
 
     success: {
@@ -157,7 +172,7 @@ module.exports = {
         symbolmap_add:      'Added symbol mapping: {0}: {1} => {2}',
         symbolmap_delete:   'Deleted symbol mapping: {0}: {1}',
 
-        order_submit:       'Order submitted successfully: {0}: {1}',
+        order_submit:       'Order submitted successfully: {0}',
         orders_retrieve:    '{0} Order(s) retrieved',
         order_cancel:       'Successfully cancelled order {0}',
         orders_cancel:      '{0} Order(s) cancelled',
@@ -171,6 +186,9 @@ module.exports = {
         markets_retrieve:   '{0} Markets(s) retrieved',
 
         leverage_set:        'Successfully set leverage for symbol {0} to {1}x ({2})',
+
+        config_get:         'Successfully retrieved setting: {0}',
+        config_set:         'Successfully configured setting: {0}: {1}',
 
     }
     
