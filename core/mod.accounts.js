@@ -279,7 +279,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
     async get_exchange_from_stub(stub) {
         var account = await this.getaccount(stub);
         if (account !== false) {
-            var ccxtparams = this.ccxtparams(account);
+            var ccxtparams = await this.ccxtparams(account);
             return ccxtparams.exchange;
         }
         return false;

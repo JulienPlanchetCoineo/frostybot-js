@@ -274,7 +274,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
                     }
                     // Check for symbol mapping and use it if required, verify that market exists
                     if (module != 'symbolmap' && params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
-                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
+                        var exchangeid = await this.accounts.get_exchange_from_stub(params.stub);
                         if (exchangeid !== false) {
                             // Check for symbolmap and use it if configured
                             var mapping = await this.symbolmap.map(exchangeid, params.symbol);
