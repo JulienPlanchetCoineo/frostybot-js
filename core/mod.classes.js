@@ -1,6 +1,7 @@
 // Frostybot Custom Classes
 
 md5 = require ('md5');
+var context = require('express-http-context');
 
 // The base class (All Frostybot classes are derived from this)
 class frostybot_base {
@@ -230,8 +231,8 @@ class frostybot_exchange extends frostybot_base {
     // Methods to cache and how many seconds they should be cached for
 
     this.cached_methods = {
-      //positions: 2,
-      //position: 2,
+      positions: 2,
+      position: 2,
       available_equity_usd: 2,
       markets: 10,
       market: 10,
@@ -263,6 +264,9 @@ class frostybot_exchange extends frostybot_base {
   async load_handler (stub) {
     this.load_modules ();
     //this['accounts'] = global.frostybot._modules_['accounts'];
+    if (stub == undefined) {
+      stub = context.get('stub');
+    }
     this.handler = null;
     var account = await this.accounts.getaccount (stub);
     if (account) {
@@ -270,7 +274,10 @@ class frostybot_exchange extends frostybot_base {
       if (account && account.hasOwnProperty (stub)) {
         account = account[stub];
       }
-      const exchange_id = account.exchange;
+      const exchange_id = (account.hasOwnProperty('exchange') ? account.exchange : undefined);
+      if (exchange_id == undefined) {
+        return this.output.error('account_retrieve', 'Undefined stub')
+      }
       this.exchange_id = exchange_id;
       var type = account.hasOwnProperty ('type') ? account.type : null;
       this.exchanges[exchange_id] = require ('../exchanges/exchange.' + exchange_id + (type != null ? '.' + type : ''));

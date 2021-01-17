@@ -305,7 +305,8 @@ module.exports = class frostybot_trade_module extends frostybot_module {
                 adv_params.usd   = (usd != undefined ? usd / qty : undefined);
                 adv_params.price = this.round_price(market, minprice + (variance * i));
                 adv_params.tag   = tag != undefined ? tag + (qty > 1 ? '-' + (i + 1) : '') : undefined;
-                var level_params = await this.order_params_standard(type, params);
+                adv_params['is_layered'] = true;
+                var level_params = await this.order_params_standard(type, adv_params);
                 order_params.push(level_params);
             }
             this.output.debug('convert_layered', [qty, minprice, maxprice])
@@ -361,7 +362,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
     
     async convert_size(type, params) {
 
-        var [stub, market, symbol, size, base, quote, usd, scale, maxsize] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize']);
+        var [stub, market, symbol, size, base, quote, usd, scale, maxsize, is_layered] = this.utils.extract_props(params, ['stub', 'market', 'symbol', 'size', 'base', 'quote', 'usd', 'scale', 'maxsize', 'is_layered']);
 
         // Check market symbol
         if (market == null) {
@@ -372,6 +373,9 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         var side = null;
         var is_close = false;   // Report this order will result in position closure
         var is_flip = false;    // Report this order will result in position flip
+
+        // This order is part of a layered set of orders
+        if (is_layered == undefined) is_layered = false; 
 
         // Check for base and quote factored sizing
         if (this.is_factor(base) || this.is_factor(quote)) {
@@ -438,7 +442,17 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         if (this.is_relative(requested)) {
             if (['long', 'short'].includes(type)) {
                 if (maxsize == undefined) {
-                    return this.output.error('order_rel_req_max', type)
+                    var warn_limit = 5;
+                    var require_maxsize = await this.settings.get('config','trade:require_maxsize',true);
+                    var warn_maxsize = await this.settings.get('counter','trade:warn_maxsize',0);
+                    if (!require_maxsize && warn_maxsize < 5) {
+                        warn_maxsize++;
+                        this.output.warning('maxsize_disabled',[warn_maxsize, warn_limit]);
+                        await this.settings.set('counter','trade:warn_maxsize',warn_maxsize);
+                    }
+                    if (require_maxsize) {
+                        return this.output.error('order_rel_req_max', type)
+                    }
                 }
                 requested = (dir == 'short' ? -1 : 1) * (Math.abs(current) + this.apply_operator(requested))
                 order_is_relative = true
@@ -498,7 +512,8 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
 
         // Check if already long or short more than requested (non relative orders only)
-        if (!order_is_relative && scale == undefined && ((type == 'long' && target < current) || (type == 'short' && target > current))) {
+        
+        if (type != "close" && is_layered !== true && !order_is_relative && scale == undefined && ((type == 'long' && target < current) || (type == 'short' && target > current))) {
             return this.output.error('order_size_exceeds', type)  
         }
 
@@ -548,13 +563,15 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
         var currency = currencies[sizing];
 
-        this.output.debug('order_sizing_type', [currency, (sizing == 'usd' ? 'USD' : sizing)])
-        this.output.debug('order_sizing_cur', [ (sizing == 'usd' ? 'USD' : sizing), currency, current])
-        this.output.debug('order_sizing_tar', [ (sizing == 'usd' ? 'USD' : sizing), currency, target])
-        this.output.debug('order_sizing_ord', [this.utils.uc_first(order_side), currency, order_size])
-
+        if (!is_layered) {
+            this.output.debug('order_sizing_type', [currency, (sizing == 'usd' ? 'USD' : sizing)])
+            this.output.notice('order_sizing_cur', [ (sizing == 'usd' ? 'USD' : sizing), currency, current])
+            this.output.notice('order_sizing_tar', [ (sizing == 'usd' ? 'USD' : sizing), currency, target])
+            this.output.notice('order_sizing_ord', [this.utils.uc_first(order_side), currency, order_size])
+        }
+        
         // Return result
-        return [sizing, order_size, order_side, {is_close : is_close, is_flip: is_flip}];
+        return [sizing, order_size, order_side, {is_close : is_close, is_flip: is_flip, is_layered: is_layered}];
         
     }
 
@@ -564,8 +581,8 @@ module.exports = class frostybot_trade_module extends frostybot_module {
     async order_params_standard(type, params) {
 
         // Calculate order sizing and direction (side)
-        let order_sizes = await this.convert_size(type, params);   
-
+        let order_sizes = await this.convert_size(type, params);
+        
         if (order_sizes === false)
             return this.output.error('order_size_unknown');
         
@@ -587,7 +604,12 @@ module.exports = class frostybot_trade_module extends frostybot_module {
 
         //Check if an order is an advanced order (layered orders, relative pricing, etc)
         if (this.order_is_advanced(price)) {
+            if (['long','short'].includes(type)) {
+                type = side;
+            }
             var level_params = await this.order_params_advanced(type, params);
+            //if (this.utils.is_array(level_params) && level_params.length > 1)
+            //    params['is_layered'] = true;
             return level_params;
         }
 
@@ -1020,6 +1042,11 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         var result = await this.exchange[stub].positions(params);
         if (this.utils.is_array(result)) {
             this.output.success('positions_retrieve', result.length)
+            /*
+            result.forEach(position => {
+                this.output.debug('custom_object', [position.symbol, position]);
+            });
+            */
         } else {
             this.output.error('positions_retrieve')
         }
