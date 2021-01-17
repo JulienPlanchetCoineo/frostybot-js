@@ -265,7 +265,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
                 continue;
             var val = obj[key];
             if (this.is_object(val) && !this.is_empty(val) && !this.encryption.is_encrypted(val))
-                obj[key] = this.walk_values(val, filter, callfunc);
+                obj[key] = await this.walk_values_async(val, filter, callfunc);
             else 
                 if ((filter == null) || (filter.includes(key))) 
                     obj[key] = await callfunc(val); 
