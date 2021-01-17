@@ -19,7 +19,7 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance','bitmex'],
+                oneof: ['ftx', 'deribit', 'binance', 'binanceus', 'bitmex'],
             },
             symbol: {
                 optional: 'string',
@@ -61,7 +61,7 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance','bitmex'],
+                oneof: ['ftx', 'deribit', 'binance', 'binanceus', 'bitmex'],
             },
             symbol: {
                 required: 'string',
@@ -98,7 +98,7 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance','bitmex'],
+                oneof: ['ftx', 'deribit', 'binance', 'binanceus', 'bitmex'],
             },
             symbol: {
                 required: 'string',

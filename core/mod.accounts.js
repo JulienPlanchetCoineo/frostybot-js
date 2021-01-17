@@ -107,7 +107,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
 
         var schema = {
             stub: {        required: 'string', format: 'lowercase' },
-            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit', 'binance', 'bitmex'] },
+            exchange: {    required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit', 'binance', 'binanceus', 'bitmex'] },
             description: { optional: 'string'  },
             apikey: {      required: 'string'  },
             secret: {      required: 'string'  },
