@@ -53,7 +53,7 @@ module.exports = class frostybot_queue_module extends frostybot_module {
             params = [params]
         }
         params.forEach(order => {
-            this.output.notice('order_queued', this.utils.serialize(order))
+            this.output.notice('order_queued', order)
             this.queue[uuid][stub][symbol].push(order)
         });
     }
@@ -62,6 +62,12 @@ module.exports = class frostybot_queue_module extends frostybot_module {
     // Process order queue (submit orders to the exchange)
 
     async process(stub, symbol) {
+        var debug_noexecute = await this.settings.get('config', 'debug:noexecute', false);
+        if (String(debug_noexecute) == "true") {
+            this.output.debug('debug_noexecute');
+            this.clear(stub, symbol);
+            return true;
+        }
         var uuid = context.get('reqId')
         this.create(stub, symbol)
         this.results[uuid][stub][symbol] = []
@@ -74,13 +80,13 @@ module.exports = class frostybot_queue_module extends frostybot_module {
             let result = await exchange.create_order(order);
             if (result.result == 'success') {
                 success++;
-                this.output.success('order_submit', [stub, this.utils.serialize(order)]); 
+                this.output.success('order_submit', { ...{stub: stub}, ...order}); 
             } else {
                 //output.set_exitcode(-1);
                 var message = result.error.type + ': ' + (this.utils.is_object(result.error.message) ? this.utils.serialize_object(result.error.message) : result.error.message);
                 var params = this.utils.serialize(result.params);
                 var info = message + ': ' + params;
-                this.output.error('order_submit', [stub, info, this.utils.serialize(order)]); 
+                this.output.error('order_submit', { ...{error: result.error}, ...{stub: stub}, ...order} ); 
             }
             this.results[uuid][stub][symbol].push(result);
         };

@@ -28,6 +28,11 @@ module.exports = {
         'delete|/cache/flush'               :   'cache:flush',      // Flush the cache
         'get|/cache/stats'                  :   'cache:stats',      // Retrieve cache statistics
 
+        // Configuration
+
+        'get|/config/:key'                  :   'config:get',       // Get configuration setting
+        'post|/config/:key'                 :   'config:set',       // Set configuration setting
+
         // Symbol Map Handling
 
         'get|/symbolmap/:exchange'          :   'symbolmap:get',    // Retrieve all symbol mapping for an exchange
@@ -47,6 +52,10 @@ module.exports = {
         'post|/whitelist'                   :   'whitelist:add',    // Add a whitelist entry
         'put|/whitelist'                    :   'whitelist:add',    // Update a whitelist entry
         'delete|/whitelist/:ip'             :   'whitelist:delete', // Delete whitelist entry for specific IP address
+
+        // Multi-Tenant Handling
+
+        //'post|/multitenant/enable'          :   'multitenant:enable',// Enable Multi-Tenant Mode (MySQL Required)
 
         // Trading
 

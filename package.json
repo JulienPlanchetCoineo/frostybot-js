@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "stop": "pkill --signal SIGINT frostybot-js",
-    "test": "mocha"
+    "test": "mocha --exit"
   },
   "dependencies": {
     "accepts": "^1.3.7",

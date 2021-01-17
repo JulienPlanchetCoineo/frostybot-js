@@ -1,6 +1,7 @@
 // Frostybot core module
 
 const fs = require('fs');
+var context = require('express-http-context');
 
 // Method exported to the API
 
@@ -16,6 +17,11 @@ const api_methods = {
     cache: [
         'flush', 
         'stats', 
+    ],
+
+    config: [
+        'get',
+        'set',
     ],
 
     trade: [
@@ -57,6 +63,10 @@ const api_methods = {
         'enable',
         'disable', 
     ],
+
+    //multitenant: [
+    //    'enable',
+    //],
 
     websocket: [
         'subscribe',
@@ -131,13 +141,14 @@ module.exports = class frostybot_core_module extends frostybot_module {
     // Parse Command Parameter Object
 
     parse_obj(params) {
-        params = this.utils.clean_props(params);      
+        params = this.utils.clean_object(params);      
         var command = this.utils.extract_props(params, 'command');
         if (command == undefined) 
             return this.output.error('required_param', ['command']);
         if (command.indexOf(':') < 0) 
             return this.output.error('malformed_param', ['command']);
         var parts = command.split(':');
+        var numparts = parts.length;
         if (this.utils.is_array(parts) && parts.length > 1) {
             var mod = parts[0];
             var cmd = parts.slice(1).join(':');
@@ -145,10 +156,19 @@ module.exports = class frostybot_core_module extends frostybot_module {
                 var [stub, cmd] = cmd.split(':');
                 params['stub'] = stub;
             }
+            if ((numparts == 2) && (api_methods.trade.includes(cmd)) && (parts[0] !== 'trade')) {
+                // "trade:" was excluded from the command, add it
+                var stub = mod;
+                var mod = "trade";
+                params['stub'] = stub;
+                this.output.debug('trade_cmd_shortcut', [stub.toLowerCase(), cmd.toLowerCase()]);
+            }
         } else {
             return this.output.error('malformed_param', ['command']);
         }
         delete params.command;
+        params = this.utils.uppercase_values(params, ['symbol', 'mapping']);
+        params = this.utils.lowercase_values(params, ['stub']);
         return [mod, cmd, params];
     }
 
@@ -221,7 +241,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
             var [module, method, params] = parsed;
             this.output.section('executing_command', [module, method]);
             this.output.notice('executing_command', [module, method]);
-            this.output.notice('command_params', this.utils.serialize(params));
+            this.output.notice('command_params', [{ ...{ command: module + ":" + method}, ...params }]);
             if (this.load_module(module)) {
             //if (typeof(this[module] == 'function')) {
                 this.output.notice('loaded_module', module)    
@@ -243,17 +263,6 @@ module.exports = class frostybot_core_module extends frostybot_module {
                             } 
                         }
                     }
-                    // Check for symbol mapping and use it
-                    if (module != 'symbolmap' && params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
-                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
-                        if (exchangeid !== false) {
-                            var mapping = await this.symbolmap.map(exchangeid, params.symbol);
-                            if (mapping !== false) {
-                                this.output.notice('symbol_mapping', [exchangeid, params.symbol, mapping])
-                                params.symbol = mapping;
-                            } 
-                        }
-                    }
                     // If stub is supplied, and not adding a new stub, make sure the account exists
                     if (params.hasOwnProperty('stub') && !(module == 'accounts' && method == 'add')) {
                         var stub = params.stub.toLowerCase()
@@ -261,6 +270,28 @@ module.exports = class frostybot_core_module extends frostybot_module {
                             return this.output.parse(this.output.error('unknown_stub', stub))
                         } 
                         params.stub = stub
+                        context.set('stub', stub);
+                    }
+                    // Check for symbol mapping and use it if required, verify that market exists
+                    if (module != 'symbolmap' && params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
+                        var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
+                        if (exchangeid !== false) {
+                            // Check for symbolmap and use it if configured
+                            var mapping = await this.symbolmap.map(exchangeid, params.symbol);
+                            if (mapping !== false) {
+                                this.output.notice('symbol_mapping', [exchangeid, params.symbol, mapping])
+                                params.symbol = mapping.toUpperCase();
+                            }
+                            params.symbol = params.symbol.toUpperCase();
+                            // Check that market symbol is valid
+                            var exchange = new this.classes.exchange(stub);
+                            if (exchange != undefined) {
+                                let result = await exchange.market({symbol: params.symbol});
+                                if (this.utils.is_empty(result)) {
+                                    return this.output.error('unknown_market', params.symbol)
+                                }
+                            }
+                        }
                     }
                     //let result = await this[module][method](params);
                     let result = await global.frostybot._modules_[module][method](params);
