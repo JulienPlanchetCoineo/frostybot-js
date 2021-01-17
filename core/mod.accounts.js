@@ -59,7 +59,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         if (accounts != false) {
             for (var [stub, account] of Object.entries(accounts)) {
                 if (account != false) {
-                    account = await this.utils.decrypt_props(account, ['apikey', 'secret'])
+                    account = await this.utils.decrypt_values(account, ['apikey', 'secret'])
                     account = await this.utils.censor_props(account, ['apikey', 'secret'])
                 }
                 result[stub] = account;
