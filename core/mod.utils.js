@@ -22,6 +22,11 @@ module.exports = class frostybot_utils_module extends frostybot_module {
         return true;
     }
 
+    // Check if value is a string
+
+    is_string(val) {
+        return (typeof val === 'string');
+    }
 
     // Check if value is boolean
 
@@ -84,6 +89,13 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     }
 
 
+    // Check if a value is a function
+
+    is_function(value) {
+        return typeof(value) === 'function';
+    }
+
+
     // Force a value to be an array if it not already an array
 
     force_array(val) {
@@ -135,62 +147,35 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     }
 
 
-    // Walk over object and encrypt properties with the names provided in the props array element
+    // Walk over object and encrypt properties matching the names provided in the filter array
+    // If no filter is supplied, then all properties will be encrypted
+    // If no UUID is supplied, the core UUID will be used
 
-    async encrypt_props(obj, props = []) {
-        if (!this.is_object(obj)) return false;
-        for (var key in obj) {
-            if (!obj.hasOwnProperty(key))
-                continue;
-            if (typeof obj[key] === 'object' && obj[key] !== null)
-                obj[key] = await this.encrypt_props(obj[key], props);
-            else
-                if (props.includes(key)) {
-                    var val = await this.encryption.encrypt(obj[key])
-                    obj[key] = val
-                } 
-        }
-        return obj;
+    async encrypt_values(obj, filter = null, uuid = null) {
+        return await this.walk_values_async(obj, filter, async function(val) {
+            return await global.frostybot._modules_['encryption'].encrypt(val, uuid);
+        }); 
     }
 
 
-    // Walk over object and decrypt properties with the names provided in the props array element
+    // Walk over object and decrypt properties matching the names provided in the filter array
+    // If no filter is supplied, then all encrypted values will be decrypted
+    // If no UUID is supplied, the core UUID will be used
 
-    async decrypt_props(obj, props = []) {
-        if (!this.is_object(obj)) return false;
-        for (var key in obj) {
-            if (!obj.hasOwnProperty(key))
-                continue;
-            if (props.includes(key)) {
-                var val = await this.encryption.decrypt(obj[key])
-                obj[key] = val
-            } else 
-                if (typeof obj[key] === 'object' && obj[key] !== null)
-                    obj[key] = await this.decrypt_props(obj[key], props);
-        }
-        return obj;
+    async decrypt_values(obj, filter = null, uuid = null) {
+        return await this.walk_values_async(obj, filter, async function(val) {
+            return await global.frostybot._modules_['encryption'].decrypt(val, uuid);
+        }); 
     }
 
 
-    // Trim whitespace from object properties recursively
+    // Trim whitespace from object values recursively
 
-    trim_props(obj) {
-        if (!this.is_object(obj)) return false;
-        for (var key in obj) {
-            if (!obj.hasOwnProperty(key))
-                continue;
-            if (typeof obj[key] === 'object' && obj[key] !== null)
-                obj[key] = this.trim_props(obj[key]);
-            else {
-                var val = obj[key];
-                if (typeof(val) == 'string') {
-                    val = val.replace(/^\s+|\s+$/g, '');
-                    obj[key] = val;
-                }
-            }
-        }
-        return obj;
-    }
+    trim_values(obj, filter = null) {
+        return this.walk_values(obj, filter, function(val) {
+            return typeof(val) === "string" ? val.replace(/^\s+|\s+$/g, '') : val;
+        }); 
+    }    
 
 
     // Walk over object and remove properties with the names provided in the props array element
@@ -224,14 +209,91 @@ module.exports = class frostybot_utils_module extends frostybot_module {
                     delete obj[key];
         }
         return obj;
+    }
+    
+    // Walk over object properties recursively and execute a callback function for each of the given properties (if supplied), or all of the properties is no filter is supplied
+
+    walk_values() {
+        if (arguments.length < 2) return false;
+        if (!this.is_object(arguments[0])) return arguments[0];
+        var obj = arguments[0];
+        var filter = null;
+        var callfunc = null;
+        if (arguments.length == 2) 
+            callfunc = arguments[1];
+        if (arguments.length == 3) {
+            filter = arguments[1];
+            callfunc = arguments[2];
+        }
+        if ((filter != null) && (!this.is_array(filter))) 
+            throw 'Invalid filter supplied to utils.walk_values()';
+        if (!this.is_function(callfunc)) 
+            throw 'Invalid callback function supplied to utils.walk_values()';
+        for (var key in obj) {
+            if (!obj.hasOwnProperty(key))
+                continue;
+            var val = obj[key];
+            if (this.is_object(val) && !this.is_empty(val) && !this.encryption.is_encrypted(val))
+                obj[key] = this.walk_values(val, filter, callfunc);
+            else 
+                if ((filter == null) || (filter.includes(key))) 
+                    obj[key] = callfunc(val); 
+        }
+        return obj;
+    }
+
+    // Asyncronously Walk over object properties recursively and execute a callback function for each of the given properties (if supplied), or all of the properties is no filter is supplied
+
+    async walk_values_async() {
+        if (arguments.length < 2) return false;
+        if (!this.is_object(arguments[0])) return arguments[0];
+        var obj = arguments[0];
+        var filter = null;
+        var callfunc = null;
+        if (arguments.length == 2) 
+            callfunc = arguments[1];
+        if (arguments.length == 3) {
+            filter = arguments[1];
+            callfunc = arguments[2];
+        }
+        if ((filter != null) && (!this.is_array(filter))) 
+            throw 'Invalid filter supplied to utils.walk_values()';
+        if (!this.is_function(callfunc)) 
+            throw 'Invalid callback function supplied to utils.walk_values()';
+        for (var key in obj) {
+            if (!obj.hasOwnProperty(key))
+                continue;
+            var val = obj[key];
+            if (this.is_object(val) && !this.is_empty(val) && !this.encryption.is_encrypted(val))
+                obj[key] = this.walk_values(val, filter, callfunc);
+            else 
+                if ((filter == null) || (filter.includes(key))) 
+                    obj[key] = await callfunc(val); 
+        }
+        return obj;        
+    }
+
+    // Walk over object and uppercase the values of the given property name filter, or for all propterties if the filter is ommited
+
+    uppercase_values(obj, filter = null) {
+        return this.walk_values(obj, filter, function(val) {
+            return typeof(val) === "string" ? val.toUpperCase() : val;
+        }); 
     }    
 
+    // Walk over object and uppercase the values of the given property name filter, or for all propterties if the filter is ommited
 
-    // Recursively trim object properties and change the property names to lowercase
+    lowercase_values(obj, filter = null) {
+        return this.walk_values(obj, filter, function(val) {
+            return typeof(val) === "string" ? val.toLowerCase() : val;
+        }); 
+    }    
 
-    clean_props(obj) {
-        if (!this.is_object(obj)) return false;
-        return this.lower_props(this.trim_props(obj));
+    // Recursively trim object values and change the property names to lowercase
+
+    clean_object(val) {
+        if (!this.is_object(val)) return val;
+        return this.lower_props(this.trim_values(val));
     }
 
 
@@ -327,7 +389,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
         if (!this.is_object(obj)) return false;
         var props = [];
         for (const [prop, val] of Object.entries(obj)) {
-            if (['apikey','secret'].includes(prop.toLowerCase())) {
+            if (['apikey','secret','password'].includes(prop.toLowerCase())) {
                 var newval = '********';
             } else {
                 var newval = this.serialize(val);

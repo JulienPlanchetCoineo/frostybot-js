@@ -16,7 +16,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
     async getaccount(stub) {
         var account = await this.settings.get('accounts', stub);
         if (account !== null) {
-            return await this.utils.decrypt_props( this.utils.lower_props(account), ['apikey', 'secret'])
+            return await this.utils.decrypt_values( this.utils.lower_props(account), ['apikey', 'secret'])
         }
         return false;
     }
@@ -126,7 +126,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         var [stub, data] = this.create_params(params);
         let testresult = await this.test(data);
         if (testresult) {
-            if (await this.settings.set('accounts', stub, await this.utils.encrypt_props(data, ['apikey', 'secret']))) {
+            if (await this.settings.set('accounts', stub, await this.utils.encrypt_values(data, ['apikey', 'secret']))) {
                 this.output.success('account_create', stub);
                 return true;
             }
@@ -150,7 +150,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         let testresult = await this.test(data);
         if (testresult) {
             this.output.success('account_test', stub);
-            data = await this.utils.encrypt_props(data, ['apikey', 'secret'])
+            data = await this.utils.encrypt_values(data, ['apikey', 'secret'])
             if (await this.settings.set('accounts', stub, data)) {
                 this.output.success('account_update', stub);
             }

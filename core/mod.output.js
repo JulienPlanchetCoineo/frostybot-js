@@ -12,7 +12,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
     // Constructor
 
     constructor() {
-        super()
+        super();
     }
 
 
@@ -34,9 +34,30 @@ module.exports = class frostybot_output_module extends frostybot_module {
             var language = await this.settings.get('core', 'language', 'en');
             if (language == undefined) language = 'en';
             this.language = require('../lang/lang.' + language);
+            this.output_debug = await this.settings.get('config', 'debug:output', true);
             this.section('frostybot_startup');
             this.translate('notice', 'using_language', language);
+            this.notice('database_type', this.database.type);
+            this.notice('database_name', this.database.name);
+            this.notice('output_debug', (this.output_debug ? 'enabled' : 'disabled'));
         }
+    }
+
+    // Enable debug output
+
+    async enable_debug() {
+        await this.settings.set('config', 'debug:output', true);
+        this.output_debug = true;
+        return true;
+    }
+
+
+    // Enable debug output
+
+    async disable_debug() {
+        await this.settings.set('config', 'debug:output', false);
+        this.output_debug = false;
+        return true;
     }
 
 
@@ -54,31 +75,86 @@ module.exports = class frostybot_output_module extends frostybot_module {
         return true;
     }
 
+    // Expand object in console output
+
+    outobj(type, str, idx, obj) {
+        var data = this.utils.is_array(obj) || this.utils.is_object(obj) ? this.utils.serialize(obj) : obj;
+        var datalen = this.utils.is_string(data) ? data.length : 0;
+        if (datalen > 40) {
+            var resmessage = str.replace(idx, data).trim();
+            var objmessage = str.replace(idx, "").trim();
+            this.add_message(type, resmessage, {toLog: true, toResults: true, toConsole: false})
+            this.add_message(type, objmessage, {toLog: false, toResults: false, toConsole: true})
+            this.add_message(type, obj, {toLog: false, toResults: false, toConsole: true})
+            return (type == 'error' ? false : true);
+        }  
+        return -1;      
+    }
 
     // Translate message and add to output
 
     translate(type, id, params = []) {
+        
+        if (this.utils.is_array(id) && id.length == 2) {
+            var params = [id[1]];
+            var id = id[0];
+        }
+
+        // If object supplied, just output it directly
+        if (this.utils.is_object(id)) {
+            this.add_message(type, id, true);
+            return (type == 'error' ? false : true);       
+        }
+
+        // Else perform language translation
+        if (this.language == undefined) {
+            this.language = require("../lang/lang.en");
+        }
         params = this.utils.force_array(params);
         if ((this.language.hasOwnProperty(type)) && (this.language[type].hasOwnProperty(id))) {
             var str = this.language[type][id];
+
+            // If serialized object is too long to fit on console, output it on multiple lines
+
+            if (params.length == 1) {
+                var result = this.outobj(type, str, '{0}', params[0])
+                if (result !== -1) {
+                    return result;
+                }
+            }
+
+            // Else parse normally
+
+            var expanded = false;
             params.forEach((param, idx) => {
-                var data = this.utils.is_array(param) || this.utils.is_object(param) ? this.utils.serialize(param) : param;
                 var placeholder = '{' + idx + '}';
-                str = str.replace(placeholder, data).trim();
+                var expand = '{+' + idx + '}';
+                var result = -1;
+                if (str.includes(expand)) {
+                    expanded  = true;
+                    var result = this.outobj(type, str, expand, param);
+                    if (result !== -1) {
+                        return result;
+                    }
+                }
+                var data = result == -1 ? (this.utils.is_array(param) || this.utils.is_object(param) ? this.utils.serialize(param) : param) : null;
+                str = str.split(placeholder).join(data).trim();
                 str = str.slice(-1) == ':' ? str.substr(0, str.length - 1) : str;
             });
-            if (!this.checkonce(str))
+            if ((!this.checkonce(str)) && (!expanded))
                 this.add_message(type, str);
             return (type == 'error' ? false : true);
         }
         return this.add_message('error', 'Translation not found: ' + type + '.' + id);
+
     }
 
 
     // Some helper functions
 
     debug(id, params = []) {
-        return this.translate('debug', id, params)
+        if (this.output_debug)
+            return this.output_debug ? this.translate('debug', id, params) : true;
     }
 
     notice(id, params = []) {
@@ -96,6 +172,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
     success(id, params = []) {
         return this.translate('success', id, params)
     }
+
 
     // Start a new section
 
@@ -177,17 +254,52 @@ module.exports = class frostybot_output_module extends frostybot_module {
 
     // Add a message to the output
 
-    add_message(type, message) {
-        message = message.replace(/\s+/g,' ');  // Trim message
+    add_message(type, message, settings = {}) {
+        var defaults = {
+            toLog:      true,
+            toConsole:  true,
+            toResults:  true,
+            noTrim:     false
+        };
+        var settings = { ...defaults, ...settings };
+        if (this.utils.is_object(message)) {
+            var maxproplength = Object.getOwnPropertyNames(message).sort(
+                function(a,b) {  
+                  if (a.length > b.length) return -1;
+                  if (a.length < b.length) return 1;
+                  return 0
+                }
+              )[0].length;
+            var objmsgs = [];
+            //this.add_message(type, "{".padStart(3, " "), { toLog: false, toResults: false, noTrim: true });
+            for (const [prop, val] of Object.entries(message)) {
+                if (['apikey','secret','password'].includes(prop.toLowerCase())) {
+                    var outstr = '********';
+                } else {
+                    var outstr = this.utils.is_empty(val) ? null : this.utils.serialize(val);
+                }
+                if (outstr !== null)
+                    objmsgs.push((prop + ": ").padEnd(maxproplength + 2, " ") + outstr);
+            }     
+            for (var i = 0; i < objmsgs.length; i++) {
+                var objmsg = objmsgs[i];
+                this.add_message(type, " ".padStart(2, " ") + (i == (objmsgs.length - 1) ? "└─ " : "├─ ") + objmsg, { toLog: false, toResults: false, noTrim: true });
+            }
+            //this.add_message(type, "}".padStart(3, " "), { toLog: false, toResults: false, noTrim: true });
+            return true;
+        }
+        message = settings.noTrim === true ? message : message.replace(/\s+/g,' ');  // Trim message
         var maxwidth = process.stdout.columns - 35;
         var d = new Date();
         var ts = d.getTime();
-        if (!['section','subsection','blank'].includes(type)) {          
-            this.output_obj.messages.push({
-                'timestamp': ts,
-                'type': type.toUpperCase(),
-                'message': message.replace(/\s+/g,' ').trim()
-            })    
+        if (!['section','subsection','blank'].includes(type)) {  
+            if (settings.toResults) {
+                this.output_obj.messages.push({
+                    'timestamp': ts,
+                    'type': type.toUpperCase(),
+                    'message': settings.noTrim === true ? message : message.replace(/\s+/g,' ').trim()
+                })    
+            }
         }
         let dateobj = new Date(ts);
         let day = ("0" + dateobj.getDate()).slice(-2);
@@ -217,7 +329,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
 
         if (!['section', 'subsection','blank'].includes(type)) {
             var logmessage = datetime + ' | ' + type.toUpperCase().padEnd(7) + ' | ' + message + eol
-            if (this.mode == 'normal') {
+            if ((this.mode == 'normal') && (settings.toLog !== false)) {
                 fs.appendFileSync(this.logfile, logmessage);
             }
             var logentry = {
@@ -247,7 +359,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
             default             : var message_type = type.toUpperCase(); 
         }
         var output = datetime /*+ splitter + code*/ + splitter1 + message_type.padEnd(7) + splitter2 + (message.padEnd(maxwidth,' ').slice(0,maxwidth));
-        if (this.mode == 'normal') {
+        if ((this.mode == 'normal') && (settings.toConsole !== false)) {
             console.log(type_color_map[type](output));
         }
         if (type.toLowerCase() == 'error') {
