@@ -22,7 +22,7 @@ else
   DOSTART="false"
 fi
 echo "Creating a backup..."
-tar czvf ~/`date +%s`.tar.gz /usr/local/frostybot-js  > /dev/null 2>&1
+sudo tar czvf ~/`date +%s`.tar.gz /usr/local/frostybot-js  > /dev/null 2>&1
 echo "Switching branch..."
 sudo git stash
 sudo git checkout $BRANCH
