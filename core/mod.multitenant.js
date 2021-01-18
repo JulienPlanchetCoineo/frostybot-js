@@ -65,6 +65,17 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
         return await this.settings.get('core', 'multitenant:enabled', false);
     }
 
+
+    // Get tenant UUID by email address
+
+    async uuid_by_email(email) {
+        var result = await this.database.select('tenants', {email: email});
+        if (result.length == 1)
+            return result[0].uuid;
+        else
+            return false;
+    }
+
     
     // Add New Tenant (returns the tenant UUID)
 
@@ -80,15 +91,20 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
 
         var email = params.email;
 
+        var uuid = await this.uuid_by_email(email);
+        if (uuid !== false)
+            return uuid;
+
         var user = {
             email    : String(email)
         };
         var result = await this.database.insertOrReplace('tenants',  user);
         if (result.changes > 0) {
+            var uuid = await this.uuid_by_email(email);
             this.output.success('multitenant_add', [uuid]);
             return uuid;
         }  
-        return this.output.error('multitenant_add', [uuid]);  
+        return this.output.error('multitenant_add', [email]);  
     }
 
     // Delete Tenant

@@ -61,7 +61,7 @@ VALUES
 
 CREATE TABLE IF NOT EXISTS tenants (
 	`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`uuid` CHAR(38) NOT NULL DEFAULT uuid_v4(),
+	`uuid` CHAR(38) NOT NULL,
 	`email` VARCHAR(100) NOT NULL,
 	`enabled` BOOL NOT NULL DEFAULT true,
 	`elevated` BOOL NOT NULL DEFAULT false,
@@ -72,6 +72,16 @@ CREATE TABLE IF NOT EXISTS tenants (
 	INDEX `IDX_UUID` (`uuid` ASC) VISIBLE,
 	INDEX `IDX_EMAIL` (`email` ASC) VISIBLE
 ) COLLATE='latin1_swedish_ci';    
+
+DROP TRIGGER IF EXISTS `tenants_before_insert`;
+DELIMITER $$
+CREATE TRIGGER `tenants_before_insert` BEFORE INSERT ON `tenants`
+FOR EACH ROW
+  IF new.uuid IS NULL
+  THEN
+    SET new.uuid = uuid_v4();
+  END IF$$
+DELIMITER ;
 
 -- Create multitenant_enable procedure
 
