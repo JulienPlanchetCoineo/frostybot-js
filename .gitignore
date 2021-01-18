@@ -72,6 +72,7 @@ typings/
 .next
 
 # Frostybot Database
+.dbcfg
 database/database.db
 database/database.db-shm
 database/database.db-wal
