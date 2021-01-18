@@ -3,7 +3,7 @@
 PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
 CURRENTPATH=`pwd`
 SCRIPTPATH=`dirname "$(readlink -f "$0")"`
-BRANCH=`echo "$@"
+BRANCH=`echo "$@"`
 
 cd "$SCRIPTPATH" &
 cd ../ &
@@ -41,6 +41,7 @@ if [ "$DOSTART" == "true" ]; then
   done
   echo "Frostybot server started"
 fi
+
 echo "Completed switching to $BRANCH"
 
 cd "$CURRENTPATH" &
