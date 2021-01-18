@@ -80,12 +80,8 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
 
         var email = params.email;
 
-        var uuid = await this.encryption.new_uuid();
         var user = {
-            uuid     : String(uuid),
-            email    : String(email),
-            enabled  : true,
-            elevated : false
+            email    : String(email)
         };
         var result = await this.database.insertOrReplace('tenants',  user);
         if (result.changes > 0) {

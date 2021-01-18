@@ -1,3 +1,33 @@
+-- Create uuid_v4 function
+
+DROP function IF EXISTS `uuid_v4`;
+
+DELIMITER $$
+CREATE FUNCTION uuid_v4()
+    RETURNS CHAR(36) DETERMINISTIC
+BEGIN
+    -- 1th and 2nd block are made of 6 random bytes
+    SET @h1 = HEX(RANDOM_BYTES(4));
+    SET @h2 = HEX(RANDOM_BYTES(2));
+
+    -- 3th block will start with a 4 indicating the version, remaining is random
+    SET @h3 = SUBSTR(HEX(RANDOM_BYTES(2)), 2, 3);
+
+    -- 4th block first nibble can only be 8, 9 A or B, remaining is random
+    SET @h4 = CONCAT(HEX(FLOOR(ASCII(RANDOM_BYTES(1)) / 64)+8),
+                SUBSTR(HEX(RANDOM_BYTES(2)), 2, 3));
+
+    -- 5th block is made of 6 random bytes
+    SET @h5 = HEX(RANDOM_BYTES(6));
+
+    -- Build the complete UUID
+    RETURN LOWER(CONCAT(
+        @h1, '-', @h2, '-4', @h3, '-', @h4, '-', @h5
+    ));
+END$$
+
+DELIMITER ;
+
 -- Create settings table
 
 CREATE TABLE IF NOT EXISTS `settings` (
@@ -31,7 +61,7 @@ VALUES
 
 CREATE TABLE IF NOT EXISTS tenants (
 	`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`uuid` CHAR(38) NOT NULL,
+	`uuid` CHAR(38) NOT NULL DEFAULT uuid_v4(),
 	`email` VARCHAR(100) NOT NULL,
 	`enabled` BOOL NOT NULL DEFAULT true,
 	`elevated` BOOL NOT NULL DEFAULT false,
@@ -42,37 +72,6 @@ CREATE TABLE IF NOT EXISTS tenants (
 	INDEX `IDX_UUID` (`uuid` ASC) VISIBLE,
 	INDEX `IDX_EMAIL` (`email` ASC) VISIBLE
 ) COLLATE='latin1_swedish_ci';    
-
--- Create uuid_v4 function
-
-DROP function IF EXISTS `uuid_v4`;
-
-DELIMITER $$
-CREATE FUNCTION uuid_v4()
-    RETURNS CHAR(36) DETERMINISTIC
-BEGIN
-    -- 1th and 2nd block are made of 6 random bytes
-    SET @h1 = HEX(RANDOM_BYTES(4));
-    SET @h2 = HEX(RANDOM_BYTES(2));
-
-    -- 3th block will start with a 4 indicating the version, remaining is random
-    SET @h3 = SUBSTR(HEX(RANDOM_BYTES(2)), 2, 3);
-
-    -- 4th block first nibble can only be 8, 9 A or B, remaining is random
-    SET @h4 = CONCAT(HEX(FLOOR(ASCII(RANDOM_BYTES(1)) / 64)+8),
-                SUBSTR(HEX(RANDOM_BYTES(2)), 2, 3));
-
-    -- 5th block is made of 6 random bytes
-    SET @h5 = HEX(RANDOM_BYTES(6));
-
-    -- Build the complete UUID
-    RETURN LOWER(CONCAT(
-        @h1, '-', @h2, '-4', @h3, '-', @h4, '-', @h5
-    ));
-END$$
-
-DELIMITER ;
-
 
 -- Create multitenant_enable procedure
 
