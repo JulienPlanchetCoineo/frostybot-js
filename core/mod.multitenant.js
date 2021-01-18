@@ -33,7 +33,7 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
 
         // Create tenant table if required
         this.output.debug('multitenant_createdb');
-        this.database.exec("CREATE TABLE IF NOT EXISTS tenants (`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,`uuid` CHAR(38) NOT NULL,`email` VARCHAR(100) NOT NULL,`password` JSON NOT NULL,`enabled` BOOL NOT NULL DEFAULT true,`elevated` BOOL NOT NULL DEFAULT false,`last` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY (`uid`),UNIQUE INDEX `UNQ_UUID` (`uuid`),UNIQUE INDEX `UNQ_EMAIL` (`email`),INDEX `IDX_UUID` (`uuid` ASC) VISIBLE,INDEX `IDX_EMAIL` (`email` ASC) VISIBLE) COLLATE='latin1_swedish_ci';");
+        await this.database.exec("CALL `frostybot`.`multitenant_enable`();");
 
         // Add master tenant and enable multitenant functionality
         params['elevated'] = true;
@@ -51,6 +51,7 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
     // Disable Multi-Tenant Mode
 
     async disable() {
+        await this.database.exec("CALL `frostybot`.`multitenant_enable`();");
         return await this.settings.set('core', 'multitenant:enabled', false);
     }
 
@@ -60,6 +61,7 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
     async is_enabled() {
         return await this.settings.get('core', 'multitenant:enabled', false);
     }
+
     
     // Add New Tenant (returns the tenant UUID)
 
@@ -73,15 +75,17 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
                 required: 'string',
             },
             elevated: {
-                required: 'boolean',
-            },
+                optional: 'boolean',
+            }
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         var [email, password, elevated] = this.utils.extract_props(params, ['email', 'password', 'elevated']);
 
-        var uuid = await this.encryption.new_uuid();
+        if (elevated == undefined) elevated = false;
+
+        var uuid = elevated ? await this.encryption.core_uuid() :  await this.encryption.new_uuid();
         var user = {
             uuid     : String(uuid),
             email    : String(email),

@@ -34,17 +34,18 @@ module.exports = class frostybot_output_module extends frostybot_module {
             var language = await this.settings.get('core', 'language', 'en');
             if (language == undefined) language = 'en';
             this.language = require('../lang/lang.' + language);
-            this.output_debug = await this.settings.get('config', 'debug:output', true);
             this.section('frostybot_startup');
             this.translate('notice', 'using_language', language);
             this.notice('database_type', this.database.type);
             this.notice('database_name', this.database.name);
-            this.notice('output_debug', (this.output_debug ? 'enabled' : 'disabled'));
+            //this.output_debug = await this.settings.get('config', 'debug:output', true);
+            //this.notice('output_debug', (this.output_debug ? 'enabled' : 'disabled'));
         }
     }
 
     // Enable debug output
 
+    /*
     async enable_debug() {
         await this.settings.set('config', 'debug:output', true);
         this.output_debug = true;
@@ -59,6 +60,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
         this.output_debug = false;
         return true;
     }
+    */
 
 
     // Check if message has been outputted
@@ -153,8 +155,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
     // Some helper functions
 
     debug(id, params = []) {
-        if (this.output_debug)
-            return this.output_debug ? this.translate('debug', id, params) : true;
+        return this.translate('debug', id, params)
     }
 
     notice(id, params = []) {
@@ -367,20 +368,48 @@ module.exports = class frostybot_output_module extends frostybot_module {
         }
     }
 
+    brief_messages(messages = []) {
+        var results = [];
+        messages.forEach(message => {
+            var dateobj = new Date(message.timestamp);
+            let day = ("0" + dateobj.getDate()).slice(-2);
+            let month = ("0" + (dateobj.getMonth() + 1)).slice(-2);
+            let year = dateobj.getFullYear();
+            let hour = ("0" + dateobj.getHours()).slice(-2);
+            let minute = ("0" + dateobj.getMinutes()).slice(-2);
+            let second = ("0" + dateobj.getSeconds()).slice(-2);
+            var datestr = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+            results.push(datestr + ' | ' + message.type.padEnd(7) + ' | ' + message.message);
+        });
+        return results;
+    }
+
+    async format_output(output) {
+        if (this.utils.is_false(await this.config.get('output:debug', false))) 
+            output.messages = output.messages.filter(message => message.type.toLowerCase() != 'debug');
+        
+        switch (await this.config.get('output:messages', 'brief')) {
+            case 'none'  : delete output.messages;
+                           break;
+            case 'brief' : output.messages = this.brief_messages(output.messages);
+                           break;
+        }   
+        return output;         
+    }
 
     // Parse raw output into a frostybot_output object
 
-    parse(result) {
+    async parse(result) {
         this.add_data(result);
         var output = new this.classes.output(...this.utils.extract_props(this.output_obj, ['command', 'params', 'result', 'type', 'data', 'messages']));
         this.reset();
-        return output;
+        return await this.format_output(output);
     }
 
 
     // Combine multiple command outputs into a single command output
 
-    combine(results) {
+    async combine(results) {
         var result = '';
         var data = results;
         var type = 'frostybot_output[]';
@@ -391,7 +420,8 @@ module.exports = class frostybot_output_module extends frostybot_module {
                 result = (output_result.result == 'error' ? 'error' : (result == 'error' ? 'error' : 'success'));
             }
         }
-        return new this.classes.output('<multiple>', null, result, type, data, messages);
+        var output = new this.classes.output('<multiple>', null, result, type, data, messages);
+        return await this.format_output(output);
     }
 
 }

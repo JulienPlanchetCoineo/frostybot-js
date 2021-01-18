@@ -2,12 +2,13 @@
 
 const frostybot_module = require('./mod.base')
 
-const config_keys = [
-    'dummy:unittest',           // Dummy key for unit testing
-    'debug:output',             // (Boolean) Enable debug output
-    'debug:noexecute',          // (Boolean) Do not process order queue and execute orders on the exchange
-    'trade:require_maxsize',    // (Boolean) Whether or not to require the maxsize parameter when using relative pricing
-];
+const config_keys = {
+    'dummy:unittest': 'string',                 // Dummy key for unit testing
+    'output:messages': 'oneof:none,brief,full', // (none/brief/full) Include messages in result JSON object
+    'output:debug': 'boolean',                  // (Boolean) Enable debug output
+    'debug:noexecute': 'boolean',               // (Boolean) Do not process order queue and execute orders on the exchange
+    'trade:require_maxsize': 'boolean',         // (Boolean) Whether or not to require the maxsize parameter when using relative pricing
+};
 
 module.exports = class frostybot_config_module extends frostybot_module {
 
@@ -20,77 +21,127 @@ module.exports = class frostybot_config_module extends frostybot_module {
 
     // Get config parameter
 
-    async get(params) {
+    async get(params, defval = null) {
 
-        var schema = {
-            key: {
-                required: 'string',
-                format: 'lowercase',
+        // Internal 
+        if (this.utils.is_string(params)) {
+            var key = params;
+            if (!Object.keys(config_keys).includes(key)) {
+                this.output.error('config_invalid_key', [key]);
+                return null;
+            } else {
+                return await this.settings.get('config', key, defval);
             }
         }
 
-        if (!(params = this.utils.validator(params, schema))) return false; 
+        // User
 
-        var key = String(params.key);
-        if (!config_keys.includes(key)) 
-            return this.output.error('config_invalid_key', [key]);
+        var results = {};
 
-        var val = await this.settings.get('config', key, null);
-        if (val != null) {
-            this.output.success('config_get', [key])
-            return JSON.parse((!this.utils.is_json(val) ? JSON.stringify(val) : val));
+        if (this.utils.is_object(params) && Object.keys(params).length > 0) {
+            var keys = Object.keys(params);
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (!Object.keys(config_keys).includes(key)) {
+                    this.output.error('config_invalid_key', [key]);
+                } else {
+                    var val = await this.settings.get('config', key, null);
+                    if (val != null)
+                        results[key] = val;
+                    else 
+                        this.output.warning('config_get', [key])        
+                }    
+            }
         }
-        else
-            return this.output.error('config_get', [key])        
+
+        switch (Object.values(results).length) {
+            case 0  :   return false;
+            case 1  :   return Object.values(results)[0];
+            default :   return results;
+        }
+
     }
 
 
      // Set config parameter
 
-     async set(params) {
+     async set(params, val = null) {
 
-        var schema = {
-            key: {
-                required: 'string',
-                format: 'lowercase',
-            },
-            value: {
-                required: 'string',
+        // Internal 
+        if (this.utils.is_string(params)) {
+            var key = params;
+            if (!Object.keys(config_keys).includes(key)) {
+                this.output.error('config_invalid_key', [key]);
+                return false;;
+            } else {
+                return await this.settings.set('config', key, val);
             }
         }
 
-        if (!(params = this.utils.validator(params, schema))) return false; 
+        // User 
+        var results = {};
 
-        var key = String(params.key);
-        if (!config_keys.includes(key)) 
-            return this.output.error('config_invalid_key', [key]);
+        if (this.utils.is_object(params) && Object.keys(params).length > 0) {
+            var keys = Object.keys(params);
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var val = params[key];
+                var validated = false;
+                if (!Object.keys(config_keys).includes(key)) {
+                    this.output.error('config_invalid_key', [key]);
+                } else {
+                    var valstr = config_keys[key];
+                    if (valstr.indexOf(':') > 0) 
+                        var [valtype, valopt] = valstr.split(':');
+                    else
+                        var valtype = valstr;
+                    switch (valtype) {
+                        case 'boolean'  :   if (this.utils.is_bool(val)) {
+                                                validated = true;
+                                                val = val == 'true' ? true : false;
+                                            } else
+                                                this.output.error('config_invalid_value', [key, 'true or false']);
+                                            break;
+                        case 'string'   :   if (this.utils.is_string(val)) 
+                                                validated = true;
+                                            else
+                                                this.output.error('config_invalid_value', [key, 'a string']);
+                                            break;
+                        case 'oneof'    :   if (valopt.split(',').includes(val))
+                                                validated = true;
+                                            else
+                                                this.output.error('config_invalid_value', [key, 'one of [' + valopt + ']']);
+                                            break;
+                }
 
-        var value = (this.utils.is_json(params.value)) ? params.value : JSON.stringify(params.value);
+                    if (validated) {
+                        if (await this.settings.set('config', key, val)) {
+                            this.output.success('config_set', [key, val])
+                            results[key] = val;
+                        } else {
+                            this.output.error('config_set', [key, val])
+                        }   
+                    }
+                }    
+            }
+        }
 
-        if (!this.utils.is_json(value))
-            return this.output.error('config_invalid_value', [value]);
-        if (await this.settings.set('config', key, value)) 
-            return this.output.success('config_set', [key, value])
-        else
-            return this.output.error('config_set', [key, value])
+        switch (Object.values(results).length) {
+            case 0  :   return false;
+            case 1  :   return Object.values(results)[0];
+            default :   return results;
+        }    
+
     }
 
      // Delete config parameter
 
-     async delete(params) {
+     async delete(key) {
 
-        var schema = {
-            key: {
-                required: 'string',
-                format: 'lowercase',
-            }
+        if (!Object.keys(config_keys).includes(key)) {
+            this.output.error('config_invalid_key', [key]);
+            return false;
         }
-
-        if (!(params = this.utils.validator(params, schema))) return false; 
-
-        var key = String(params.key);
-        if (!config_keys.includes(key)) 
-            return this.output.error('config_invalid_key', [key]);
         
         return await this.settings.delete('config', key);
      }

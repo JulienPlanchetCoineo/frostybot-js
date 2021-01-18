@@ -30,8 +30,8 @@ module.exports = class frostybot_cache_module extends frostybot_module {
 
     stats() {
         var stats = cache.getStats()
-        total = stats.hits + stats.misses;
-        ratio = (total > 0 ? Math.round((stats.hits / total) * 100) : 0);
+        var total = stats.hits + stats.misses;
+        var ratio = (total > 0 ? Math.round((stats.hits / total) * 100) : 0);
         var result = {
             hit: stats.hits,
             miss: stats.misses,

@@ -20,18 +20,18 @@ describe(test.title('Config Module (mod.config.js)'), function() {
     // get()
 
     describe(test.function('get'), function() {
-        it('should return false if setting unconfigured', async function() {
-            await test.config.delete({key: 'dummy:unittest'});
-            var val = await test.config.get({key: 'dummy:unittest'});
-            expect(val).to.equal(false);
+        it('should return null if setting unconfigured', async function() {
+            await test.config.delete('dummy:unittest');
+            var val = await test.config.get('dummy:unittest');
+            expect(val).to.equal(null);
         });
-        it('should return false if setting key invalid', async function() {
-            var val = await test.config.get({key: 'invalidkey'});
-            expect(val).to.equal(false);
+        it('should return null if setting key invalid', async function() {
+            var val = await test.config.get('invalidkey');
+            expect(val).to.equal(null);
         });
         it('should return configuration setting if configured', async function() {
-            if (await test.config.set({key: 'dummy:unittest', value: "This is a string"}))
-                var val = await test.config.get({key: 'dummy:unittest'});
+            if (await test.config.set('dummy:unittest', 'This is a string'))
+                var val = await test.config.get('dummy:unittest');
             else
                 var val = 'Failed to set';
             expect(val).to.equal("This is a string");
@@ -42,12 +42,12 @@ describe(test.title('Config Module (mod.config.js)'), function() {
 
     describe(test.function('set'), function() {
         it('should return false if setting key invalid', async function() {
-            var val = await test.config.set({key: 'invalidkey', value: '123'});
+            var val = await test.config.set('invalidkey','123');
             expect(val).to.equal(false);
         });
         it('should return true if configuration setting successfully configured', async function() {
-            var val = await test.config.set({key: 'dummy:unittest', value: "This is a string"});
-            await test.config.delete({key: 'dummy:unittest'});
+            var val = await test.config.set('dummy:unittest', "This is a string");
+            await test.config.delete('dummy:unittest');
             expect(val).to.equal(true);
         });
     });

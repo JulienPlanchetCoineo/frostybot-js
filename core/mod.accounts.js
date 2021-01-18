@@ -32,11 +32,15 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         if (stub == null) {
             var accounts = await this.settings.get('accounts');
             if (accounts) {
-                for (const [stub, account] of Object.entries(accounts)) {
-                    accounts[stub] = this.utils.lower_props(account)
+                var result = {};
+                for (var [stub, account] of Object.entries(accounts)) {
+                    if (account.hasOwnProperty('stub') && this.utils.is_numeric(stub)) {
+                        stub = account.stub;
+                    }
+                    result[stub] = this.utils.lower_props(account)
                 }
                 //this.output.success('account_retrieve');
-                return await this.censored(accounts);
+                return await this.censored(result);
             }
             return this.output.error('account_retrieve');
         }  else {
@@ -126,7 +130,10 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         var [stub, data] = this.create_params(params);
         let testresult = await this.test(data);
         if (testresult) {
-            if (await this.settings.set('accounts', stub, await this.utils.encrypt_values(data, ['apikey', 'secret']))) {
+            data['stub'] = stub;
+            data = await this.utils.remove_props(data, ['tenant']);
+            data = await this.utils.encrypt_values(data, ['apikey', 'secret']);
+            if (await this.settings.set('accounts', stub, data)) {
                 this.output.success('account_create', stub);
                 return true;
             }
@@ -149,7 +156,9 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         var [stub, data] = this.create_params(params);
         let testresult = await this.test(data);
         if (testresult) {
+            data['stub'] = stub;
             this.output.success('account_test', stub);
+            data = await this.utils.remove_props(data, ['tenant'])
             data = await this.utils.encrypt_values(data, ['apikey', 'secret'])
             if (await this.settings.set('accounts', stub, data)) {
                 this.output.success('account_update', stub);

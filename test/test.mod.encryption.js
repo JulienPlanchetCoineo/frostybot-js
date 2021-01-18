@@ -29,9 +29,9 @@ describe(test.title('Encryption Module (mod.encryption.js)'), function() {
     // core_uuid()
 
     describe(test.function('core_uuid'), function() {
-        it('should return an MD5 string of length 32', async function() {
+        it('should return an UUID string of length 36', async function() {
             var val = await test.encryption.core_uuid();
-            expect(val).to.be.a('string').that.has.length(32);
+            expect(val).to.be.a('string').that.has.length(36);
         });
     });
 

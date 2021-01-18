@@ -34,11 +34,11 @@ module.exports = class frostybot_encryption_module extends frostybot_module {
         if ([null, undefined].includes(key)) {
             key = this.new_uuid();
             if (this.settings.set('core', 'uuid', key)) {
-                return md5(key)
+                return key
             }
             return false
         }
-        return md5(key)
+        return key
     }
 
 

@@ -26,7 +26,9 @@ module.exports = {
     debug: {
 
         custom_object:      '{0}: {+1}',
+        context_uuid:       'Context: {0}',
         trade_cmd_shortcut: 'Converting command shortcut \'{0}:{1}\' to \'trade:{0}:{1}\'',
+        loaded_module:      'Loaded module: {0}',
         whitelist_verify:   'API Access Granted: {0} is whitelisted: {0}',
         whitelist_get:      'Retrieved IP address from the whitelist: {0}: {1}',
         symbolmap_get:      'Retrieved symbol mapping: {0}: {1} => {2}',
@@ -53,7 +55,6 @@ module.exports = {
         executing_command:  'Executing Command: {0}:{1}', 
         command_params:     'Command Parameters: {0}', 
         command_completed:  'Command Completed: Execution Time: {0} seconds',
-        loaded_module:      'Loaded module: {0}',
         processing_queue:   'Processing order queue: {0} order(s) queued',
         processed_queue:    'Processed order queue:  {0}/{1} order(s) submitted successfully.',
         order_sizing_cur:   'Current position {0} size is: {1} {2}',
@@ -77,6 +78,7 @@ module.exports = {
         order_will_flip:    'The provided order sizing results in a position flip from {0} to {1}',
         order_flip_price:   'The {0} parameter was changed from {1} to {2}',
         maxsize_disabled:   'Warning ({0}/{1}): You have disabled the maxsize parameter requirement. You do so at your own risk!',
+        config_get:          'Setting not configured: {0}',
 
     },
 
@@ -149,8 +151,7 @@ module.exports = {
         multitenant_delete:  'Failed to delete tenant with UUID: {0}',
 
         config_invalid_key:  'Invalid config key: {0}',
-        config_invalid_value:'Invalid JSON value format: {0}',
-        config_get:          'Setting not configured: {0}',
+        config_invalid_value:'Invalid value for {0} (Must be {1})',
         config_set:          'Failed to configure setting: {0}: {1}',
         
     },

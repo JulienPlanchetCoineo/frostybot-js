@@ -62,14 +62,14 @@ module.exports = class frostybot_queue_module extends frostybot_module {
     // Process order queue (submit orders to the exchange)
 
     async process(stub, symbol) {
-        var debug_noexecute = await this.settings.get('config', 'debug:noexecute', false);
-        if (String(debug_noexecute) == "true") {
-            this.output.debug('debug_noexecute');
-            this.clear(stub, symbol);
-            return true;
-        }
         var uuid = context.get('reqId')
         this.create(stub, symbol)
+        if (await this.config.get('debug:noexecute')) {
+            this.output.debug('debug_noexecute');
+            var result = this.queue[uuid][stub][symbol];
+            this.clear(stub, symbol);
+            return result;
+        }
         this.results[uuid][stub][symbol] = []
         var total = this.queue[uuid][stub][symbol].length;
         var success = 0;
