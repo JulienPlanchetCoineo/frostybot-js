@@ -40,7 +40,6 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
 
         // Enable multi-tenant mode
         this.output.debug('multitenant_createdb');
-        console.log(config);
         if ((await this.database.exec("CALL `frostybot`.`multitenant_enable`('" + config.join("','") + "');", [])) !== false) {
             this.output.success('multitenant_enable');
             return this.encryption.core_uuid();            
@@ -74,30 +73,20 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
         var schema = {
             email: {
                 required: 'string',
-            },
-            password: {
-                required: 'string',
-            },
-            elevated: {
-                optional: 'boolean',
             }
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
 
-        var [email, password, elevated] = this.utils.extract_props(params, ['email', 'password', 'elevated']);
+        var email = params.email;
 
-        if (elevated == undefined) elevated = false;
-
-        var uuid = elevated ? await this.encryption.core_uuid() :  await this.encryption.new_uuid();
+        var uuid = await this.encryption.new_uuid();
         var user = {
             uuid     : String(uuid),
             email    : String(email),
-            password : password,
             enabled  : true,
-            elevated : (elevated == undefined ? false : elevated)
+            elevated : false
         };
-        user = await this.utils.encrypt_values(user, ['password']);
         var result = await this.database.insertOrReplace('tenants',  user);
         if (result.changes > 0) {
             this.output.success('multitenant_add', [uuid]);
