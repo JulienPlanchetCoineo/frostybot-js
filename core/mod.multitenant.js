@@ -18,12 +18,19 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
             email: {
                 required: 'string',
             },
-            password: {
+            url: {
+                required: 'string',
+            },
+            clientid: {
+                required: 'string',
+            },
+            secret: {
                 required: 'string',
             }
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
+        var config = this.utils.extract_props(params, ['email', 'url', 'clientid', 'secret']);
 
         // Make sure that MySQL is being used
         var type = this.database.type;
@@ -31,19 +38,14 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
             return this.output.error('multitenant_mysql_req');
         }
 
-        // Create tenant table if required
+        // Enable multi-tenant mode
         this.output.debug('multitenant_createdb');
-        await this.database.exec("CALL `frostybot`.`multitenant_enable`();");
-
-        // Add master tenant and enable multitenant functionality
-        params['elevated'] = true;
-        var uuid = await this.add(params);
-        if (uuid !== false) {
-            if (await this.settings.set('core', 'multitenant:enabled', true)) {
-                this.output.success('multitenant_enable');
-                return uuid;
-            }
+        console.log(config);
+        if ((await this.database.exec("CALL `frostybot`.`multitenant_enable`('" + config.join("','") + "');", [])) !== false) {
+            this.output.success('multitenant_enable');
+            return this.encryption.core_uuid();            
         }
+
         return this.output.error('multitenant_enable');
     }
 
@@ -51,8 +53,10 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
     // Disable Multi-Tenant Mode
 
     async disable() {
-        await this.database.exec("CALL `frostybot`.`multitenant_enable`();");
-        return await this.settings.set('core', 'multitenant:enabled', false);
+        if (await this.database.exec("CALL `frostybot`.`multitenant_disable`();") !== false) 
+            return this.output.success('multitenant_disable');
+        else
+            return this.output.error('multitenant_disable');
     }
 
 

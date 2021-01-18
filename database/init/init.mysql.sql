@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS tenants (
 	`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`uuid` CHAR(38) NOT NULL,
 	`email` VARCHAR(100) NOT NULL,
-	`password` JSON NOT NULL,
 	`enabled` BOOL NOT NULL DEFAULT true,
 	`elevated` BOOL NOT NULL DEFAULT false,
 	`last` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -44,44 +43,69 @@ CREATE TABLE IF NOT EXISTS tenants (
 	INDEX `IDX_EMAIL` (`email` ASC) VISIBLE
 ) COLLATE='latin1_swedish_ci';    
 
+-- Create uuid_v4 function
+
+DROP function IF EXISTS `uuid_v4`;
+
+DELIMITER $$
+CREATE FUNCTION uuid_v4()
+    RETURNS CHAR(36) DETERMINISTIC
+BEGIN
+    -- 1th and 2nd block are made of 6 random bytes
+    SET @h1 = HEX(RANDOM_BYTES(4));
+    SET @h2 = HEX(RANDOM_BYTES(2));
+
+    -- 3th block will start with a 4 indicating the version, remaining is random
+    SET @h3 = SUBSTR(HEX(RANDOM_BYTES(2)), 2, 3);
+
+    -- 4th block first nibble can only be 8, 9 A or B, remaining is random
+    SET @h4 = CONCAT(HEX(FLOOR(ASCII(RANDOM_BYTES(1)) / 64)+8),
+                SUBSTR(HEX(RANDOM_BYTES(2)), 2, 3));
+
+    -- 5th block is made of 6 random bytes
+    SET @h5 = HEX(RANDOM_BYTES(6));
+
+    -- Build the complete UUID
+    RETURN LOWER(CONCAT(
+        @h1, '-', @h2, '-4', @h3, '-', @h4, '-', @h5
+    ));
+END$$
+
+DELIMITER ;
+
+
 -- Create multitenant_enable procedure
 
 DROP PROCEDURE IF EXISTS `multitenant_enable`;
 
 DELIMITER $$
-CREATE PROCEDURE `multitenant_enable` ()
+CREATE PROCEDURE `multitenant_enable` (
+	IN email VARCHAR(100),
+    IN url VARCHAR(100),
+    IN clientid VARCHAR(100),
+    IN secret VARCHAR(100)
+)
 BEGIN
 
-	-- Create tenants table if required		
-	CREATE TABLE IF NOT EXISTS tenants (
-		`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-		`uuid` CHAR(38) NOT NULL,
-		`email` VARCHAR(100) NOT NULL,
-		`password` JSON NOT NULL,
-		`enabled` BOOL NOT NULL DEFAULT true,
-		`elevated` BOOL NOT NULL DEFAULT false,
-		`last` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (`uid`),
-		UNIQUE INDEX `UNQ_UUID` (`uuid`),
-		UNIQUE INDEX `UNQ_EMAIL` (`email`),
-		INDEX `IDX_UUID` (`uuid` ASC) VISIBLE,
-		INDEX `IDX_EMAIL` (`email` ASC) VISIBLE
-	) COLLATE='latin1_swedish_ci';    
-	
-	-- Check for existance of context column and create if required
-	SELECT count(*) INTO @exist FROM information_schema.columns WHERE table_schema = (SELECT DATABASE()) AND table_name = 'settings' AND column_name = 'uuid' LIMIT 1;
-	IF @exist = 0 THEN 
-		ALTER TABLE `settings` ADD COLUMN `uuid` CHAR(36) NULL AFTER `uid`, DROP INDEX `UNQ`, ADD UNIQUE INDEX `UNQ` (`uuid` ASC, `mainkey` ASC, `subkey` ASC) VISIBLE;
-		SET @uuid = NULL;
+	-- Configure master tenant
+    SELECT COUNT(*) INTO @checkuuid FROM `settings` WHERE mainkey='core' AND subkey='uuid';
+	IF @checkuuid = 0 THEN
+		SET @uuid = uuid_v4();
+		INSERT INTO `settings` (uuid, mainkey, subkey, value) VALUES ('00000000-0000-0000-0000-000000000000', 'core', 'uuid', CONCAT('"',@uuid,'"'));
+	ELSE
 		SELECT REPLACE(value,'"','') INTO @uuid FROM `settings` WHERE mainkey='core' AND subkey='uuid';
-        IF @uuid = NULL THEN
-			SET @uuid = uuid_v4();
-            INSERT INTO `settings` (uuid, mainkey, subkey, value) VALUES (NULL, 'core', 'uuid', CONCAT('"',@uuid,'"'));
-        END IF;
-		UPDATE `settings` SET `uuid`='00000000-0000-0000-0000-000000000000' WHERE mainkey IN ('core','whitelist');
-		UPDATE `settings` SET `uuid`=@uuid WHERE mainkey NOT IN ('core','whitelist') AND uuid IN ('00000000-0000-0000-0000-000000000000',NULL);
 	END IF;
-	
+	UPDATE `settings` SET `uuid`='00000000-0000-0000-0000-000000000000' WHERE mainkey IN ('core','whitelist');
+	UPDATE `settings` SET `uuid`=@uuid WHERE mainkey NOT IN ('core','whitelist') AND uuid IN ('00000000-0000-0000-0000-000000000000',NULL);
+	REPLACE INTO `tenants` (uuid, email, enabled, elevated) VALUES (@uuid, email, true, true);
+    
+    -- Configure Google Auth settings
+    REPLACE INTO `settings` (uuid, mainkey, subkey, value) 
+    VALUES 
+		('00000000-0000-0000-0000-000000000000','core', 'auth:clientid', CONCAT('"',clientid,'"')),
+        ('00000000-0000-0000-0000-000000000000','core', 'auth:secret', CONCAT('"',secret,'"')),
+        ('00000000-0000-0000-0000-000000000000','core', 'auth:url', CONCAT('"',url,'"'));
+    
 	-- Enable multi tenant mode
 	REPLACE INTO `settings` (uuid, mainkey, subkey, value) VALUES ('00000000-0000-0000-0000-000000000000','core', 'multitenant:enabled','true');
 		
