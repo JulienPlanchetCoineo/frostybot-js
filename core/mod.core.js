@@ -64,7 +64,7 @@ const api_methods = {
         'disable', 
     ],
 
-    multitenant: [
+    multiuser: [
         'enable',
         'disable',
         'add',
@@ -259,13 +259,13 @@ module.exports = class frostybot_core_module extends frostybot_module {
                     };
 
                     // If multitenancy is enabled, require a tenant parameter if not accessing from localhost
-                    if (this.multitenant.is_enabled()) {
+                    if (this.multiuser.is_enabled()) {
                         if (context.get('srcIp') !== '127.0.0.1') {
-                            if (params.hasOwnProperty('tenant')) {
-                                var uuid = params.tenant;
-                                delete params.tenant;
+                            if (params.hasOwnProperty('uuid')) {
+                                var uuid = params.uuid;
+                                delete params.uuid;
                             } else {
-                                return await this.output.parse(this.output.error('required_param', ['tenant']));
+                                return await this.output.parse(this.output.error('required_param', ['uuid']));
                             }
                         } else {
                             var uuid = await this.encryption.core_uuid();

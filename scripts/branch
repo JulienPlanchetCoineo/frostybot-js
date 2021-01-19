@@ -24,7 +24,7 @@ fi
 echo "Creating a backup..."
 sudo tar czvf ~/`date +%s`.tar.gz /usr/local/frostybot-js  > /dev/null 2>&1
 echo "Switching branch..."
-sudo git stash
+#sudo git stash
 sudo git checkout $BRANCH
 sudo git pull -f
 echo "Updating MOTD"

@@ -1,8 +1,12 @@
-var express     = require('express');
-var bodyParser  = require('body-parser');
-const fs        = require('fs'); 
+var express = require('express');
+var bodyParser = require('body-parser');
+const fs = require('fs'); 
 const { v4: uuidv4 } = require('uuid');
-var context     = require('express-http-context');
+var context = require('express-http-context');
+const google = require('googleapis').google;
+const jwt = require('jsonwebtoken');
+const OAuth2 = google.auth.OAuth2;
+const cookieParser = require('cookie-parser');
 
 // Set App Title
 
@@ -13,9 +17,10 @@ process.title = "frostybot-js";
 const loader      = require('./core/core.loader');
 loader.load_all()
 
-// API Router
+// Routers
 
 var apiRouter = require('./routes/routes.api');  
+var uiRouter = require('./routes/routes.ui');  
 
 // Load Express
 
@@ -63,13 +68,23 @@ app.use(function(req, res, next) {
     next();
 });
 
-// Map to Main API router
+// Cookie Middleware
+
+app.use(cookieParser());
+
+// Setting up Views
+
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
+// Static Assets
+
+app.use(express.static('views/assets'))
+
+// Router Mappings
 
 app.use('/', apiRouter);
-
-// Map to UI
-
-app.use('/ui', express.static('ui'))
+app.use('/ui', uiRouter);
 
 // Export app
 

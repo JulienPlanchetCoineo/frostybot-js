@@ -1,0 +1,20 @@
+.frostybot-tab-content {
+    margin: 20px;
+}
+
+.frostybot-form-label {
+    width: 80px;
+}
+
+.frostybot-input {
+    border: solid 1px #AAAAAA;
+}
+
+.frostybot-input-lg {
+    width: 400px;
+    border: solid 1px #AAAAAA;
+}
+.frostybot-input-sm {
+    width: 150px;
+    border: solid 1px #AAAAAA;
+}

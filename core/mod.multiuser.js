@@ -1,8 +1,8 @@
-// Multi-Tenant Module
+// Multi-user Module
 
 const frostybot_module = require('./mod.base')
 
-module.exports = class frostybot_multitenant_module extends frostybot_module {
+module.exports = class frostybot_multiuser_module extends frostybot_module {
 
     // Constructor
 
@@ -10,7 +10,7 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
         super()
     }
 
-    // Enable Multi-Tenant Mode
+    // Enable Multi-User Mode
 
     async enable(params) {
 
@@ -35,41 +35,41 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
         // Make sure that MySQL is being used
         var type = this.database.type;
         if (type != 'mysql') {
-            return this.output.error('multitenant_mysql_req');
+            return this.output.error('multiuser_mysql_req');
         }
 
-        // Enable multi-tenant mode
-        this.output.debug('multitenant_createdb');
-        if ((await this.database.exec("CALL `frostybot`.`multitenant_enable`('" + config.join("','") + "');", [])) !== false) {
-            this.output.success('multitenant_enable');
+        // Enable multi-user mode
+        //this.output.debug('multiuser_createdb');
+        if ((await this.database.exec("CALL `frostybot`.`multiuser_enable`('" + config.join("','") + "');", [])) !== false) {
+            this.output.success('multiuser_enable');
             return this.encryption.core_uuid();            
         }
 
-        return this.output.error('multitenant_enable');
+        return this.output.error('multiuser_enable');
     }
 
 
-    // Disable Multi-Tenant Mode
+    // Disable Multi-User Mode
 
     async disable() {
-        if (await this.database.exec("CALL `frostybot`.`multitenant_disable`();") !== false) 
-            return this.output.success('multitenant_disable');
+        if (await this.database.exec("CALL `frostybot`.`multiuser_disable`();") !== false) 
+            return this.output.success('multiuser_disable');
         else
-            return this.output.error('multitenant_disable');
+            return this.output.error('multiuser_disable');
     }
 
 
-    // Check if Multi-Tenant is Enabled
+    // Check if Multi-User is Enabled
 
     async is_enabled() {
-        return await this.settings.get('core', 'multitenant:enabled', false);
+        return await this.settings.get('core', 'multiuser:enabled', false);
     }
 
 
-    // Get tenant UUID by email address
+    // Get user UUID by email address
 
     async uuid_by_email(email) {
-        var result = await this.database.select('tenants', {email: email});
+        var result = await this.database.select('users', {email: email});
         if (result.length == 1)
             return result[0].uuid;
         else
@@ -77,7 +77,7 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
     }
 
     
-    // Add New Tenant (returns the tenant UUID)
+    // Add New User (returns the user UUID)
 
     async add(params) {
 
@@ -98,16 +98,16 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
         var user = {
             email    : String(email)
         };
-        var result = await this.database.insertOrReplace('tenants',  user);
+        var result = await this.database.insertOrReplace('users',  user);
         if (result.changes > 0) {
             var uuid = await this.uuid_by_email(email);
-            this.output.success('multitenant_add', [uuid]);
+            this.output.success('multiuser_add', [uuid]);
             return uuid;
         }  
-        return this.output.error('multitenant_add', [email]);  
+        return this.output.error('multiuser_add', [email]);  
     }
 
-    // Delete Tenant
+    // Delete user
 
     async delete(params) {
 
@@ -120,12 +120,12 @@ module.exports = class frostybot_multitenant_module extends frostybot_module {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         var uuid = params.uuid;
-        var result = await this.database.delete('tenants',  {uuid: uuid});
+        var result = await this.database.delete('users',  {uuid: uuid});
         if (result.changes > 0) {
-            this.output.success('multitenant_delete', [uuid]);
+            this.output.success('multiuser_delete', [uuid]);
             return true;
         }  
-        return this.output.error('multitenant_delete', [uuid]);  
+        return this.output.error('multiuser_delete', [uuid]);  
     }
 
   

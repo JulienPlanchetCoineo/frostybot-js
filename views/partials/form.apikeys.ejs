@@ -1,0 +1,87 @@
+<h6>Configure API Key</h6>
+<hr>
+<form>
+    <div class="row mb-3">
+      <label for="inputstub" class="col-sm-2 col-form-label-sm frostybot-form-label">Stub</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="inputstub">
+        <span id="stubinlinehelp" class="form-text">
+          Must be lowercase, no spaces or special characters.
+        </span>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label for="inputexchange" class="col-sm-2 col-form-label-sm frostybot-form-label">Exchange</label>
+      <div class="col-sm-10">
+        <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputexchange">
+
+            <%
+
+              var exchanges = {
+                deribit: "Deribit",
+                ftx: "FTX",
+                binance_spot: "Binance Spot",
+                binance_futures: "Binance Futures",
+                bitmex: "Bitmex",
+                binance_spot: "Binance Spot",
+              };
+
+              for (const [exchange, description] of Object.entries(exchanges)) {
+          
+            %>
+            
+            <option value="<%= exchange %>"><%= description %></option>
+          
+            <%
+
+              }
+
+            %>
+
+        </select>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label for="inputapikey" class="col-sm-2 col-form-label-sm frostybot-form-label">API Key</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control-sm frostybot-input frostybot-input-lg" id="inputapikey">
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label for="inputsecret" class="col-sm-2 col-form-label-sm frostybot-form-label">Secret</label>
+      <div class="col-sm-10">
+        <input type="password" class="form-control-sm frostybot-input frostybot-input-lg" id="inputsecret">
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label for="inputdescription" class="col-sm-2 col-form-label-sm frostybot-form-label">Description</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control-sm frostybot-exchange-keys frostybot-input frostybot-input-lg" id="inputdescription">
+      </div>
+    </div>
+    <div class="row mb-3" id="subaccountfield">
+      <label for="inputsubaccount" class="col-sm-2 col-form-label-sm frostybot-form-label">Subaccount</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="inputsubaccount">
+        <span id="stubinlinehelp" class="form-text">
+          Required when using FTX subaccount, case sensitive.
+        </span>
+      </div>
+    </div>
+    <div class="row mb-3" id="testnetfield">
+      <div class="col-sm-4 offset-sm-1">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="testnet">
+          <label class="form-check-label" for="testnet">
+            This is a testnet account
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-sm-4 offset-sm-1">
+        <button type="submit" class="btn btn-primary" id="apiformsubmit"><span class="fa fa-check"></span> Submit</button>
+        <button type="button" class="btn btn-danger" id="apiformcancel"><span class="fa fa-ban"></span> Cancel</button>
+      </div>
+    </div>
+  </form>

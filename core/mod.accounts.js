@@ -32,11 +32,21 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         if (stub == undefined) {
             var results = await this.settings.get('accounts');
             if (results) {
-                if (!this.utils.is_array(results))
-                    results = [results];
                 var accounts = {};
-                for(var i = 0; i < results.length; i++) 
-                    accounts[results[i].stub] = this.utils.lower_props(results[i]);
+                if (this.utils.is_object(results)) {
+                    if (results.hasOwnProperty('stub')) {
+                        var stub = results.stub;
+                        accounts[stub] = results;
+                    } else {
+                        accounts = results;
+                    }
+                }
+                //if (!this.utils.is_array(results))
+                //results = results.hasOwnProperty('stub') ? [results] : results;
+
+                //var accounts = {};
+                //for(var i = 0; i < results.length; i++) 
+                //    accounts[results[i].stub] = this.utils.lower_props(results[i]);
                 
                 this.output.success('account_retrieve', [ results.length + ' accounts' ]);
                 return await this.censored(accounts);

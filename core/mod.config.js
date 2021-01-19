@@ -63,9 +63,9 @@ module.exports = class frostybot_config_module extends frostybot_module {
     }
 
 
-     // Set config parameter
+    // Set config parameter
 
-     async set(params, val = null) {
+    async set(params, val = null) {
 
         // Internal 
         if (this.utils.is_string(params)) {
@@ -134,9 +134,9 @@ module.exports = class frostybot_config_module extends frostybot_module {
 
     }
 
-     // Delete config parameter
+    // Delete config parameter
 
-     async delete(key) {
+    async delete(key) {
 
         if (!Object.keys(config_keys).includes(key)) {
             this.output.error('config_invalid_key', [key]);
@@ -144,5 +144,6 @@ module.exports = class frostybot_config_module extends frostybot_module {
         }
         
         return await this.settings.delete('config', key);
-     }
+    }
+    
 };

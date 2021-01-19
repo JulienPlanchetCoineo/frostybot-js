@@ -53,9 +53,9 @@ module.exports = {
         'put|/whitelist'                    :   'whitelist:add',    // Update a whitelist entry
         'delete|/whitelist/:ip'             :   'whitelist:delete', // Delete whitelist entry for specific IP address
 
-        // Multi-Tenant Handling
+        // Multi-User Handling
 
-        'post|/multitenant/enable'          :   'multitenant:enable',// Enable Multi-Tenant Mode (MySQL Required)
+        'post|/multiuser/enable'          :   'multiuser:enable',   // Enable Multi-User Mode (MySQL Required)
 
         // Trading
 

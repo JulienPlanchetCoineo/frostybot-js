@@ -25,7 +25,7 @@ module.exports = {
 
     debug: {
 
-        custom_object:      '{0}: {+1}',
+        custom_object:      '{0}: {1}',
         context_uuid:       'Context: {0}',
         trade_cmd_shortcut: 'Converting command shortcut \'{0}:{1}\' to \'trade:{0}:{1}\'',
         loaded_module:      'Loaded module: {0}',
@@ -44,7 +44,7 @@ module.exports = {
         close_exceeds_pos:  'The closing order size of {0} exceeds your current position, adjusting order size to {1}.',
         ws_subscribe:       'Subscribed to websocket channel: {0}',
         ws_unsubscribe:     'Unsubscribed from websocket channel: {0}',
-        multitenant_createdb: 'Creating multi-tenant database tables (if required)',
+        multiuser_createdb: 'Creating multi-tenant database tables (if required)',
         debug_noexecute:    'Order execution disabled, clearing queue',
     },
 
@@ -145,11 +145,11 @@ module.exports = {
         leverage_set:        'Unable to set leverage for symbol {0}',
         leverage_unsupported:'Setting leverage on this exchange is not currently supported',
 
-        multitenant_mysql_req: 'Multi-tenant mode requires MySQL/MariaDB database',
-        multitenant_enable:  'Failed to enable multi-tenant support',
-        multitenant_disable: 'Failed to disable multi-tenant support',
-        multitenant_add:     'Failed to add tenant with UUID: {0}',
-        multitenant_delete:  'Failed to delete tenant with UUID: {0}',
+        multiuser_mysql_req: 'Multi-tenant mode requires MySQL/MariaDB database',
+        multiuser_enable:    'Failed to enable multi-user support',
+        multiuser_disable:   'Failed to disable multi-user support',
+        multiuser_add:       'Failed to add user: {0}',
+        multiuser_delete:    'Failed to delete user: {0}',
 
         config_invalid_key:  'Invalid config key: {0}',
         config_invalid_value:'Invalid value for {0} (Must be {1})',
@@ -194,10 +194,10 @@ module.exports = {
         config_get:         'Successfully retrieved setting: {0}',
         config_set:         'Successfully configured setting: {0}: {1}',
 
-        multitenant_enable:  'Successfully enabled multi-tenant support',
-        multitenant_disable: 'Successfully disabled multi-tenant support',
-        multitenant_add:     'Added tenant with UUID: {0}',
-        multitenant_delete:  'Deleted tenant with UUID: {0}',
+        multiuser_enable:   'Successfully enabled multi-user support',
+        multiuser_disable:  'Successfully disabled multi-user support',
+        multiuser_add:      'Added user: {0}',
+        multiuser_delete:   'Deleted user: {0}',
 
     }
     
