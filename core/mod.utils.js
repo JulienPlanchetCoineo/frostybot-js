@@ -11,9 +11,9 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     }
 
 
-     // Check if value is JSON
+    // Check if value is JSON
 
-     is_json(str) {
+    is_json(str) {
         try {
             JSON.parse(str);
         } catch (e) {
@@ -54,7 +54,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Check if value is an object
 
     is_object(val) {
-        return (typeof val === 'object');
+        return (typeof val === 'object') && (!this.is_array(val));
     }
 
 
@@ -91,9 +91,10 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     }
 
 
-    // Check if the object is missing anty of the supplied properties
+    // Check if the object is missing any of the supplied properties
 
     missing_props(obj, props = []) {
+        if (!this.is_object(obj)) return false;
         if (!this.is_array(props)) props = [props];
         var obj = this.lower_props(obj);
         var result = [];
@@ -103,40 +104,41 @@ module.exports = class frostybot_utils_module extends frostybot_module {
                 result.push(props);
             }
         }
-        if (result.length > 0)
-            return result;
-        else
-            return false;
+        return result;
     }
 
 
-    // Change all of an objects properties to lowercase
+    // Change all of an objects keys to lowercase
 
     lower_props(obj) {
         if (this.is_object(obj)) {
             for (var key in obj) {
                 if (!obj.hasOwnProperty(key))
                     continue;
-                if (typeof obj[key] === 'object' && obj[key] !== null)
-                    obj[key] = this.lower_props(obj[key]);
-                else
+                if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    var val = this.lower_props(obj[key]);
+                    delete obj[key];
+                    obj[key.toLowerCase()] = val;
+                } else {
                     if (key != key.toLowerCase()) {
                         var val = obj[key];
                         if (typeof(val) === 'string') {
-                            val = val.replace(/^\s+|\s+$/g, '');
+                            delete obj[key];
+                            obj[key.toLowerCase()] = val;
                         }
-                        delete obj[key];
-                        obj[key.toLowerCase()] = val;
                     }
+                }
             }
             return obj;
         }
+        return false;
     }
 
 
     // Walk over object and encrypt properties with the names provided in the props array element
 
     encrypt_props(obj, props = []) {
+        if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
@@ -147,7 +149,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
                     var val = this.encryption.encrypt(obj[key])
                     obj[key] = val
                 } 
-    }
+        }
         return obj;
     }
 
@@ -155,16 +157,16 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Walk over object and decrypt properties with the names provided in the props array element
 
     decrypt_props(obj, props = []) {
+        if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
-            if (typeof obj[key] === 'object' && obj[key] !== null)
-                obj[key] = this.encrypt_props(obj[key], props);
-            else
-                if (props.includes(key)) {
-                    var val = this.encryption.decrypt(obj[key])
-                    obj[key] = val
-                } 
+            if (props.includes(key)) {
+                var val = this.encryption.decrypt(obj[key])
+                obj[key] = val
+            } else 
+                if (typeof obj[key] === 'object' && obj[key] !== null)
+                    obj[key] = this.decrypt_props(obj[key], props);
         }
         return obj;
     }
@@ -173,6 +175,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Trim whitespace from object properties recursively
 
     trim_props(obj) {
+        if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
@@ -193,6 +196,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Walk over object and remove properties with the names provided in the props array element
 
     remove_props(obj, props = []) {
+        if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
@@ -209,6 +213,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Walk over object and remove properties that have the values provided in the vals array element
 
     remove_values(obj, vals = []) {
+        if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
@@ -222,10 +227,10 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     }    
 
 
-
     // Recursively trim object properties and change the property names to lowercase
 
     clean_props(obj) {
+        if (!this.is_object(obj)) return false;
         return this.lower_props(this.trim_props(obj));
     }
 
@@ -233,6 +238,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Walk over object and censor properties that match provided array elements
 
     censor_props(obj, props = ['apikey', 'secret']) {
+        if (!this.is_object(obj)) return false;
         for (var key in obj) {
             if (!obj.hasOwnProperty(key))
                 continue;
@@ -249,6 +255,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Filter array of objects by field values
 
     filter_objects(objarr, filters={}) {
+        if (!this.is_array(objarr)) return false;
         var results = [];
         filters = this.lower_props(filters);
         for (var i=0; i < objarr.length; i++) {
@@ -258,7 +265,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
                 var fieldname = field.toLowerCase();
                 if (filters[fieldname] != undefined) {
                     var filterval = filters[fieldname];
-                    if (obj[field].toLowerCase() == filterval.toLowerCase()) {
+                    if (String(obj[field]).toLowerCase() == String(filterval).toLowerCase()) {
                         results.push(obj);
                     }
                 }
@@ -270,15 +277,16 @@ module.exports = class frostybot_utils_module extends frostybot_module {
 
     // Extract given object properties into an array
 
-    extract_props(params, keys = []) {
+    extract_props(obj, keys = []) {
+        if (!this.is_object(obj)) return false;
         var result = [];
         if (typeof(keys) === 'string') {
             keys = [keys];
         }
         keys.forEach(key => {
             var key = key.toLowerCase();
-            if (params.hasOwnProperty(key)) {
-                result.push(params[key]);
+            if (obj.hasOwnProperty(key)) {
+                result.push(obj[key]);
             } else {
                 result.push(undefined);
             }
@@ -300,6 +308,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Count the number of decimals in a number
     
     num_decimals(num) {
+        if (!this.is_numeric(num)) return false;
         let text = num.toString()
         if (text.indexOf('e-') > -1) {
           let [base, trail] = text.split('e-')
@@ -315,6 +324,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Serialize object (and strip out any api keys or secrets)
 
     serialize_object(obj) {
+        if (!this.is_object(obj)) return false;
         var props = [];
         for (const [prop, val] of Object.entries(obj)) {
             if (['apikey','secret'].includes(prop.toLowerCase())) {
@@ -331,6 +341,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Serialize array
 
     serialize_array(arr) {
+        if (!this.is_array(arr)) return false;
         return JSON.stringify(arr).replace(/"/g,'').replace(/,/g,', ');
     }
 
@@ -338,21 +349,19 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Serialize a value for output to the log
 
     serialize(val) {
-        if ( ![ 'object', 'array' ].includes(typeof val)) return val;
         if (typeof val === 'string') return val;
-        if ((val !== null) && (this.is_object(val) || this.is_array(val))) {
-            switch (typeof val) {
-                case 'object'   :   return this.serialize_object(val);
-                case 'array'    :   return this.serialize_array(val);
-            }
-        } else return 'Unable to serialize object';
+        if (this.is_numeric(val)) return String(val);
+        if (this.is_numeric(val)) return String(val);
+        if (this.is_object(val)) return this.serialize_object(val);
+        if (this.is_array(val)) return this.serialize_array(val);
+        return false;
     }
 
 
-    // Capitilize first letter in a word
+    // Capitilize first letter in a stirng
 
     uc_first(str) {
-        if (typeof str !== 'string') return '';
+        if (typeof str !== 'string') return false;
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
@@ -360,6 +369,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Capitilize first letter of every word in a sentence
 
     uc_words(str) {
+        if (typeof str !== 'string') return false;
         var words = str.split(' ');
         if (!this.is_array(words)) return this.uc_first(str);
         words.forEach((word, idx) => {
@@ -378,7 +388,8 @@ module.exports = class frostybot_utils_module extends frostybot_module {
 
     validator(params, schema) {
         params = this.lower_props(params);
-        schema = this.lower_props(schema);
+        //schema = this.lower_props(schema);
+
         for (var prop in schema) {
             if (!schema.hasOwnProperty(prop)) continue;
             var settings = schema[prop];

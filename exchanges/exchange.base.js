@@ -405,5 +405,10 @@ module.exports = class frostybot_exchange_base {
         return this.cancel(params);
     }
     
+    // Default leverage function (if not supported by exchange)
+
+    async leverage(params) {
+        return this.output.error('leverage_unsupported')
+    }
 
 }

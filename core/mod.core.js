@@ -35,6 +35,7 @@ const api_methods = {
         'orders', 
         'cancel', 
         'cancelall',
+        'leverage',
     ],
 
     settings: [
@@ -224,7 +225,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
             if (this.load_module(module)) {
             //if (typeof(this[module] == 'function')) {
                 this.output.notice('loaded_module', module)    
-                var method = this.utils.is_array(method.split(':')) ? String.prototype.toLowerCase(method.split(':')[0]) : String.prototype.toLowerCase(method);
+                var method = this.utils.is_array(method.split(':')) ? method.split(':')[0] : method;
                 if (this.method_exists(module, method)) {
                     var start = (new Date).getTime();
                     global.frostybot['command'] = {

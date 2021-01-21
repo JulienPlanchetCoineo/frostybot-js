@@ -33,6 +33,20 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         return order_params;
     }    
 
+    // Set leverage for symbol
+
+    async leverage(params) {
+        var [symbol, type, leverage] = this.utils.extract_props(params, ['symbol', 'type', 'leverage']);
+        var type = (type == 'cross' ? 'CROSSED' : (type == 'isolated' ? 'ISOLATED' : null));
+        var leverage = leverage.toLowerCase().replace('x', '');
+        await this.ccxt('fapiPrivate_post_margintype', { symbol: symbol, marginType: type});
+        var leverageResult = await this.ccxt('fapiPrivate_post_leverage', { symbol: symbol, leverage: leverage});
+        if ((leverageResult.hasOwnProperty('leverage')) && (leverageResult.leverage == leverage)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     // Get available equity in USD for placing an order on a specific symbol using size as a factor of equity (size=1x)
 

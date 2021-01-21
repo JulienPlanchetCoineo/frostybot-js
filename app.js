@@ -1,5 +1,8 @@
 var express     = require('express');
 var bodyParser  = require('body-parser');
+const fs        = require('fs'); 
+const { v4: uuidv4 } = require('uuid');
+var context     = require('express-http-context');
 
 // Set App Title
 
@@ -18,9 +21,22 @@ var apiRouter = require('./routes/routes.api');
 
 var app = express();
 
-// Trust reverse proxy if used
+// Get Listen Port
 
-app.set('trust proxy', true);
+const portfile = __dirname + '/.port';
+var port = 80
+try {
+  var port = fs.readFileSync(portfile, {encoding:'utf8', flag:'r'}) 
+} catch {
+  var port = (process.env.FROSTYBOT_PORT || 80);
+}
+app.set('port', port);
+fs.writeFileSync(portfile, port)
+
+// Trust reverse proxy if used
+// Only use this if you are configuring Frostybot behind a reverse proxy
+// Currently disabled to prevent source address spoofing using X-Forward-For headers
+// app.set('trust proxy', true); 
 
 // Save raw buffer for command parsing
 
@@ -35,6 +51,15 @@ function rawBufferSaver (req, res, buf, encoding) {
 app.use(bodyParser.raw({ type: 'text/plain', verify: rawBufferSaver }));
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Unique Request ID (HTTP Context)
+
+app.use(context.middleware);
+app.use(function(req, res, next) {
+    context.set('reqId', uuidv4());
+    var reqId = context.get('reqId');
+    next();
+});
 
 // Map to Main API router
 

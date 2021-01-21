@@ -1,0 +1,94 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "botName": {
+            "type": "string",
+            "defaultValue": "frostybot"
+        },
+        "frostybotPort": {
+            "type": "int",
+            "defaultValue": 80
+        },
+        "sshPort": {
+            "type": "int",
+            "defaultValue": 22
+        },
+        "sshUsername": {
+            "type": "string",
+            "defaultValue": "frostybot"
+        },
+        "sshPassword": {
+            "type": "securestring"
+        }       
+    },
+    "resources": [
+        {
+            "location": "westeurope",
+            "name": "[parameters('botName')]",
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "[parameters('botName')]",
+                        "properties": {
+                            "image": "frostyio/frostybot-js:latest",
+                            "resources": {
+                                "requests": {
+                                    "cpu": "1",
+                                    "memoryInGB": "0.5"
+                                }
+                            },
+                            "environmentVariables": [
+                                {
+                                    "name": "SSH_USER",
+                                    "value": "[parameters('sshUsername')]"
+                                },
+                                {
+                                    "name": "SSH_PASS",
+                                    "secureValue": "[parameters('sshPassword')]"
+                                },
+                                {
+                                    "name": "SSH_PORT",
+                                    "value": "[parameters('sshPort')]"
+                                },
+                                {
+                                    "name": "FROSTYBOT_PORT",
+                                    "value": "[parameters('frostybotPort')]"
+                                }
+                            ],
+                            "ports": [
+                                {
+                                    "port": "[parameters('frostybotPort')]",
+                                    "protocol": "TCP"
+                                },
+                                {
+                                    "port": "[parameters('sshPort')]",
+                                    "protocol": "TCP"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "restartPolicy": "OnFailure",
+                "osType": "Linux",
+                "ipAddress": {
+                    "type": "Public",
+                    "ports": [
+                        {
+                            "port": "[parameters('frostybotPort')]",
+                            "protocol": "TCP"
+                        },
+                        {
+                            "port": "[parameters('sshPort')]",
+                            "protocol": "TCP"
+                        }
+                    ],
+                    "dnsNameLabel": "[toLower(replace(concat(parameters('botName'),'-',uniqueString(resourceGroup().id)), ' ', ''))]"
+                }
+            },
+            "tags": {}
+        }
+    ]
+}

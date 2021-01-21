@@ -74,7 +74,7 @@ class frostybot_position extends frostybot_base {
     var usdquote = market.usd.hasOwnProperty ('quote')
       ? market.usd.quote
       : market.usd;
-    this.raw = raw;
+    //this.raw = raw;
 
     this.symbol = market.symbol;
     this.type = market.type;
@@ -85,14 +85,14 @@ class frostybot_position extends frostybot_base {
       : quote_size == null ? 'base' : 'unknown';
     switch (sizing) {
       case 'base':
-        this.base_size = base_size;
-        this.quote_size = this.base_size * price;
-        this.usd_size = this.base_size * usdbase;
+        this.base_size = Math.abs(base_size);
+        this.quote_size = Math.abs(this.base_size * price);
+        this.usd_size = Math.abs(this.base_size * usdbase);
         break;
       case 'quote':
-        this.base_size = quote_size / price;
-        this.quote_size = quote_size;
-        this.usd_size = this.base_size * usdquote;
+        this.base_size = Math.abs(quote_size / price);
+        this.quote_size = Math.abs(quote_size);
+        this.usd_size = Math.abs(this.base_size * usdquote);
         break;
     }
   }
@@ -112,13 +112,13 @@ class frostybot_position_futures extends frostybot_position {
   ) {
     super (market, direction, base_size, quote_size, entry_price, raw);
     this.entry_price = entry_price;
-    this.entry_value = this.base_size * this.entry_price;
+    this.entry_value = Math.abs(this.base_size * this.entry_price);
     this.current_price = market.avg != null
       ? market.avg
       : (market.bid + market.ask) / 2;
-    this.current_value = this.base_size * this.current_price;
+    this.current_value = Math.abs(this.base_size * this.current_price);
     this.liquidation_price = liquidation_price;
-    this.pnl = this.current_value - this.entry_value; // Calculate PNL is not supplied by exchange
+    this.pnl = (this.direction == "short" ? -1 : 1) * (this.current_value - this.entry_value); // Calculate PNL is not supplied by exchange
   }
 }
 
@@ -224,6 +224,7 @@ class frostybot_exchange extends frostybot_base {
       'get_market_by_id_or_symbol',
       'create_order',
       'custom_params',
+      'leverage',
     ];
 
     // Methods to cache and how many seconds they should be cached for

@@ -8,7 +8,7 @@ if [ ! "$PID" == "" ]; then
         echo "Stopping Frostybot server (PID: $PID)..."
 	cd "$SCRIPTPATH" &
         cd ../ &
-        sudo npm stop > /dev/null 2>&1 &
+        sudo kill $PID > /dev/null 2>&1 &
         cd "$CURRENTPATH" &
 else
 	echo "Frostybot server is not currently started"
