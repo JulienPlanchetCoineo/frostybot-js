@@ -48,38 +48,200 @@ $( document ).ready(function() {
     $(".loading").hide();
 
     // ---------------------------------------------------------
-    //   REST API Calls
+    //   Form field validators
+    // ---------------------------------------------------------
+
+    function validateEmail(mail) {
+        if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(mail)) {
+            return true
+        }
+        return false
+    }
+
+    // ---------------------------------------------------------
+    //   API
     // ---------------------------------------------------------
 
     function api(command, params, callback) {
         params['command'] = command;
-        console.log(params);
+        var token = getToken();
+        if (token != null) {
+            params['token'] = token;
+        }
         $.post( "/frostybot", params)
             .done(function( json ) {
                 callback(json);
             })
             .fail(function( jqxhr, textStatus, error ) {
                 var err = textStatus + ", " + error;
-                console.log( "Request Failed: " + err );
             });
+    }
+
+    function loadPage(key) {
+        document.location.href = key;
     }
 
     function updateContent(key, params = {}, callback = null) {
-        var uuid = (localStorage) ? localStorage.getItem("uuid") : null;
-        $.get( "/ui/content/" + uuid + "/" + key, params)
-            .done(function( html ) {
-                $('#'+key).html( html);
-                if (callback != null)
-                    callback();
-            })
-            .fail(function( jqxhr, textStatus, error ) {
-                var err = textStatus + ", " + error;
-                console.log( "Request Failed: " + err );
-            });
+        var token = getToken();
+        if (token != null) {
+            params['token'] = token;
+        }
+        $.get( "/ui/content/" + key, params)
+        .done(function( html ) {
+            $('#'+key).html( html);
+            if (callback != null)
+                callback();
+        })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+        });
     }
 
+    // ---------------------------------------------------------
+    //   Session Management
+    // ---------------------------------------------------------
 
-    // Create/Update API Keys
+
+    function checkTokenValidity() {
+        if (localStorage) {
+            var token = localStorage.getItem("token");
+            if (token != null) {
+                var token = JSON.parse(token);
+                if (token != null && token.hasOwnProperty('expiry')) {
+                    var expiry = token.expiry;
+                    var ts = (new Date()).getTime();
+                    if (ts > expiry) {
+                        localStorage.setItem("token", null);
+                        loadPage('/ui/login?sessiontimeout=true');
+                    }
+                }
+            }
+        }
+    }
+
+    setInterval(checkTokenValidity, 1000);
+
+    function getUUID() {
+        if (localStorage) {
+            var token = localStorage.getItem("token");
+            if (token != null) {
+                var token = JSON.parse(token);
+                if (token != null && token.hasOwnProperty('uuid')) {
+                    var uuid = token.uuid;
+                   return uuid;
+                }
+            }
+        }
+        return null;
+    }
+
+    function getToken() {
+        if (localStorage) {
+            var token = localStorage.getItem("token");
+            if (token != null) {
+                var token = JSON.parse(token);
+                if (token != null) {
+                   return token;
+                }
+            }
+        }
+        return null;
+    }
+
+    function updateHeaderUUID() {
+        if (localStorage) {
+            var token = localStorage.getItem("token");
+            if (token != null) {
+                var token = JSON.parse(token);
+                if (token != null && token.hasOwnProperty('uuid')) {
+                    var uuid = token.uuid;
+                    $('#header_uuid').html('<b>UUID:</b> ' + uuid);
+                }
+            }
+        }
+    }
+    
+    updateHeaderUUID();
+
+    $('#tabs-logout-tab').on('click', function() {
+        if (localStorage) 
+            localStorage.setItem("token", null);
+        loadPage('/ui/login');
+    });
+
+    // ---------------------------------------------------------
+    //  User Registration
+    // ---------------------------------------------------------
+
+    function submitRegistrationForm() {
+        var email = $("#inputemail").val();
+        var password = $("#inputpassword").val();
+        var confirm = $("#inputconfirm").val();
+        if (!validateEmail(email)) {
+            showError('Invalid email address');
+            return false;
+        }
+        if (password != confirm) {
+            showError('Password and confirm password do not match');
+            return false;
+        }
+        var data = {
+            email: email,
+            password: password
+        }
+        api('user:register', data, function(json) {
+            if (json.result == "success") {
+                loadPage('/ui/login?regsuccess=true');
+            } else {
+                showError("Failed to register user.", 5000)
+            }
+        });
+
+    }    
+
+    $("#registerform").submit(function(event){
+        event.preventDefault();
+        submitRegistrationForm();
+    });
+
+    // ---------------------------------------------------------
+    //  User Login
+    // ---------------------------------------------------------
+
+    function submitLoginForm() {
+        var email = $("#inputemail").val();
+        var password = $("#inputpassword").val();
+        if (!validateEmail(email)) {
+            showError('Invalid email address');
+            return false;
+        }
+        var data = {
+            email: email,
+            password: password
+        }
+        api('user:login', data, function(json) {
+            if (json.result == "success") {
+                var token = json.data;
+                if(localStorage)
+                    localStorage.setItem("token", JSON.stringify(token));
+                loadPage('/ui');
+            } else {
+                showError("Login failed. Please check your credentials and try again.", 5000)
+            }
+        });
+
+    }    
+
+    $("#loginform").submit(function(event){
+        event.preventDefault();
+        submitLoginForm();
+    });
+
+
+    // ---------------------------------------------------------
+    //   API Key Management
+    // ---------------------------------------------------------
+
 
     function submitApiKeysForm() {
         var uuid = (localStorage) ? localStorage.getItem("uuid") : null;
@@ -114,10 +276,6 @@ $( document ).ready(function() {
         event.preventDefault();
         submitApiKeysForm();
     });
-
-    // ---------------------------------------------------------
-    //   API Key Form automation
-    // ---------------------------------------------------------
 
     function updateApiKeyFormFields() {
         var val = $( "#inputexchange" ).val();
@@ -155,6 +313,7 @@ $( document ).ready(function() {
                     $('#inputexchange').val(account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : ''));
                     $('#inputapikey').val(account.parameters.apikey);
                     $('#inputsecret').val('');
+                    $("#inputsecret").attr("placeholder", "For security reasons, you must re-enter your secret to edit this stub");
                     $('#inputtestnet').prop( "checked", account.parameters.testnet == "true" ? true : false);
                     $('#inputdescription').val(account.description);
                     $('#inputsubaccount').val(account.parameters.subaccount);
@@ -170,12 +329,14 @@ $( document ).ready(function() {
             $('#inputexchange').val('');
             $('#inputapikey').val('');
             $('#inputsecret').val('');
+            $("#inputsecret").attr("placeholder", "");
             $('#inputtestnet').prop( "checked", false);
             $('#inputdescription').val('');
             updateApiKeyFormFields();
             setApiKeyTitle('Configure API Key');
             $( "#form_apikeys" ).show();
         }
+        $( "inputstub" ).focus();
     }
 
     function hideApiKeyTable() {
@@ -254,5 +415,6 @@ $( document ).ready(function() {
         showApiKeyTable();
         refreshApiKeyTable();
     });
+
     
 });

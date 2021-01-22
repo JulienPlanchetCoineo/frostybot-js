@@ -48,13 +48,15 @@ Object.keys(api).forEach(baseapi => {
             // Current commented out to prevent source address spoofing using x-forwarded-for headers
             var ip = (req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
             var uuid = params.hasOwnProperty('uuid') ? params.uuid : (params.hasOwnProperty('body') && params.body.hasOwnProperty('uuid') ? params.body.uuid : null);
+            var token = params.hasOwnProperty('token') ? params.token : (params.hasOwnProperty('body') && params.body.hasOwnProperty('token') ? params.body.token : null);
             //var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).replace('::ffff:','').replace('::1, ','');
+            if (await core.verify_access(ip, uuid, token, params)) {
             //if (await core.verify_access(uuid, ip)) {
                 return await core.execute(params, {req : req, res : res });  // Works sliently different to the API
                 //res.send(result);
-            //} else {
-            //    res.sendStatus(401);       // HTTP 401: Unauthorized;
-            //}        
+            } else {
+                res.sendStatus(401);       // HTTP 401: Unauthorized;
+            }        
         })
 
     }

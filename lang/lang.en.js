@@ -29,7 +29,6 @@ module.exports = {
         context_uuid:       'Context: {0}',
         trade_cmd_shortcut: 'Converting command shortcut \'{0}:{1}\' to \'trade:{0}:{1}\'',
         loaded_module:      'Loaded module: {0}',
-        token_verify:       'API Access Granted: Valid UI token: {0}',
         whitelist_verify:   'API Access Granted: {0} is whitelisted: {0}',
         whitelist_get:      'Retrieved IP address from the whitelist: {0}: {1}',
         symbolmap_get:      'Retrieved symbol mapping: {0}: {1} => {2}',
@@ -47,6 +46,9 @@ module.exports = {
         ws_unsubscribe:     'Unsubscribed from websocket channel: {0}',
         multiuser_createdb: 'Creating multi-tenant database tables (if required)',
         debug_noexecute:    'Order execution disabled, clearing queue',
+        access_local_core:  'Access granted on localhost using core uuid',
+        access_gui_token:   'Access granted using verified token',
+        access_api_core:    'Access granted on API using core uuid',
     },
 
     notice: {
@@ -94,6 +96,7 @@ module.exports = {
         unknown_method:     'Unknown Command: {0}',
         unknown_stub:       'Unknown Account: {0}. Please use accounts:add to add the account.',      
         unknown_market:     'Unknown Market: {0}. Please ensure that the market symbol is listed in \'trade:<stub>:markets\'.',      
+        local_only:         'This command can only be executed from the CLI.',
 
         account_retrieve:   'Failed to retrieve account(s): {0}',
         account_create:     'Failed to create account: {0}',
@@ -151,10 +154,17 @@ module.exports = {
         multiuser_disable:   'Failed to disable multi-user support',
         multiuser_add:       'Failed to add user: {0}',
         multiuser_delete:    'Failed to delete user: {0}',
+        user_exists:         'The user already exists: {0}',
+        user_register:       'Failed to reigster user: {0}',
+        user_auth:           'User authentication failed: {0}',
+        invalid_token:       'Invalid token provided',
 
         config_invalid_key:  'Invalid config key: {0}',
         config_invalid_value:'Invalid value for {0} (Must be {1})',
         config_set:          'Failed to configure setting: {0}: {1}',
+
+        gui_enable:          'Failed to enable GUI',
+        gui_disable:         'Failed to disable GUI',
         
     },
 
@@ -199,6 +209,11 @@ module.exports = {
         multiuser_disable:  'Successfully disabled multi-user support',
         multiuser_add:      'Added user: {0}',
         multiuser_delete:   'Deleted user: {0}',
+        user_register:      'Successfully registered user: {0}',
+        user_auth:          'User authenticated successfully: {0}',
+
+        gui_enable:          'Successfully enabled GUI',
+        gui_disable:         'Successfully disabled GUI',
 
     }
     

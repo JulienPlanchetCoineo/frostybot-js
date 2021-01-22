@@ -97,6 +97,20 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     }
 
 
+    // Convert timestamp milliseconds to datetime str
+    
+    ts_to_datetime(ts) {
+        let dateobj = new Date(ts);
+        let day = ("0" + dateobj.getDate()).slice(-2);
+        let month = ("0" + (dateobj.getMonth() + 1)).slice(-2);
+        let year = dateobj.getFullYear();
+        let hour = ("0" + dateobj.getHours()).slice(-2);
+        let minute = ("0" + dateobj.getMinutes()).slice(-2);
+        let second = ("0" + dateobj.getSeconds()).slice(-2);
+        return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+    }
+
+
     // Force a value to be an array if it not already an array
 
     force_array(val) {

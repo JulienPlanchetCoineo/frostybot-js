@@ -51,11 +51,11 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
         var result = (ip == undefined ? await this.settings.get('whitelist') : await this.settings.get('whitelist', ip, false));
         if (result !== false) {
             if (result.hasOwnProperty('ip')) {
-                this.output.debug('whitelist_get', [result.ip, result.description]);
+                this.output.debug('whitelist_get', [result.ipAddress, result.description]);
             } else {
                 result = this.utils.remove_values(result, [false, undefined]);
                 Object.values(result).forEach(val => {
-                    this.output.debug('whitelist_get', [val.ip, val.description]);
+                    this.output.debug('whitelist_get', [val.ipAddress, val.description]);
                 });
             }
             return result;

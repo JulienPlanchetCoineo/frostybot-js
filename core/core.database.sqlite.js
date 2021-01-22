@@ -22,7 +22,7 @@ module.exports = class frostybot_database_sqlite_module extends frostybot_databa
         this.db.pragma('journal_mode = wal');
         this.name = dbfile;
     }
-
+    
     // Query data from the database
 
     async query(sql, values = []) {

@@ -16,31 +16,23 @@
 </head>
 
 <body>
-  <% 
-    if (uuid != '') {
-  %>
   <script>
-    $( document ).ready(function() {
-      // Check if the localStorage object exists
-      if(localStorage) {
-          localStorage.setItem("uuid", "<%= uuid %>");
+    if (localStorage) {
+      var token = localStorage.getItem("token");
+      if (token != null) {
+        var token = JSON.parse(token);
+        if (token != null && token.hasOwnProperty('uuid')) {
+          var uuid = token.uuid;
+        }
       }
-    });
+    }
   </script>
-
-  <% } %>
-
   <div class="loading"><img src="/images/ajax.gif" height="256" width="256" /></div>
   <div class="container">
     <div class="row align-items-center">
       <div class="col"><img class="img-fluid" src="/images/frostybot.png" /></div>
       <div class="col-md-auto">
-        <p class="text-end"><h2 class="text-end"><%= pageTitle %></h2>
-          <% 
-            if (uuid != '') {
-          %>
-          <p class="text-end text-muted"><b>UUID:</b> <%= uuid %></p>
-          <% } %>
+        <p class="text-end"><h2 class="text-end"><%= pageTitle %></h2><p class="text-end text-muted" id="header_uuid"></p>
       </div>
     </div>
     <hr>

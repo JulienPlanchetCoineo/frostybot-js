@@ -20,7 +20,32 @@
 }
 
 .frostybot-button-sm {
-    width: 100px;
+    width: 110px;
+}
+
+.frostybot-panel-header {
+    background-color: #DDDDDD;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.frostybot-panel-content {
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 0px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.frostybot-panel {
+    background-color: #EEEEEE;
+    border: #AAAAAA;
+    border-radius: 10px;
+    padding: 0px;
 }
 
 .tab-content {

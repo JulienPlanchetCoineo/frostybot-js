@@ -64,9 +64,11 @@ const api_methods = {
         'disable', 
     ],
 
-    multiuser: [
-        'enable',
-        'disable',
+    user: [
+        'multiuser_enable',
+        'multiuser_disable',
+        'register',
+        'login',
         'add',
         'delete',
     ],
@@ -77,7 +79,10 @@ const api_methods = {
     ],
 
     gui: [
+        'enable',
+        'disable',
         'main',
+        'register',
         'login',
         'auth_callback',
         'content',
@@ -103,19 +108,68 @@ module.exports = class frostybot_core_module extends frostybot_module {
 
     // Verify if access is allowed using a valid token or whitelist
 
-    async verify_access(uuid, ip) {
-        // If multitenancy is enabled, require a uuid parameter if not accessing from localhost
+    async verify_access(ip, uuid, token, params) {
+        var command = params != undefined && params.hasOwnProperty('body') && params.body.hasOwnProperty('command') ? params.body.command : null;
+        context.set('srcIp', ip)
         var core_uuid = await this.encryption.core_uuid();
-        var uuid = (['127.0.0.1','::1'].includes(ip) && uuid == null ? core_uuid : uuid);
-        if (await this.multiuser.is_enabled() && !['127.0.0.1','::1'].includes(ip) && uuid == null) {
+        var token_uuid = token != null && token.hasOwnProperty('uuid') ? token.uuid : null;
+        var param_uuid = uuid;
+        var localhost = ['127.0.0.1','::1'].includes(ip);
+        var isgui = token != null;
+        var isapi = !isgui;
+        var multiuser = await this.user.multiuser_isenabled();
+        var verified = token != null ? await this.user.verify_token(token) : false;
+        var uuid = null;
+
+        var all_ip_allowed = [
+            'gui:main',
+            'gui:login',
+            'gui:register',
+            //'gui:content',
+            'user:register',
+            'user:login',
+        ]
+
+        if (!localhost && isapi && multiuser && uuid == null) {
             await this.output.error('required_param', ['uuid']);
-            return false; 
+            return false;
         }
-        context.set('uuid', uuid);
-        if (uuid != null && await this.multiuser.get_token(uuid, false)) {
-            this.output.debug('token_verify', [uuid]);
+
+        if (isgui && !verified) {
+            await this.output.error('invalid_token');
+            return false;
+        }
+
+        if (localhost && isapi && param_uuid == null) {
+            this.output.debug('access_local_core')
+            uuid = core_uuid;
+            context.set('uuid', uuid);
+            return (all_ip_allowed.includes(command) ? true : await this.whitelist.verify(ip));
+        }
+
+        if (isgui && verified) {
+            this.output.debug('access_gui_token')
+            uuid = token_uuid;
+            context.set('uuid', uuid);
             return true;
-        } else return await this.whitelist.verify(ip);
+        }
+
+        if (isapi && multiuser && param_uuid != null) {
+            uuid = param_uuid;
+            this.output.debug('access_api_uuid')
+            context.set('uuid', uuid);
+            return (all_ip_allowed.includes(command) ? true : await this.whitelist.verify(ip));
+        }
+            
+
+        if (isapi && !multiuser && param_uuid == null) {
+            uuid = core_uuid;
+            this.output.debug('access_api_core')
+            context.set('uuid', uuid);
+            return (all_ip_allowed.includes(command) ? true : await this.whitelist.verify(ip));
+        }
+
+        return false;
 
     }
 

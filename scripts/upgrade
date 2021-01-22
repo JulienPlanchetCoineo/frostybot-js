@@ -34,6 +34,7 @@ else
   #sudo git checkout stable > /dev/null 2>&1
   #sudo git stash 
   sudo git pull -f
+  ./scripts/dbupgrade
   echo "Updating MOTD"
   sudo cp -f /usr/local/frostybot-js/scripts/motd /etc/motd
   echo "Installing outstanding NodeJS modules"

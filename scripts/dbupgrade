@@ -11,7 +11,7 @@ echo "Checking for database upgrades"
 
 if [ "$TYPE" == "sqlite" ]; then
     FILE=`cat .dbcfg | jq '.file' | sed 's/"//g'`
-    DBVER=`sqlite3 $FILE "SELECT CASE COUNT(value) WHEN 0 THEN 0 ELSE value END FROM settings WHERE mainkey='core' AND subkey='dbver';"`
+    DBVER=`sqlite3 $FILE "SELECT CASE COUNT(value) WHEN 0 THEN 0 ELSE value END FROM settings WHERE mainkey='core' AND subkey='sqlite:dbver';"`
     UPGFILE="database/updates/update.sqlite.$DBVER.sql"
     if [ -f "$UPGFILE" ]; then
         echo "Upgrading $TYPE database using $UPGFILE" 

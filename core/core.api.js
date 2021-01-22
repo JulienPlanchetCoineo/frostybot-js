@@ -53,9 +53,10 @@ module.exports = {
         'put|/whitelist'                    :   'whitelist:add',    // Update a whitelist entry
         'delete|/whitelist/:ip'             :   'whitelist:delete', // Delete whitelist entry for specific IP address
 
-        // Multi-User Handling
+        // User Handling
 
-        'post|/multiuser/enable'          :   'multiuser:enable',   // Enable Multi-User Mode (MySQL Required)
+        //'post|/user/multiuser_enable'       :   'user:multiuser_enable',   // Enable Multi-User Mode (MySQL Required)
+        //'post|/user/multiuser_disable'      :   'user:multiuser_disable',  // Disable Multi-User Mode (MySQL Required)
 
         // Trading
 

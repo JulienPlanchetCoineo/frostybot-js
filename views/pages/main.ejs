@@ -1,5 +1,5 @@
 <%- include('../partials/header.ejs'); %>
-
+<%- include('../partials/protected.ejs'); %>
   <container role="navigation">
   
     <div class="d-flex align-items-start">
@@ -9,6 +9,7 @@
         <!--a class="nav-link" id="tabs-console-tab" data-bs-toggle="pill" href="#tabs-console" role="tab" aria-controls="tabs-console" aria-selected="false">Console</a>
         <a class="nav-link" id="tabs-log-tab" data-bs-toggle="pill" href="#tabs-log" role="tab" aria-controls="tabs-log" aria-selected="false">View Log</a>
         <a class="nav-link" id="tabs-settings-tab" data-bs-toggle="pill" href="#tabs-settings" role="tab" aria-controls="tabs-settings" aria-selected="false">Settings</a-->
+        <a class="nav-link" id="tabs-logout-tab" data-bs-toggle="pill" href="#tabs-logout" role="tab" aria-controls="tabs-logout" aria-selected="false">Logout</a>
       </div>
       <div class="tab-content flex-fill" id="tabs-tabContent">
         <!--div class="frostybot-tab-content tab-pane fade" id="tabs-home" role="tabpanel" aria-labelledby="tabs-home-tab">...</div-->
@@ -16,6 +17,7 @@
         <!--div class="frostybot-tab-content tab-pane fade" id="tabs-console" role="tabpanel" aria-labelledby="tabs-console-tab">Not yet implemented</div>
         <div class="frostybot-tab-content tab-pane fade" id="tabs-log" role="tabpanel" aria-labelledby="tabs-log-tab">Not yet implemented</div>
         <div class="frostybot-tab-content tab-pane fade" id="tabs-settings" role="tabpanel" aria-labelledby="tabs-settings-tab">Not yet implemented</div-->
+        <div class="frostybot-tab-content tab-pane fade" id="tabs-settings" role="tabpanel" aria-labelledby="tabs-settings-tab">Logging out...</div>
       </div>
     </div>
 

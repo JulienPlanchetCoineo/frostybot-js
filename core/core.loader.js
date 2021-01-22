@@ -33,7 +33,6 @@ module.exports = {
             var mod = require(dir + '/core/core.database.' + dbtype)
             var obj = (typeof(mod) == 'function') ? new mod() : mod
             global.frostybot._modules_['database'] = obj
-
         }
     },
 
