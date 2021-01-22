@@ -130,7 +130,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
             'user:login',
         ]
 
-        if (!localhost && isapi && multiuser && uuid == null) {
+        if (!localhost && isapi && multiuser && uuid == null && !all_ip_allowed.includes(command)) {
             await this.output.error('required_param', ['uuid']);
             return false;
         }
