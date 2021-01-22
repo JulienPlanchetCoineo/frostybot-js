@@ -48,7 +48,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
                 //for(var i = 0; i < results.length; i++) 
                 //    accounts[results[i].stub] = this.utils.lower_props(results[i]);
                 
-                this.output.success('account_retrieve', [ results.length + ' accounts' ]);
+                this.output.success('account_retrieve', [ Object.values(accounts).length + ' accounts' ]);
                 return await this.censored(accounts);
             } else return this.output.error('account_retrieve', ['No accounts configured']);
         }  else {

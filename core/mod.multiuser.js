@@ -62,6 +62,10 @@ module.exports = class frostybot_multiuser_module extends frostybot_module {
     // Check if Multi-User is Enabled
 
     async is_enabled() {
+        var type = this.database.type;
+        if (type != 'mysql') {
+            return false;
+        }
         return await this.settings.get('core', 'multiuser:enabled', false);
     }
 
