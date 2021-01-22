@@ -3,6 +3,7 @@ var router = express.Router();
 const google = require('googleapis').google;
 const jwt = require('jsonwebtoken');
 const OAuth2 = google.auth.OAuth2;
+var context = require('express-http-context');
 
 // Render Page
 
@@ -44,9 +45,9 @@ async function create_user(email) {
     return uuid;
 }
 
-// Route for /ui/
+// Route for /ui/login
 
-router.get('/', async function (req, res) {
+router.get('/login', async function (req, res) {
     var auth = await get_auth_config();
     if (auth !== false) {
         const oauth2Client = new OAuth2(auth.clientid, auth.secret, auth.url + '/ui/auth_callback');    
@@ -76,29 +77,69 @@ router.get('/auth_callback', async function (req, res) {
                 if (err)
                     return render_error(res, JSON.stringify(err));
                 else {
-                    console.log(token);
                     res.cookie('frostybot', jwt.sign(token, auth.jwt_secret));
-                    return res.redirect('/ui/config');
+                    return res.redirect('/ui');
                 }
             });
         }    
     } else return render_error(res, 'Authentication is not configured');
 });
 
+
+// User Dashboard
+
+router.get('/', async function (req, res) {
+    var uuid = await get_uuid(req);
+    if (uuid == false) {
+        return res.redirect('/ui/login');
+    } else {
+        return render_page(res, "pages/main", { pageTitle: 'Configuration', uuid: uuid });
+    } 
+});
+
+
+// Partial Output Router
+
+router.get('/partial/:uuid/:key', async function (req, res) {
+    var params = {...req.params, ...req.query};
+    var uuid = params.hasOwnProperty('uuid') ? params.uuid : false;
+    if (uuid == false) {
+        return res.send({'error' : 'invalid_uuid'});
+    } else {
+        context.set('uuid', uuid);
+        if (params.hasOwnProperty('key')) {
+            var key = params.key;
+            var data = { uuid : uuid };
+            switch (key) {
+                case 'table_apikeys'    :   var accounts = await global.frostybot._modules_['accounts'].get();
+                                            data[key] = accounts;
+                                            break;
+            }
+            var template = key.split('_').join('.');
+            return render_page(res, "partials/" + template + ".ejs", data);   
+        } else {
+            return res.send({'error' : 'invalid_key'});
+        }
+    }
+});
+
 // Get UUID
 
 async function get_uuid(req) {
-    if (!req.cookies.frostybot) {
-        // We haven't logged in
-        return false;
+    var token = null;
+    if ((typeof(req) == 'string') && (req.length == 36)) {
+        var uuid = req;
+        token = await this.multiuser.get_token(uuid, true);
+        if (token == false) return false;
+    } else {
+        if (!req.cookies.frostybot) 
+            return false;
     }
     var auth = await get_auth_config();
     if (auth !== false) {
         const oauth2Client = new OAuth2(auth.clientid, auth.secret, auth.url + '/ui/auth_callback');   
-        var token = jwt.verify(req.cookies.frostybot, auth.jwt_secret);
-        console.log(token);
+        var token = token == null ? jwt.verify(req.cookies.frostybot, auth.jwt_secret) : token;
         var ts = (new Date()).getTime();
-        console.log('TS:' + ts);
         oauth2Client.setCredentials(token);
         var oauth2 = google.oauth2({
             auth: oauth2Client,
@@ -110,24 +151,13 @@ async function get_uuid(req) {
             if (data.hasOwnProperty('email')) {
                 var email = data.email;
                 var uuid = await create_user(email);
+                await global.frostybot._modules_['database'].update('users', {token : JSON.stringify(token), expiry: token.expiry_date}, {uuid: uuid});
                 return uuid;
             }
         }
         return render_error(res, 'Cannot retrieve user info from Google');
     } else return false;
-
 }
-
-// user Dashboard
-
-router.get('/config', async function (req, res) {
-    var uuid = await get_uuid(req);
-    if (uuid == false) {
-        return res.redirect('/ui/');
-    } else {
-        return render_page(res, "pages/config", { pageTitle: 'Configuration', uuid: uuid });
-    } 
-});
 
 
 module.exports = router;

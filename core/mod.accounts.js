@@ -29,7 +29,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
             params = []
         }
         var stub = this.utils.extract_props(params, 'stub');
-        if (stub == undefined) {
+        if ([undefined, false].includes(stub)) {
             var results = await this.settings.get('accounts');
             if (results) {
                 var accounts = {};
@@ -72,7 +72,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
             for (var [stub, account] of Object.entries(accounts)) {
                 if (account != false) {
                     account = await this.utils.decrypt_values(account, ['apikey', 'secret'])
-                    account = await this.utils.censor_props(account, ['apikey', 'secret'])
+                    account = await this.utils.censor_props(account, ['secret'])
                 }
                 result[stub] = account;
             }
@@ -212,6 +212,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
 
     async ccxtparams(account) {
 
+        if (account.hasOwnProperty('uuid')) delete account.uuid;
         const ccxtlib = require ('ccxt');
         if (!account.hasOwnProperty('parameters')) {
             var stubs = Object.getOwnPropertyNames(account);

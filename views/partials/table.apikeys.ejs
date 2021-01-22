@@ -1,7 +1,17 @@
-<h6>Configured API Keys</h6>
-<hr>
-<button type="button" class="btn btn-success" id="addapikeybutton"><span class="fa fa-plus"></span> Add</button>
-<hr>
+<% 
+  if (typeof(table_apikeys) !== 'undefined') {
+    var accounts = Object.values(table_apikeys);
+  } else {
+    var accounts = [];
+  }
+  
+  const capitalize = (s) => {
+    if (typeof s !== "string") return "";
+    if (s.toLowerCase() == "ftx") return "FTX";
+    return s.charAt(0).toUpperCase() + s.slice(1)
+  }
+
+%>
 <table class="table table-sm">
     <thead>
       <tr>
@@ -9,18 +19,24 @@
         <th scope="col">Exchange</th>
         <th scope="col">Description</th>
         <th scope="col">Subaccount</th>
+        <th scope="col">Testnet</th>
         <th scope="col">Actions</th>
       </tr>
     </thead>
     <tbody>
-        
-      <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tr>
+
+      <% accounts.forEach(account => {  %>
+        <tr>
+          <td><%= account.stub.toLowerCase() %></td>
+          <td><%= capitalize(account.exchange) %> <%= account.type != null ? " " + capitalize(account.type) : "" %></td>
+          <td><%= account.description %></td>
+          <td><%= account.parameters.subaccount %></td>
+          <td><%= Boolean(account.parameters.testnet) ? "Yes" : "No" %></td>
+          <td><a href="#" id="testapikeylink" data-toggle="tooltip" title="Test"><span class="fa fa-bolt"></span></a><a class="mx-3" href="#" id="editapikeylink" data-toggle="tooltip" title="Edit"><span class="fa fa-edit"></span></a><a href="#" id="deleteapikeylink" data-toggle="tooltip" title="Delete"><span class="fa fa-trash"></span></a></td>
+        </tr>
+      <% }); %>
+
+
 
     </tbody>
 </table>

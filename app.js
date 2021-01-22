@@ -19,8 +19,8 @@ loader.load_all()
 
 // Routers
 
-var apiRouter = require('./routes/routes.api');  
-var uiRouter = require('./routes/routes.ui');  
+var apiRouter = require('./routes/routes.api');
+var guiRouter = require('./routes/routes.gui');
 
 // Load Express
 
@@ -81,10 +81,21 @@ app.set('views', __dirname + '/views');
 
 app.use(express.static('views/assets'))
 
-// Router Mappings
+// Router Configuration
+  
+app.use('/rest', apiRouter);      // REST API
+app.use('/frostybot', apiRouter); // WebSocket API
+app.use('/ui', guiRouter);        // GUI
 
-app.use('/', apiRouter);
-app.use('/ui', uiRouter);
+// Redirect to the GUI
+app.all('/', async function(req, res) {
+    res.redirect('/ui')
+  //  next();
+});
+
+
+
+
 
 // Export app
 

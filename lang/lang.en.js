@@ -29,6 +29,7 @@ module.exports = {
         context_uuid:       'Context: {0}',
         trade_cmd_shortcut: 'Converting command shortcut \'{0}:{1}\' to \'trade:{0}:{1}\'',
         loaded_module:      'Loaded module: {0}',
+        token_verify:       'API Access Granted: Valid UI token: {0}',
         whitelist_verify:   'API Access Granted: {0} is whitelisted: {0}',
         whitelist_get:      'Retrieved IP address from the whitelist: {0}: {1}',
         symbolmap_get:      'Retrieved symbol mapping: {0}: {1} => {2}',

@@ -94,10 +94,22 @@ module.exports = class frostybot_core_module extends frostybot_module {
     initialize() {
     }
 
-    // Verify whitelist
+    // Verify if access is allowed using a valid token or whitelist
 
-    async verify_whitelist(ip) {
-        return await this.whitelist.verify(ip);
+    async verify_access(uuid, ip) {
+        // If multitenancy is enabled, require a uuid parameter if not accessing from localhost
+        var core_uuid = await this.encryption.core_uuid();
+        var uuid = (['127.0.0.1','::1'].includes(ip) && uuid == null ? core_uuid : uuid);
+        if (this.multiuser.is_enabled() && !['127.0.0.1','::1'].includes(ip) && uuid == null) {
+            await this.output.error('required_param', ['uuid']);
+            return false; 
+        }
+        context.set('uuid', uuid);
+        if (uuid != null && await this.multiuser.get_token(uuid, false)) {
+            this.output.debug('token_verify', [uuid]);
+            return true;
+        } else return await this.whitelist.verify(ip);
+
     }
 
     // Parse request
@@ -258,24 +270,6 @@ module.exports = class frostybot_core_module extends frostybot_module {
                         method: method
                     };
 
-                    // If multitenancy is enabled, require a tenant parameter if not accessing from localhost
-                    if (this.multiuser.is_enabled()) {
-                        if (context.get('srcIp') !== '127.0.0.1') {
-                            if (params.hasOwnProperty('uuid')) {
-                                var uuid = params.uuid;
-                                delete params.uuid;
-                            } else {
-                                return await this.output.parse(this.output.error('required_param', ['uuid']));
-                            }
-                        } else {
-                            var uuid = await this.encryption.core_uuid();
-                        }
-                    } else {
-                        var uuid = await this.encryption.core_uuid();
-                    }
-                    context.set('uuid', uuid);
-                    //this.output.debug('context_uuid', [uuid]);
-
                     // If no symbol is supplied, use the default symbol
                     if (module != 'symbolmap' && !params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
                         var exchangeid = this.accounts.get_exchange_from_stub(params.stub);
@@ -320,6 +314,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
                         }
                     }
 
+                    if (params.hasOwnProperty('uuid')) delete params.uuid;
                     let result = await global.frostybot._modules_[module][method](params);
                     var end = (new Date).getTime();
                     var duration = (end - start) / 1000;            

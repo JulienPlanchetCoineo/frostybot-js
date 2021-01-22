@@ -75,6 +75,21 @@ module.exports = class frostybot_multiuser_module extends frostybot_module {
         else
             return false;
     }
+    
+    // Get use token or see if it is still valid for the UI access to the API
+
+    async get_token(uuid, return_token = true) {
+        var result = await this.database.select('users', {uuid: uuid});
+        if (result.length == 1) {
+            var token = result[0]['token'];
+            var expiry = result[0]['expiry'];
+            var ts = (new Date()).getTime();
+            if (ts < expiry) {
+                return return_token ? token : true;
+            }
+        }
+        return false;
+    }
 
     
     // Add New User (returns the user UUID)

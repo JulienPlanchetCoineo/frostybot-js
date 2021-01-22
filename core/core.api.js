@@ -6,7 +6,7 @@ module.exports = {
 
     '/frostybot' : {
 
-        'post|/'                            :   'this:execute'      // Catch-all router for /frostybot Webhook
+        'post|/'                            :   'this:execute',     // Catch-all router for /frostybot Webhook
 
     },
 
@@ -83,7 +83,6 @@ module.exports = {
         'post|/websocket/:stub/subscribe/:channel'  :   'websocket:subscribe',  // Subscrive to websocket channel
 
     },
-
 
 }
 

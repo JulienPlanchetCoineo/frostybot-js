@@ -1,5 +1,55 @@
 $( document ).ready(function() {
 
+
+    // ---------------------------------------------------------
+    //   REST API Calls
+    // ---------------------------------------------------------
+
+    function updateContent(key, params = {}) {
+        var uuid = (localStorage) ? localStorage.getItem("uuid") : null;
+        $.get( "/ui/partial/" + uuid + "/" + key, params)
+            .done(function( html ) {
+                $('#'+key).html( html);
+            })
+            .fail(function( jqxhr, textStatus, error ) {
+                var err = textStatus + ", " + error;
+                console.log( "Request Failed: " + err );
+            });
+    }
+
+
+    // Create/Update API Keys
+
+    function submitApiKeysForm() {
+        var ex = $("#inputexchange").val();
+        var [exchange, type] = ex.split('_');
+        var data = {
+            uuid: (localStorage) ? localStorage.getItem("uuid") : null,
+            stub: $("#inputstub").val(),
+            exchange: exchange,
+            testnet: exchange == 'ftx' ? false : $("#testnet").is(":checked"),
+            apikey: $("#inputapikey").val(),
+            secret: $("#inputsecret").val(),
+            description: $("#description").val()
+        }
+        if (type != undefined) data['type'] = type;
+        $.ajax({
+            type: "POST",
+            url: "/rest/accounts",
+            data: data,
+            success : function(text){
+                if (text == "success"){
+                    alert('Cool');
+                }
+            }
+        });
+    }
+
+    $("#apikeysform").submit(function(event){
+        event.preventDefault();
+        submitApiKeysForm();
+    });
+
     // ---------------------------------------------------------
     //   API Key Form automation
     // ---------------------------------------------------------
@@ -15,22 +65,39 @@ $( document ).ready(function() {
         }
     }
 
+    function setApiKeyTitle(title) {
+        $( "#apikeystitle" ).html(title);
+    }
+
+    function hideApiKeyTableButtons() {
+        $( "#apikeysnavbar" ).hide();
+    }
+
+    function showApiKeyTableButtons() {
+        $( "#apikeysnavbar" ).show();
+    }
+
     function hideApiKeyForm() {
-        $( "#apikeyform" ).hide();
+        $( "#form_apikeys" ).hide();
     }
 
     function showApiKeyForm() {
-        $( "#apikeyform" ).show();
+        setApiKeyTitle('Configure API Key');
+        $( "#form_apikeys" ).show();
     }
 
     function hideApiKeyTable() {
-        $( "#apikeytable" ).hide();
+        hideApiKeyTableButtons();
+        $( "#table_apikeys" ).hide();
     }
 
     function showApiKeyTable() {
-        $( "#apikeytable" ).show();
+        setApiKeyTitle('API Keys');
+        showApiKeyTableButtons()
+        $( "#table_apikeys" ).show();
     }
 
+    updateContent('table_apikeys');
     hideApiKeyForm();
     showApiKeyTable();
     updateApiKeyFormFields();
@@ -44,10 +111,15 @@ $( document ).ready(function() {
         showApiKeyTable();
     });
 
-    $( "#addapikeybutton" ).on( "click", function() {
+    $( "#addapikeylink" ).on( "click", function() {
         showApiKeyForm();
         hideApiKeyTable();
     });
-
-
+    
+    $( "#apikeyrefreshlink" ).on( "click", function() {
+        hideApiKeyForm();
+        showApiKeyTable();
+        updateContent('table_apikeys');
+    });
+    
 });
