@@ -37,6 +37,9 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
 
     async leverage(params) {
         var [symbol, type, leverage] = this.utils.extract_props(params, ['symbol', 'type', 'leverage']);
+        await this.markets();
+        var market = await this.get_market_by_id_or_symbol(symbol);
+        symbol = market.id;
         var type = (type == 'cross' ? 'CROSSED' : (type == 'isolated' ? 'ISOLATED' : null));
         var leverage = leverage.toLowerCase().replace('x', '');
         await this.ccxt('fapiPrivate_post_margintype', { symbol: symbol, marginType: type});
@@ -65,7 +68,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
             .filter(raw_position => raw_position.positionAmt != 0)
             .forEach(async raw_position => {
                 const symbol = raw_position.symbol;
-                const market = await this.get_market_by_id_or_symbol(symbol);
+                const market = await this.get_market_by_id(symbol);
                 const direction = (raw_position.positionAmt > 0 ? 'long' : (raw_position.positionAmt <  0 ? 'short' : 'flat'));
                 const base_size = (raw_position.positionAmt * 1);
                 const entry_price = (raw_position.entryPrice * 1);
