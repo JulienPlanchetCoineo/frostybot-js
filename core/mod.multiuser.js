@@ -10,6 +10,15 @@ module.exports = class frostybot_multiuser_module extends frostybot_module {
         super()
     }
 
+    // Initialize
+
+    async initialize() {
+        // Create users table if not already created
+        if (this.database.type == 'sqlite') {
+            this.database.exec("CREATE TABLE IF NOT EXISTS users (uid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, uuid CHAR (38) UNIQUE NOT NULL DEFAULT (lower(hex( randomblob(4)) || '-' || hex( randomblob(2)) || '-' || '4' || substr( hex( randomblob(2)), 2) || '-' || substr('AB89', 1 + (abs(random()) % 4) , 1)  || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))) ), email   VARCHAR (100) UNIQUE NOT NULL, enabled BOOLEAN NOT NULL DEFAULT (1), last DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP), token TEXT, expiry  BIGINT);");
+        }
+    }
+
     // Enable Multi-User Mode
 
     async enable(params) {
@@ -62,10 +71,8 @@ module.exports = class frostybot_multiuser_module extends frostybot_module {
     // Check if Multi-User is Enabled
 
     async is_enabled() {
-        var type = this.database.type;
-        if (type != 'mysql') {
+        if (this.database.type != 'mysql') 
             return false;
-        }
         return await this.settings.get('core', 'multiuser:enabled', false);
     }
 

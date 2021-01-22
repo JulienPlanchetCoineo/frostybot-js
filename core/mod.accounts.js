@@ -129,6 +129,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
+        console.log(params);
 
 
         if ((params.exchange == 'binance') && (!params.hasOwnProperty('type'))) {

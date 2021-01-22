@@ -32,11 +32,9 @@
           <td><%= account.description %></td>
           <td><%= account.parameters.subaccount %></td>
           <td><%= Boolean(account.parameters.testnet) ? "Yes" : "No" %></td>
-          <td><a href="#" id="testapikeylink" data-toggle="tooltip" title="Test"><span class="fa fa-bolt"></span></a><a class="mx-3" href="#" id="editapikeylink" data-toggle="tooltip" title="Edit"><span class="fa fa-edit"></span></a><a href="#" id="deleteapikeylink" data-toggle="tooltip" title="Delete"><span class="fa fa-trash"></span></a></td>
+          <td><a href="#" data-stub="<%= account.stub.toLowerCase() %>" class="testapikeylink" data-toggle="tooltip" title="Test"><span class="fa fa-bolt"></span></a><a class="editapikeylink mx-3" href="#" data-stub="<%= account.stub.toLowerCase() %>" data-toggle="tooltip" title="Edit"><span class="fa fa-edit"></span></a><a href="#" class="deleteapikeylink" data-stub="<%= account.stub.toLowerCase() %>" data-toggle="tooltip" title="Delete"><span class="fa fa-trash"></span></a></td>
         </tr>
       <% }); %>
-
-
 
     </tbody>
 </table>

@@ -76,6 +76,13 @@ const api_methods = {
         'unsubscribe',
     ],
 
+    gui: [
+        'main',
+        'login',
+        'auth_callback',
+        'content',
+    ],
+
 }
 
 const frostybot_module = require('./mod.base')
@@ -100,7 +107,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
         // If multitenancy is enabled, require a uuid parameter if not accessing from localhost
         var core_uuid = await this.encryption.core_uuid();
         var uuid = (['127.0.0.1','::1'].includes(ip) && uuid == null ? core_uuid : uuid);
-        if (this.multiuser.is_enabled() && !['127.0.0.1','::1'].includes(ip) && uuid == null) {
+        if (await this.multiuser.is_enabled() && !['127.0.0.1','::1'].includes(ip) && uuid == null) {
             await this.output.error('required_param', ['uuid']);
             return false; 
         }
@@ -218,16 +225,16 @@ module.exports = class frostybot_core_module extends frostybot_module {
 
     // Execute Frostybot Command(s)
 
-    async execute(request) {
+    async execute(request, raw = null) {
         this.output.reset();
         var params = this.parse_request(request);
         if (this.utils.is_object(params) && params.hasOwnProperty('0') && params['0'].hasOwnProperty('command')) {
             params = Object.values(params);
         }
         if (this.utils.is_array(params)) {                          
-            var results = await this.execute_multiple(params);  // Multiple commands submitted
+            var results = await this.execute_multiple(params, raw);  // Multiple commands submitted
         } else {        
-            var results = await this.execute_single(params);     // Single command submitted
+            var results = await this.execute_single(params, raw);     // Single command submitted
         }
         return results;
     }
@@ -235,7 +242,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
 
     // Execute Multiple Commands
 
-    async execute_multiple(multi_params) {
+    async execute_multiple(multi_params, raw) {
         var results = [];
         if (this.utils.is_object(multi_params)) {
             multi_params = Object.values(multi_params)
@@ -243,7 +250,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
         for (var i = 0; i < multi_params.length; i++) {
             var params = multi_params[i];
             if (this.utils.is_object(params)) {
-                var result = await this.execute_single(params);
+                var result = await this.execute_single(params, raw);
                 results.push(result);    
             }
         }
@@ -252,12 +259,13 @@ module.exports = class frostybot_core_module extends frostybot_module {
 
     // Execute a Single Command
     
-    async execute_single(params) {
+    async execute_single(params, raw) {
         var parsed = this.parse_obj(params);
         if (parsed.length == 3) {
             var [module, method, params] = parsed;
             this.output.section('executing_command', [module, method]);
             this.output.notice('executing_command', [module, method]);
+            //this.output.notice('command_params', [{ ...{ command: module + ":" + method}, ...(this.utils.remove_props(params,['_raw_'])) }]);
             this.output.notice('command_params', [{ ...{ command: module + ":" + method}, ...params }]);
             if (this.load_module(module)) {
                 //this.output.debug('loaded_module', module)    
@@ -315,6 +323,8 @@ module.exports = class frostybot_core_module extends frostybot_module {
                     }
 
                     if (params.hasOwnProperty('uuid')) delete params.uuid;
+                    if (raw !== null) 
+                        params['_raw_'] = raw;
                     let result = await global.frostybot._modules_[module][method](params);
                     var end = (new Date).getTime();
                     var duration = (end - start) / 1000;            

@@ -74,6 +74,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
 
     is_empty(value) {
         return (
+            (value == undefined) ||
             (value == null) ||
             (value.hasOwnProperty('length') && value.length === 0) ||
             (value.constructor === Object && Object.keys(value).length === 0)
@@ -123,6 +124,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     // Change all of an objects keys to lowercase
 
     lower_props(obj) {
+        if (obj.hasOwnProperty('_raw_')) delete obj['_raw_'];
         if (this.is_object(obj)) {
             for (var key in obj) {
                 if (!obj.hasOwnProperty(key))
@@ -450,6 +452,7 @@ module.exports = class frostybot_utils_module extends frostybot_module {
 
     validator(params, schema) {
         params = this.lower_props(params);
+        if (params.hasOwnProperty('_raw_')) delete params['_raw_'];
         //schema = this.lower_props(schema);
 
         for (var prop in schema) {
