@@ -90,9 +90,14 @@ module.exports = class frostybot_config_module extends frostybot_module {
         if (settings != false) {
             var result = [];
             if (this.utils.is_object(settings))
-                for (var i = 0; i < Object.values(settings).length; i++)
-                    result.push(Object.values(settings)[i].stub);
-                result.push(settings.stub);
+                if (settings.hasOwnProperty('stub'))
+                    result.push(settings.stub)
+                else
+                    for (var i = 0; i < Object.values(settings).length; i++) {
+                        var val = Object.values(settings)[i];
+                        if (val.hasOwnProperty('stub')) 
+                            result.push(val);
+                    }
             if (this.utils.is_array(settings))
                 for (var i = 0; i < settings.length; i++)
                     result.push(settings[i].stub);
