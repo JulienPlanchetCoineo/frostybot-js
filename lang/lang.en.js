@@ -166,6 +166,16 @@ module.exports = {
 
         gui_enable:          'Failed to enable GUI',
         gui_disable:         'Failed to disable GUI',
+
+        add_provider:        'Failed to add signal provider: {0}',
+        add_provider_exch:   'Failed to add {1} exchange to signal provider: {0}',
+        add_provider_ip:     'Failed to whitelist IP {1} for signal provider: {0}',
+        del_provider_exch:   'Failed to remove {1} exchange from signal provider: {0}',
+        del_provider_ip:     'Failed to remove whitelisted IP {1} from signal provider: {0}',
+        invalid_provider:    'Invalid provider UUID: {0}',
+        invalid_user:        'Invalid user UUID: {0}',
+        exch_not_supported:  'Signal provider does not support exchange: {0}',
+        no_accounts:         'No {1} accounts configured for provider: {0}',
         
     },
 
@@ -215,6 +225,13 @@ module.exports = {
 
         gui_enable:          'Successfully enabled GUI',
         gui_disable:         'Successfully disabled GUI',
+
+        add_provider:        'Successfully added signal provider: {0}',
+        add_provider_exch:   'Successfully added {1} exchange to signal provider: {0}',
+        add_provider_ip:     'Successfully whitelisted IP {1} for signal provider: {0}',
+        del_provider_exch:   'Successfully removed {1} exchange from signal provider: {0}',
+        del_provider_ip:     'Successfully removed whitelisted IP {1} from signal provider: {0}',
+        signal_queued:       'Signal Queued: {0}: {1}',
 
     }
     

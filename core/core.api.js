@@ -79,6 +79,11 @@ module.exports = {
         'delete|/trade/:stub/order/:id'     :   'trade:cancel',     // Cancel specific order ID
         'delete|/trade/:stub/orders'        :   'trade:cancelall',  // Cancel all orders
 
+        // Signal Provider Signals
+
+        'post|/signal/send'                 :   'signals:send',     // Send signal provider signal
+        'post|/signals/send'                :   'signals:send',     // Send signal provider signal
+
         // Websocket Management
 
         'post|/websocket/:stub/subscribe/:channel'  :   'websocket:subscribe',  // Subscrive to websocket channel

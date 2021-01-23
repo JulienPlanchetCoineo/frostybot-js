@@ -88,6 +88,16 @@ const api_methods = {
         'content',
     ],
 
+    signals: [
+        'add_provider',
+        'add_exchange',
+        'remove_exchange',
+        'add_ip',
+        'remove_ip',
+        'get_providers',
+        'send',
+    ],
+
 }
 
 const frostybot_module = require('./mod.base')

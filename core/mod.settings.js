@@ -4,7 +4,7 @@ const frostybot_module = require('./mod.base')
 var context = require('express-http-context');
 md5 = require('md5');
 
-const global_keys = ['core', 'whitelist'];
+const global_keys = ['core', 'whitelist', 'signalprovider'];
 
 module.exports = class frostybot_settings_module extends frostybot_module {
 

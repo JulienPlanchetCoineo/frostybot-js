@@ -8,6 +8,8 @@ const config_keys = {
     'output:debug': 'boolean',                  // (Boolean) Enable debug output
     'debug:noexecute': 'boolean',               // (Boolean) Do not process order queue and execute orders on the exchange
     'trade:require_maxsize': 'boolean',         // (Boolean) Whether or not to require the maxsize parameter when using relative pricing
+    '{stub}:provider': 'string',                // (UUID) Signal provider configured for stub
+    '{stub}:defsize': 'string',                 // Default order size for signals on this stub
 };
 
 module.exports = class frostybot_config_module extends frostybot_module {
@@ -62,15 +64,49 @@ module.exports = class frostybot_config_module extends frostybot_module {
 
     }
 
+    // Get accounts stubs
+
+    async get_stubs() {
+        var settings = await this.settings.get('accounts');
+        if (settings != false) {
+            var result = [];
+            if (this.utils.is_object(settings))
+                result.push(settings.stub);
+            if (this.utils.is_array(settings)) 
+                for (var i = 0; i < settings.length; i++)
+                    result.push(seetings[i].stub)
+            console.log(result);
+            return result;
+        }
+        if (this.utils.is_object(accounts)) {
+            return Object.keys(accounts);
+        }
+        return [];
+    }
 
     // Set config parameter
 
     async set(params, val = null) {
 
+        var check_keys = config_keys;
+        var keys = Object.keys(check_keys);
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (key.includes('{stub}')) {
+                var val = check_keys[key];
+                var stubs = await this.get_stubs();
+                stubs.forEach(stub => {
+                    var newkey = key.replace(/{stub}/g, stub);
+                    check_keys[newkey] = val;
+                });
+                delete check_keys[key]
+            }            
+        }
+
         // Internal 
         if (this.utils.is_string(params)) {
             var key = params;
-            if (!Object.keys(config_keys).includes(key)) {
+            if (!Object.keys(check_keys).includes(key)) {
                 this.output.error('config_invalid_key', [key]);
                 return false;;
             } else {
@@ -87,10 +123,10 @@ module.exports = class frostybot_config_module extends frostybot_module {
                 var key = keys[i];
                 var val = params[key];
                 var validated = false;
-                if (!Object.keys(config_keys).includes(key)) {
+                if (!Object.keys(check_keys).includes(key)) {
                     this.output.error('config_invalid_key', [key]);
                 } else {
-                    var valstr = config_keys[key];
+                    var valstr = check_keys[key];
                     if (valstr.indexOf(':') > 0) 
                         var [valtype, valopt] = valstr.split(':');
                     else
