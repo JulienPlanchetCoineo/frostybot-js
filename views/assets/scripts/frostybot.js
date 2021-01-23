@@ -424,9 +424,9 @@ $( document ).ready(function() {
                     $('#inputprovider').append('<option value="' + provider.uuid + '">' + provider.name + '</option>');
                 })
                 $('#inputprovider').prop( "disabled", (providers.length == 0 ));
-                $('#inputprovider').val(curprovider);
-                $('#inputdefsize').val(defsize);
-                $('#inputmaxposqty').val(maxposqty);
+                $('#inputprovider').val(curprovider == false ? '' : curprovider);
+                $('#inputdefsize').val(defsize == false ? '' : defsize);
+                $('#inputmaxposqty').val(maxposqty == false ? '' : maxposqty);
             }
             $('#signalprovidersubmit').prop( "disabled", false );
             setApiKeyTitle('Configuration Options');
