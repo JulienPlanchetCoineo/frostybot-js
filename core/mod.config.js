@@ -86,27 +86,8 @@ module.exports = class frostybot_config_module extends frostybot_module {
     // Get accounts stubs
 
     async get_stubs() {
-        var settings = await this.settings.get('accounts');
-        if (settings != false) {
-            var result = [];
-            if (this.utils.is_object(settings))
-                if (settings.hasOwnProperty('stub'))
-                    result.push(settings.stub)
-                else
-                    for (var i = 0; i < Object.values(settings).length; i++) {
-                        var val = Object.values(settings)[i];
-                        if (val.hasOwnProperty('stub')) 
-                            result.push(val);
-                    }
-            if (this.utils.is_array(settings))
-                for (var i = 0; i < settings.length; i++)
-                    result.push(settings[i].stub);
-            return result;
-        }
-        if (this.utils.is_object(accounts)) {
-            return Object.keys(accounts);
-        }
-        return [];
+        var accounts = await this.accounts.get();
+        return Object.keys(accounts);
     }
 
 
