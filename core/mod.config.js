@@ -25,10 +25,29 @@ module.exports = class frostybot_config_module extends frostybot_module {
 
     async get(params, defval = null) {
 
+        var check_keys = {};
+        var keys = Object.keys(config_keys);
+
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            var val = config_keys[key];
+            if (key.includes('{stub}')) {
+                var stubs = await this.get_stubs();
+                stubs.forEach(stub => {
+                    if (stub != undefined) {
+                        var newkey = key.replace(/{stub}/g, stub);
+                        check_keys[newkey] = val;
+                    }
+                });
+            } else {
+                check_keys[key] = val;
+            }
+        }
+
         // Internal 
         if (this.utils.is_string(params)) {
             var key = params;
-            if (!Object.keys(config_keys).includes(key)) {
+            if (!Object.keys(check_keys).includes(key)) {
                 this.output.error('config_invalid_key', [key]);
                 return null;
             } else {
@@ -44,7 +63,7 @@ module.exports = class frostybot_config_module extends frostybot_module {
             var keys = Object.keys(params);
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
-                if (!Object.keys(config_keys).includes(key)) {
+                if (!Object.keys(check_keys).includes(key)) {
                     this.output.error('config_invalid_key', [key]);
                 } else {
                     var val = await this.settings.get('config', key, null);
