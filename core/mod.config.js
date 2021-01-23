@@ -75,7 +75,6 @@ module.exports = class frostybot_config_module extends frostybot_module {
             if (this.utils.is_array(settings)) 
                 for (var i = 0; i < settings.length; i++)
                     result.push(seetings[i].stub)
-            console.log(result);
             return result;
         }
         if (this.utils.is_object(accounts)) {
@@ -88,19 +87,23 @@ module.exports = class frostybot_config_module extends frostybot_module {
 
     async set(params, val = null) {
 
-        var check_keys = config_keys;
-        var keys = Object.keys(check_keys);
-        for (var i = 0; i < keys.length; i++) {
+        var check_keys = {};
+        var keys = Object.keys(config_keys);
+
+        for (var i = 0; i < config_keys.length; i++) {
             var key = keys[i];
+            var val = config_keys[key];
+        
             if (key.includes('{stub}')) {
-                var val = check_keys[key];
                 var stubs = await this.get_stubs();
                 stubs.forEach(stub => {
                     var newkey = key.replace(/{stub}/g, stub);
                     check_keys[newkey] = val;
                 });
-                delete check_keys[key]
-            }            
+            } else {
+                check_keys[key] = val;
+            }
+
         }
 
         // Internal 
