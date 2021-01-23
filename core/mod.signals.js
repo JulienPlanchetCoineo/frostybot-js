@@ -122,7 +122,7 @@ module.exports = class frostybot_signals_module extends frostybot_module {
 
         var markets = await this.trade.markets({stub: stub});
         var ignored = await this.config.get(stub + ':ignored');
-        ignored = ignored == null ? [] : ignored.split(",");
+        ignored = [null, false, ''].includes(ignored) ? [] : ignored.split(",");
         if (!this.utils.is_array(ignored)) ignored = [];
         var results = [];
         if (this.utils.is_array(markets)) {
