@@ -340,7 +340,10 @@ module.exports = class frostybot_core_module extends frostybot_module {
             if (this.load_module(module)) {
                 //this.output.debug('loaded_module', module)    
                 var method = this.utils.is_array(method.split(':')) ? method.split(':')[0] : method;
-                
+                if (params.hasOwnProperty('uuid')) {
+                    context.set('uuid', params.uuid);
+                }
+
                 if (this.method_exists(module, method)) {
                     var start = (new Date).getTime();
                     global.frostybot['command'] = {
