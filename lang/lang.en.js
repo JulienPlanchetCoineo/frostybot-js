@@ -46,6 +46,7 @@ module.exports = {
         ws_unsubscribe:     'Unsubscribed from websocket channel: {0}',
         multiuser_createdb: 'Creating multi-tenant database tables (if required)',
         debug_noexecute:    'Order execution disabled, clearing queue',
+        access_api_uuid:    'Access granted on API using uuid',
         access_local_core:  'Access granted on localhost using core uuid',
         access_gui_token:   'Access granted using verified token',
         access_api_core:    'Access granted on API using core uuid',
