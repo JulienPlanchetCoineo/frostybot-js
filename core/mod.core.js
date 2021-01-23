@@ -95,6 +95,7 @@ const api_methods = {
         'add_ip',
         'remove_ip',
         'get_providers',
+        'get_providers_by_stub',
         'send',
     ],
 

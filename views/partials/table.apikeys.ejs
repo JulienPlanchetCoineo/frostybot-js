@@ -12,14 +12,14 @@
   }
 
 %>
-<table class="table table-sm">
+<table class="table table-sm mb-0">
     <thead>
       <tr>
         <th scope="col">Stub</th>
         <th scope="col">Exchange</th>
         <th scope="col">Description</th>
         <th scope="col">Subaccount</th>
-        <th scope="col">Testnet</th>
+        <th scope="col text-center">Testnet</th>
         <th scope="col">Actions</th>
       </tr>
     </thead>
@@ -32,7 +32,12 @@
           <td><%= account.description %></td>
           <td><%= account.parameters.subaccount %></td>
           <td><%= Boolean(account.parameters.testnet) ? "Yes" : "No" %></td>
-          <td><a href="#" data-stub="<%= account.stub.toLowerCase() %>" class="testapikeylink" data-toggle="tooltip" title="Test"><span class="fa fa-bolt"></span></a><a class="editapikeylink mx-3" href="#" data-stub="<%= account.stub.toLowerCase() %>" data-toggle="tooltip" title="Edit"><span class="fa fa-edit"></span></a><a href="#" class="deleteapikeylink" data-stub="<%= account.stub.toLowerCase() %>" data-toggle="tooltip" title="Delete"><span class="fa fa-trash"></span></a></td>
+          <td>
+            <a href="#" data-stub="<%= account.stub.toLowerCase() %>" class="testapikeylink" data-toggle="tooltip" title="Test"><span class="fa fa-bolt fa-lg"></span></a>
+            <a class="editapikeylink ml-3" href="#" data-stub="<%= account.stub.toLowerCase() %>" data-toggle="tooltip" title="Edit API Key"><span class="fa fa-key fa-lg"></span></a>
+            <a href="#" class="signalslink ml-3" data-stub="<%= account.stub.toLowerCase() %>" data-toggle="tooltip" title="Additional Settings"><span class="fa fa-cog fa-lg"></span></a>
+            <a href="#" class="deleteapikeylink ml-3" data-stub="<%= account.stub.toLowerCase() %>" data-toggle="tooltip" title="Delete"><span class="fa fa-trash fa-lg fa-danger"></span></a>
+          </td>
         </tr>
       <% }); %>
 

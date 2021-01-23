@@ -65,6 +65,55 @@ module.exports = class frostybot_signals_module extends frostybot_module {
 
     }
 
+    // Get supported providers by account stub
+
+    async get_providers_by_stub(params) {
+
+        var schema = {
+            stub: { required: 'string', format: 'lowercase' }
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
+        var stub = params.stub;
+        console.log(stub);
+        var account = await this.accounts.get(stub);
+        account = account.hasOwnProperty(stub) ? account[stub] : account;
+        console.log(account);
+
+        if (account) {
+            var defsize = await this.config.get(stub + ':defsize');
+            var curprovider = await this.config.get(stub + ':provider');
+            var maxposqty = await this.config.get(stub + ':maxposqty');
+            var options = {
+                defsize :  defsize,
+                maxposqty :  maxposqty,
+                provider: curprovider
+            };
+            var exchange = account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : '');
+
+            console.log(exchange);
+            var providers = await this.get_providers();
+            if (this.utils.is_object(providers)) {
+                var data = Object.values(providers);
+                if (data.length > 0) {
+                    var data =  data.filter(item => item.exchanges.includes(exchange));
+                }
+                console.log(data);
+                return {
+                    options: options,
+                    data: data
+                }
+            }
+        }
+
+        return {
+            options: {},
+            data: []
+        }
+
+    }
+
     // Add new signal provider
 
     async add_provider(params) {

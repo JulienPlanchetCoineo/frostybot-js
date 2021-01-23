@@ -10,6 +10,7 @@ const config_keys = {
     'trade:require_maxsize': 'boolean',         // (Boolean) Whether or not to require the maxsize parameter when using relative pricing
     '{stub}:provider': 'string',                // (UUID) Signal provider configured for stub
     '{stub}:defsize': 'string',                 // Default order size for signals on this stub
+    '{stub}:maxposqty': 'string',               // Maximum number oif allowed positions on this stub
 };
 
 module.exports = class frostybot_config_module extends frostybot_module {
@@ -94,6 +95,8 @@ module.exports = class frostybot_config_module extends frostybot_module {
     // Set config parameter
 
     async set(params, val = null) {
+
+        delete params.token;
 
         var check_keys = {};
         var keys = Object.keys(config_keys);

@@ -6,6 +6,10 @@
     width: 80px;
 }
 
+.frostybot-form-label-lg {
+    width: 120px;
+}
+
 .frostybot-input {
     border: solid 1px #AAAAAA;
 }
@@ -14,6 +18,12 @@
     width: 500px;
     border: solid 1px #AAAAAA;
 }
+
+.frostybot-input-md {
+    width: 300px;
+    border: solid 1px #AAAAAA;
+}
+
 .frostybot-input-sm {
     width: 150px;
     border: solid 1px #AAAAAA;
@@ -24,12 +34,18 @@
 }
 
 .frostybot-panel-header {
+    height: 50px;
+    vertical-align: middle;
     background-color: #DDDDDD;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    padding-left: 10px;
-    padding-top: 5px;
+    padding-left: 14px;
+    padding-top: 10px;
     padding-bottom: 5px;
+    font-weight: bold;
+    font-size: 14pt;
+    color: #444444;
+    font-family: var(--bs-font-sans-serif);
 }
 
 .frostybot-panel-content {
@@ -46,6 +62,18 @@
     border: #AAAAAA;
     border-radius: 10px;
     padding: 0px;
+}
+
+.frostybot-navbutton {
+    padding: 2px;
+    border : none;
+    width: 80px;
+    color: #444444;
+}
+
+.frostybot-table-action {
+    height: 16px;
+    width: 16px;
 }
 
 .tab-content {

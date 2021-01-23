@@ -309,6 +309,8 @@ $( document ).ready(function() {
                 if (json.result == "success") {
                     var account = Object.values(json.data)[0];
                     $('#inputstub').val(account.stub);
+                    $('#inputstub').prop( "disabled", true );
+                    $('#stubinlinehelp').hide();
                     $('#inputexchange').val(account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : ''));
                     $('#inputapikey').val(account.parameters.apikey);
                     $('#inputsecret').val('');
@@ -325,6 +327,8 @@ $( document ).ready(function() {
             });
         } else {
             $('#inputstub').val('');
+            $('#inputstub').prop( "disabled", false );
+            $('#stubinlinehelp').show();
             $('#inputexchange').val('');
             $('#inputapikey').val('');
             $('#inputsecret').val('');
@@ -337,6 +341,75 @@ $( document ).ready(function() {
         }
         $( "inputstub" ).focus();
     }
+
+    // ---------------------------------------------------------
+    //   Signal Provider Management
+    // ---------------------------------------------------------
+
+    function hideSignalProvidersForm() {
+        showApiKeyTableButtons();
+        $( "#form_signalproviders" ).hide();
+    }
+
+    function showSignalProvidersForm(stub) {
+        $('#inputproviderstub').val(stub).prop( "disabled", true );
+        $('#inputprovider').empty().append('<option selected="selected" value="">None</option>');
+        $('#inputmaxposqty').empty().append('<option selected="selected" value="">Unlimited</option>');
+        for(var i=1; i<21; i++) {
+            $('#inputmaxposqty').append('<option value="'+ i + '">' + i + '</option>');
+        }
+        api('signals:get_providers_by_stub', {stub: stub}, function(json) {
+            if (json.result == "success") {
+                var options = json.data.options;
+                var curprovider = options.hasOwnProperty('provider') ? options.provider : 'null';
+                var defsize = options.hasOwnProperty('defsize') ? options.defsize : '';
+                var maxposqty = options.hasOwnProperty('maxposqty') ? options.maxposqty : '';
+                var providers = json.data.data;
+                providers.forEach(provider => {
+                    $('#inputprovider').append('<option value="' + provider.uuid + '">' + provider.name + '</option>');
+                })
+                $('#inputprovider').prop( "disabled", (providers.length == 0 ));
+                $('#inputprovider').val(curprovider);
+                $('#inputdefsize').val(defsize);
+                $('#inputmaxposqty').val(maxposqty);
+            }
+            setApiKeyTitle('Configuration Options');
+            hideApiKeyTableButtons()
+            $( "#form_signalproviders").show();    
+        });
+    }
+
+    function submitSignalProvidersForm() {
+        var stub = $("#inputproviderstub").val();
+        var provider = $("#inputprovider").val();
+        var defsize = $("#inputdefsize").val();
+        var maxposqty = $("#inputmaxposqty").val();
+        var data = {};
+        data[stub + ':provider'] = provider;
+        data[stub + ':defsize'] = defsize;
+        data[stub + ':maxposqty'] = maxposqty;
+        api('config:set', data, function(json) {
+            if (json.result == "success") {
+                showSuccess("Successfully set configuration options", 5000);
+                hideSignalProvidersForm();
+                hideApiKeyForm();
+                showApiKeyTable();
+                refreshApiKeyTable();
+            } else {
+                showError("Failed to set the configuration options for this account.", 5000)
+            }
+        });
+    }
+
+    $("#signalprovidersform").submit(function(event){
+        event.preventDefault();
+        submitSignalProvidersForm();
+    });
+
+    // ---------------------------------------------------------
+    //   Other
+    // ---------------------------------------------------------
+
 
     function hideApiKeyTable() {
         hideApiKeyTableButtons();
@@ -379,6 +452,7 @@ $( document ).ready(function() {
             $( ".editapikeylink" ).on( "click", function() {
                 var stub = $(this).attr('data-stub');
                 showApiKeyForm(stub);
+                hideSignalProvidersForm(stub);
                 hideApiKeyTable();
             });
             $( ".deleteapikeylink" ).on( "click", function() {
@@ -387,11 +461,19 @@ $( document ).ready(function() {
                     deleteApiKey(stub);
                 }
             });
+            $( ".signalslink" ).on( "click", function() {
+                var stub = $(this).attr('data-stub');
+                showSignalProvidersForm(stub);
+                hideApiKeyForm(stub);
+                hideApiKeyTable();
+            });
+
         });
     }
 
     refreshApiKeyTable();
     hideApiKeyForm();
+    hideSignalProvidersForm();
     showApiKeyTable();
     updateApiKeyFormFields();
 
@@ -401,16 +483,25 @@ $( document ).ready(function() {
 
     $( "#apiformcancel" ).on( "click", function() {
         hideApiKeyForm();
+        hideSignalProvidersForm();
+        showApiKeyTable();
+    });
+
+    $( "#signalproviderscancel" ).on( "click", function() {
+        hideApiKeyForm();
+        hideSignalProvidersForm();
         showApiKeyTable();
     });
 
     $( "#addapikeylink" ).on( "click", function() {
         showApiKeyForm();
         hideApiKeyTable();
+        hideSignalProvidersForm();
     });
     
     $( "#apikeyrefreshlink" ).on( "click", function() {
         hideApiKeyForm();
+        hideSignalProvidersForm();
         showApiKeyTable();
         refreshApiKeyTable();
     });

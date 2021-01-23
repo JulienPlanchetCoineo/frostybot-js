@@ -1,21 +1,35 @@
-<div role="navigation">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand frostybot-nav-title" id="apikeystitle" href="#">API Keys</a>
-      <div id="apikeysnavbar">
-        <ul class="navbar-nav">
-          <li class="nav-item active">
-            <a class="nav-link" href="#" id="addapikeylink"><span class="fa fa-plus"></span> Add</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" id="apikeyrefreshlink"><span class="fa fa-refresh"></span> Refresh</a>
-          </li>
-        </ul>
+<div class="frostybot-panel-header">
+  <div class="row">
+    <div class="col "><p class="m-0" id="apikeystitle">API Leys</p></div>
+    <div class="col text-right">
+      <div class="float-right" id="apikeysnavbar">
+        <button type="button" class="btn btn-default frostybot-navbutton" href="#" id="addapikeylink"><span class="fa fa-plus"></span> Add</button>
+        <button type="button" class="btn btn-default frostybot-navbutton" href="#" id="apikeyrefreshlink"><span class="fa fa-refresh"></span> Refresh</button>
       </div>
-    </nav>
+    </div>
+  </div>
+
+      <!--nav class="navbar navbar-expand-lg navbar-light bg-light frostybot-panel-header">
+        <a class="navbar-brand frostybot-nav-title" id="apikeystitle" href="#">API Keys</a>
+        <div id="apikeysnavbar">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+              <a class="nav-link" href="#" id="addapikeylink"><span class="fa fa-plus"></span> Add</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="apikeyrefreshlink"><span class="fa fa-refresh"></span> Refresh</a>
+            </li>
+          </ul>
+        </div>
+      </nav-->
 </div>
-<hr>
-<div id="form_apikeys">
+<div class="frostybot-panel-content pb-3">
+  <div id="form_apikeys">
     <%- include('../partials/form.apikeys.ejs'); %>
-</div>
-<div id="table_apikeys">
+  </div>
+  <div id="form_signalproviders">
+    <%- include('../partials/form.signalproviders.ejs'); %>
+  </div>
+  <div id="table_apikeys">
+  </div>
 </div>
