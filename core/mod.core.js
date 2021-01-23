@@ -161,6 +161,12 @@ module.exports = class frostybot_core_module extends frostybot_module {
             return (all_ip_allowed.includes(command) ? true : await this.whitelist.verify(ip));
         }
             
+        if (!localhost && isapi && multiuser && param_uuid == null && token_uuid == null) {
+            uuid = core_uuid;
+            this.output.debug('access_api_core')
+            context.set('uuid', uuid);
+            return (all_ip_allowed.includes(command) ? true : await this.whitelist.verify(ip));
+        }
 
         if (isapi && !multiuser && param_uuid == null) {
             uuid = core_uuid;
