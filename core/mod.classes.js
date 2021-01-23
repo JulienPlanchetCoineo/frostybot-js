@@ -231,14 +231,14 @@ class frostybot_exchange extends frostybot_base {
     // Methods to cache and how many seconds they should be cached for
 
     this.cached_methods = {
-      positions: 2,
-      position: 2,
+      //positions: 2,
+      //position: 2,
       available_equity_usd: 2,
       markets: 10,
       market: 10,
       ticker: 10,
-      balances: 2,
-      orders: 2,
+      //balances: 2,
+      //orders: 2,
       get_market_by_id: 10,
       get_market_by_symbol: 10,
       get_market_by_id_or_symbol: 10,
@@ -308,6 +308,7 @@ class frostybot_exchange extends frostybot_base {
       );
       var value = this.cache.get (key);
       if (value == undefined) {
+        if (this.handler == undefined) await this.load_handler (params.stub);
         var result = await this.handler.execute (method, params);
         this.cache.set (key, result, cachetime);
       } else {
