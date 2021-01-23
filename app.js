@@ -35,6 +35,17 @@ try {
 app.set('port', port);
 fs.writeFileSync(portfile, port)
 
+// Get Reverse Proxy Address 
+
+const proxyfile = __dirname + '/.proxy';
+try {
+  var proxy = fs.readFileSync(proxyfile, {encoding:'utf8', flag:'r'});
+  if (proxy == '') proxy = false;
+} catch {
+  var proxy = false;
+}
+
+
 // Trust reverse proxy if used
 // Only use this if you are configuring Frostybot behind a reverse proxy
 // Currently disabled to prevent source address spoofing using X-Forward-For headers
@@ -59,7 +70,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(context.middleware);
 app.use(function(req, res, next) {
     context.set('reqId', uuidv4());
-    var ip = (req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
+    var ip = ((proxy !== false ? req.headers['x-forwarded-for'] : false) || req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
     context.set('srcIp', ip);
     var reqId = context.get('reqId');
     next();

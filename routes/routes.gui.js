@@ -44,12 +44,23 @@ Object.keys(api).forEach(baseapi => {
                 body: {...command, ...req.params, ...req.query, ...body},
             }
 
-            // Uncomment the second line below if using Frostybot behind a reverse proxy
-            // Current commented out to prevent source address spoofing using x-forwarded-for headers
-            var ip = (req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
+            // Get Reverse Proxy Address 
+
+            const proxyfile = '../.proxy';
+            try {
+                var proxy = fs.readFileSync(proxyfile, {encoding:'utf8', flag:'r'});
+                if (proxy == '') proxy = false;
+            } catch {
+                var proxy = false;
+            }
+
+            // Get Source IP Address
+
+            var ip = ((proxy !== false ? req.headers['x-forwarded-for'] : false) || req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
+
             var uuid = params.hasOwnProperty('uuid') ? params.uuid : (params.hasOwnProperty('body') && params.body.hasOwnProperty('uuid') ? params.body.uuid : null);
             var token = params.hasOwnProperty('token') ? params.token : (params.hasOwnProperty('body') && params.body.hasOwnProperty('token') ? params.body.token : null);
-            //var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).replace('::ffff:','').replace('::1, ','');
+
             if (await core.verify_access(ip, uuid, token, params)) {
             //if (await core.verify_access(uuid, ip)) {
                 return await core.execute(params, {req : req, res : res });  // Works sliently different to the API
