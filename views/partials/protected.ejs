@@ -1,6 +1,6 @@
 <script>
     if (localStorage) {
-        var token = localStorage.getItem("token");
+        var token = JSON.parse(localStorage.getItem("token"));
         if (token == null) {
             document.location.href = '/ui/login';
         }

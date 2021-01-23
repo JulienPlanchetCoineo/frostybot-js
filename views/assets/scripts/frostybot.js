@@ -244,11 +244,10 @@ $( document ).ready(function() {
 
 
     function submitApiKeysForm() {
-        var uuid = (localStorage) ? localStorage.getItem("uuid") : null;
         var ex = $("#inputexchange").val();
         var [exchange, type] = ex.split('_');
         var data = {
-            uuid: (localStorage) ? localStorage.getItem("uuid") : null,
+            uuid: getUUID(),
             stub: $("#inputstub").val(),
             exchange: exchange,
             testnet: exchange == 'ftx' ? false : $("#inputtestnet").is(":checked"),
