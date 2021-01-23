@@ -224,7 +224,6 @@ module.exports = class frostybot_signals_module extends frostybot_module {
             return this.output.error('exch_not_supported', [exchange]);
 
         var accounts = await this.get_user_accounts(user_uuid);        
-        console.log(accounts);
         if (this.utils.is_array(accounts))
             accounts = accounts
                 .filter(account => (account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : '')) == exchange)
@@ -233,9 +232,8 @@ module.exports = class frostybot_signals_module extends frostybot_module {
 
         if (accounts.length == 0)
             return this.output.error('no_accounts', [provider_uuid, exchange]);
-        
-        console.log(accounts);
 
+        var commands = [];
         accounts.forEach(async account => {
 
             var cmd = {
@@ -248,10 +246,12 @@ module.exports = class frostybot_signals_module extends frostybot_module {
                 cmd['size'] = config[account.stub+':defsize'];
             }
 
-            const core = global.frostybot._modules_.core
-            await core.execute_single(cmd);
+            commands.push(cmd);
 
         });
+
+        var core = global.frostybot._modules_['core'];
+        core.execute_multiple(commands, true);
 
         //if (!user)
         //    return this.output.error('invalid_user', [user_uuid]);

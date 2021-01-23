@@ -3,9 +3,6 @@ var bodyParser = require('body-parser');
 const fs = require('fs'); 
 const { v4: uuidv4 } = require('uuid');
 var context = require('express-http-context');
-const google = require('googleapis').google;
-const jwt = require('jsonwebtoken');
-const OAuth2 = google.auth.OAuth2;
 const cookieParser = require('cookie-parser');
 
 // Set App Title
