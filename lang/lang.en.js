@@ -141,6 +141,8 @@ module.exports = {
         position_retrieve:  'You do not have a position on {0}',
         positions_retrieve: 'There was an error retrieving positions',
         position_none:      'You do not currently have a position on {0}',
+        position_maxposqty: 'Maximum positions on {0} reached: {1} positions',
+        position_ignoresym: 'Symbol {0} is on the ignore list for stub {1}',
 
         balancess_retrieve: 'There was an error retrieving balances',
 

@@ -76,10 +76,8 @@ module.exports = class frostybot_signals_module extends frostybot_module {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         var stub = params.stub;
-        console.log(stub);
         var account = await this.accounts.get(stub);
         account = account.hasOwnProperty(stub) ? account[stub] : account;
-        console.log(account);
 
         if (account) {
             var defsize = await this.config.get(stub + ':defsize');
@@ -91,15 +89,12 @@ module.exports = class frostybot_signals_module extends frostybot_module {
                 provider: curprovider
             };
             var exchange = account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : '');
-
-            console.log(exchange);
             var providers = await this.get_providers();
             if (this.utils.is_object(providers)) {
                 var data = Object.values(providers);
                 if (data.length > 0) {
                     var data =  data.filter(item => item.exchanges.includes(exchange));
                 }
-                console.log(data);
                 return {
                     options: options,
                     data: data
@@ -111,6 +106,64 @@ module.exports = class frostybot_signals_module extends frostybot_module {
             options: {},
             data: []
         }
+
+    }
+
+    // Get symbol ignore list for stub
+
+    async get_ignore_list(params) {
+        var schema = {
+            stub: { required: 'string', format: 'lowercase' }
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
+        var stub = params.stub;        
+
+        var markets = await this.trade.markets({stub: stub});
+        var ignored = await this.config.get(stub + ':ignored');
+        ignored = ignored == null ? [] : ignored.split(",");
+        if (!this.utils.is_array(ignored)) ignored = [];
+        var results = [];
+        if (this.utils.is_array(markets)) {
+            for(var i=0; i< markets.length; i++) {
+                var market = markets[i];
+                var symbol = market.symbol;
+                var ignore = ignored.includes(symbol);
+                results.push({ symbol: symbol, ignored: ignore});
+            }
+        }
+        return results;
+    }
+
+    // Set symbol ignore list for stub
+
+    async set_ignore_list(stub, list) {
+        await this.config.set(stub + ':ignored', list);
+    }
+
+    // Set if a symbol is ignored for a stub
+
+    async set_ignore(params) {
+        var schema = {
+            stub: { required: 'string', format: 'lowercase' },
+            symbol: { required: 'string', format: 'uppercase' },
+            ignored: { required: 'boolean' }
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
+        var [stub, symbol, ignored] = this.utils.extract_props(params, ['stub', 'symbol', 'ignored']);        
+
+        var list = await this.config.get(stub + ':ignored');
+        if (this.utils.is_array(list)) {
+            if (!list.includes(symbol)) {
+                list.push(symbol);
+                this.set_ignore_list(stub, list);
+            }
+        }
+    
+
 
     }
 

@@ -76,6 +76,10 @@
     width: 16px;
 }
 
+.frostybot-nav-left {
+    width : 120px;
+}
+
 .tab-content {
     background-color: #EEEEEE;
     margin : 10px;
@@ -114,6 +118,18 @@
     position: absolute;
     bottom: 3px;
     right: 3px;
+}
+
+.sims-selectable {
+    width: 160px;
+    font-family: var(--bs-font-sans-serif);
+    font-size: 12px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+.sims-selectable > a {
+    line-height: 20px;
 }
 
 .jq-toast-wrap { display: block; position: fixed; width: 250px;  pointer-events: none !important; margin: 0; padding: 0; letter-spacing: normal; z-index: 9000 !important; }

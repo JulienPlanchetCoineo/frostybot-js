@@ -1,0 +1,56 @@
+/*!
+ * SmartClass Checkbox plugin
+ * ===================================
+ *
+ * simsCheckbox.css
+ * developed by Mert Simsek (simsek97@gmail.com)
+ * for SmartClass Project [www.smartclass.us]
+ * -------------------------
+ */
+
+.btn-social {
+  position: relative;
+  padding-left: 44px !important;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.btn-social :first-child {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 32px !important;
+  line-height: 34px !important;
+  font-size: 1.6em!important;
+  text-align: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
+.btn-social-icon {
+  position: relative;
+  padding-left: 44px !important;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 34px;
+  width: 34px;
+  padding: 0;
+}
+.btn-social-icon :first-child {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 32px !important;
+  line-height: 34px !important;
+  font-size: 1.6em!important;
+  text-align: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
+.btn-social-icon :first-child {
+  border: none;
+  text-align: center;
+  width: 100%!important;
+}

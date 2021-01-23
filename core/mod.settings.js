@@ -65,6 +65,7 @@ module.exports = class frostybot_settings_module extends frostybot_module {
         } else {
             var val = JSON.stringify(value)
         }
+        if (val == null) val = '';
         query['value'] = val;
         var result = await this.database.insertOrReplace('settings', query);
         if (result.changes > 0) {

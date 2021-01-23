@@ -575,6 +575,44 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         
     }
 
+    // Check if the maximum amount of allowable positions is configured and if it has been met
+
+    async check_maxposqty(stub, symbol) {
+        var maxposqty = await this.config.get(stub + ':maxposqty');
+        if ((maxposqty != null) && (maxposqty != '') && (maxposqty > 0)) {
+            var positions = await this.exchange[stub].positions();
+            var alreadyinposition = false;
+            positions.forEach(position => {
+                if (position.symbol == symbol)
+                    alreadyinposition = true
+            })
+            if (this.utils.is_array(positions)) {
+                if ((positions.length >= maxposqty) && (!alreadyinposition)) {
+                    this.output.error('position_maxposqty', [stub, positions.length]);
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                return true;
+            }   
+        }
+        return true;
+    }
+
+    // Check if the maximum amount of allowable positions is configured and if it has been met
+
+    async check_ignorelist(stub, symbol) {
+        var ignorelist = await this.config.get(stub + ':ignored');
+        ignorelist =  (typeof(ignorelist) == 'string') ? ignorelist.split(",") : [];
+        if (this.utils.is_array(ignorelist) && ignorelist.includes(symbol)) {
+            this.output.error('position_ignoresym', [symbol, stub]);
+            return false;
+        }
+        return true;
+    }
+
+
 
     // Generate order parameters for standard orders (market, limit)
     
@@ -743,6 +781,14 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         params.market = await this.exchange[stub].get_market_by_id_or_symbol(symbol.toUpperCase());
         this.output.subsection('order_' + type);  
         var order_params = null;
+        if (['long', 'short', 'buy', 'sell'].includes(type)) {
+            if (!await this.check_maxposqty(stub, symbol)) {
+                return false;
+            }
+            if (!await this.check_ignorelist(stub, symbol)) {
+                return false;
+            }
+        }
         switch (type) {
             case 'long'        : order_params = await this.order_params_standard('long', params);
                                  break;

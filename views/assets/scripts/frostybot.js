@@ -34,6 +34,35 @@ $( document ).ready(function() {
     }
 
     // ---------------------------------------------------------
+    //   Cache Subsystem
+    // ---------------------------------------------------------
+
+    function cache_get(key) {
+        if (localStorage)
+            var data = localStorage.getItem('cache:' + key);
+            if (data != null) 
+                return JSON.parse(data);
+        return null;
+    }
+
+    function cache_set(key, data) {
+        if (localStorage)
+            localStorage.setItem('cache:' + key, JSON.stringify(data));
+    }
+
+    function cache_api(command, params, callback) {
+        var key = md5(command + JSON.stringify(params));
+        var data = cache_get(key);
+        if (data == null) {
+            api(command, params, function(result) {
+                cache_set(key, result);
+                callback(result);
+            });
+        } else 
+            return data;
+    }
+
+    // ---------------------------------------------------------
     //   AJAX Loading Icon
     // ---------------------------------------------------------
 
@@ -352,12 +381,38 @@ $( document ).ready(function() {
     }
 
     function showSignalProvidersForm(stub) {
+        $('.loadingmessage').show();
+        $('#signalprovidersubmit').prop( "disabled", true );
         $('#inputproviderstub').val(stub).prop( "disabled", true );
         $('#inputprovider').empty().append('<option selected="selected" value="">None</option>');
         $('#inputmaxposqty').empty().append('<option selected="selected" value="">Unlimited</option>');
         for(var i=1; i<21; i++) {
             $('#inputmaxposqty').append('<option value="'+ i + '">' + i + '</option>');
         }
+        $('#ignoredpairs').empty();
+        api('signals:get_ignore_list', {stub: stub}, function (json) {
+            if (json.result == "success") {
+                var data = json.data;
+                var list = '';
+                data.forEach(item => {
+                    var symbol = item.symbol;
+                    var ignored = item.ignored;
+                    list += '<li' + (ignored ? ' class="checked"' : '') + ' data-symbol="' + symbol + '">' + symbol + '</li>';
+                });
+                $('#ignoredpairs').append(list);
+                $('.loadingmessage').hide();
+                $(".ignoredpairs").simsCheckbox({
+                    btnStyle: 'checkbox',
+                    height: 'auto',    
+                    element: "li",
+                    titleIcon: "square-o",
+                    uncheckedClass: "btn-default unchecked",
+                    checkedClass: "btn-default checked",
+                    selectAllBtn: false,
+                    selectAllText: 'Select/Unselect All',
+                });
+            }
+        });
         api('signals:get_providers_by_stub', {stub: stub}, function(json) {
             if (json.result == "success") {
                 var options = json.data.options;
@@ -373,6 +428,7 @@ $( document ).ready(function() {
                 $('#inputdefsize').val(defsize);
                 $('#inputmaxposqty').val(maxposqty);
             }
+            $('#signalprovidersubmit').prop( "disabled", false );
             setApiKeyTitle('Configuration Options');
             hideApiKeyTableButtons()
             $( "#form_signalproviders").show();    
@@ -388,6 +444,15 @@ $( document ).ready(function() {
         data[stub + ':provider'] = provider;
         data[stub + ':defsize'] = defsize;
         data[stub + ':maxposqty'] = maxposqty;
+        var ignorelist = [];
+        $('.ignoredpairs li').each(function(idx, li) {
+            var checked = $(li).hasClass('checked');
+            var symbol = $(li).attr('data-symbol');
+            if (checked) {
+                ignorelist.push(symbol);
+            }
+        });
+        data[stub + ':ignored'] = ignorelist.join(',');
         api('config:set', data, function(json) {
             if (json.result == "success") {
                 showSuccess("Successfully set configuration options", 5000);

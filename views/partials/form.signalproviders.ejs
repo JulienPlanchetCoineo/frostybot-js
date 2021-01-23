@@ -1,35 +1,61 @@
-<form id="signalprovidersform">
-    <div class="row mb-2">
-      <label for="inputstub" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Stub</label>
-      <div class="col-sm-4">
-        <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="inputproviderstub">
-      </div>
+<form id="signalprovidersform" class="row">
+  <div class="row">
+
+    <div class="col">     <!--  LEFT COLUMN -->
+
+        <div class="row mb-2 flex-nowrap">
+          <label for="inputstub" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Stub</label>
+          <div class="col-sm-4">
+            <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="inputproviderstub">
+          </div>
+        </div>
+
+        <div class="row mb-2 flex-nowrap">
+          <label for="inputexchange" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Signal Provider</label>
+          <div class="col-sm-4">
+            <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-md" aria-label=".form-select-sm example" id="inputprovider"></select>
+          </div>
+        </div>
+  
+        <div class="row mb-2 flex-nowrap">
+          <label for="inputsubaccount" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Default Size</label>
+          <div class="col-sm-4">
+            <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="inputdefsize">
+          </div>
+        </div>
+  
+        <div class="row mb-2 flex-nowrap">
+          <label for="inputmaxposqty" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Max Positions</label>
+          <div class="col-sm-4">
+            <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputmaxposqty">
+            </select>
+          </div>
+        </div>
+
     </div>
-    <div class="row mb-2">
-      <label for="inputexchange" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Signal Provider</label>
-      <div class="col-sm-4">
-        <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-md" aria-label=".form-select-sm example" id="inputprovider">
-        </select>
+    <div class="col">     <!--  RIGHT COLUMN -->
+
+      <div class="row mb-2">
+        <label for="inputstub" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Ignored Pairs</label>
+        <div class="col-sm-4">
+          <div style="overflow-x: hidden; overflow-y: scroll; height: 200px; width: 350px; background-color: #EEEEEE;">
+            <label class="loadingmessage col-form-label-sm">(Loading, please wait...)</label>
+            <ul id="ignoredpairs" class="ignoredpairs">
+              
+            </ul>         
+          </div>
+        </div>
       </div>
+
     </div>
-    <div class="row mb-2">
-      <label for="inputsubaccount" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Default Size</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="inputdefsize">
-      </div>
-    </div>
-    <div class="row mb-2">
-      <label for="inputmaxposqty" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Max Positions</label>
-      <div class="col-sm-10">
-        <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputmaxposqty">
-        </select>
-      </div>
-    </div>
-    <div class="row mt-2">
-      <label for="" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">&nbsp;</label>
-      <div class="col-sm-10 mt-1">
+  </div>
+  <div class="row">
+      <div class="col text-center">
         <button type="submit" class="btn btn-success frostybot-button-sm" id="signalprovidersubmit"><span class="fa fa-check"></span> Submit</button>
         <button type="button" class="btn btn-primary frostybot-button-sm" id="signalproviderscancel"><span class="fa fa-ban"></span> Cancel</button>
       </div>
-    </div>
-  </form>
+  </div>
+</form>
+
+
+

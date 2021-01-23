@@ -11,6 +11,7 @@ const config_keys = {
     '{stub}:provider': 'string',                // (UUID) Signal provider configured for stub
     '{stub}:defsize': 'string',                 // Default order size for signals on this stub
     '{stub}:maxposqty': 'string',               // Maximum number oif allowed positions on this stub
+    '{stub}:ignored': 'string',                 // List of market symbols ignored from signals
 };
 
 module.exports = class frostybot_config_module extends frostybot_module {
@@ -153,6 +154,12 @@ module.exports = class frostybot_config_module extends frostybot_module {
                                             } else
                                                 this.output.error('config_invalid_value', [key, 'true or false']);
                                             break;
+                        case 'array'    :   val = this.utils.is_json(val) ? JSON.parse(val) : val;
+                                            if (this.utils.is_array(val) || this.utils.is_object(val)) {
+                                                validated = true;
+                                            } else
+                                                this.output.error('config_invalid_value', [key, 'an array']);
+                                            break;
                         case 'string'   :   if (this.utils.is_string(val)) 
                                                 validated = true;
                                             else
@@ -166,6 +173,9 @@ module.exports = class frostybot_config_module extends frostybot_module {
                 }
 
                     if (validated) {
+                        if (val == null || val == '') { 
+                            val = false; 
+                        }
                         if (await this.settings.set('config', key, val)) {
                             this.output.success('config_set', [key, val])
                             results[key] = val;
