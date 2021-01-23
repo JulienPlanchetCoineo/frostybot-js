@@ -71,10 +71,12 @@ module.exports = class frostybot_config_module extends frostybot_module {
         if (settings != false) {
             var result = [];
             if (this.utils.is_object(settings))
+                for (var i = 0; i < Object.values(settings).length; i++)
+                    result.push(Object.values(settings)[i].stub);
                 result.push(settings.stub);
-            if (this.utils.is_array(settings)) 
+            if (this.utils.is_array(settings))
                 for (var i = 0; i < settings.length; i++)
-                    result.push(seetings[i].stub)
+                    result.push(settings[i].stub);
             return result;
         }
         if (this.utils.is_object(accounts)) {
@@ -83,6 +85,7 @@ module.exports = class frostybot_config_module extends frostybot_module {
         return [];
     }
 
+
     // Set config parameter
 
     async set(params, val = null) {
@@ -90,21 +93,22 @@ module.exports = class frostybot_config_module extends frostybot_module {
         var check_keys = {};
         var keys = Object.keys(config_keys);
 
-        for (var i = 0; i < config_keys.length; i++) {
+        for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             var val = config_keys[key];
-        
             if (key.includes('{stub}')) {
                 var stubs = await this.get_stubs();
                 stubs.forEach(stub => {
-                    var newkey = key.replace(/{stub}/g, stub);
-                    check_keys[newkey] = val;
+                    if (stub != undefined) {
+                        var newkey = key.replace(/{stub}/g, stub);
+                        check_keys[newkey] = val;
+                    }
                 });
             } else {
                 check_keys[key] = val;
             }
-
         }
+
 
         // Internal 
         if (this.utils.is_string(params)) {
