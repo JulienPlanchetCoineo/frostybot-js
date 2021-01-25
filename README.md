@@ -1,4 +1,4 @@
-![logo](https://i.imgur.com/YAME6yT.png "#FrostyBot")
+![logo](https://i.imgur.com/sdvNN7T.png "#FrostyBot")
 
 ## Frostybot-JS : A NodeJS API endpoint for Cryptocurrency Trading
 
