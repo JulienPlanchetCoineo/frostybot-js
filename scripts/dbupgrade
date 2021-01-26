@@ -15,7 +15,7 @@ if [ "$TYPE" == "sqlite" ]; then
     UPGFILE="database/updates/update.sqlite.$DBVER.sql"
     if [ -f "$UPGFILE" ]; then
         echo "Upgrading $TYPE database using $UPGFILE" 
-        sqlite3 $FILE < $UPGFILE
+        sudo sqlite3 $FILE < $UPGFILE
         echo "Database upgrade completed"
     else
         echo "No database upgrade required"

@@ -33,3 +33,5 @@ PRAGMA foreign_keys = 1;
 INSERT OR REPLACE INTO `settings` (mainkey, subkey, value) VALUES ('core', 'sqlite:dbver', 1);
 
 INSERT OR REPLACE INTO `settings` (uuid, mainkey, subkey, value) VALUES ('00000000-0000-0000-0000-000000000000', 'whitelist', '::1', '{"ipAddress":"::1","description":"Localhost","canDelete":0}');
+
+UPDATE `settings` SET uuid = (SELECT REPLACE(value,'"','') FROM `settings` WHERE mainkey='core' and subkey='uuid') WHERE mainkey NOT IN ('core','whitelist');
