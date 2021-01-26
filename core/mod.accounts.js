@@ -138,7 +138,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         let testresult = await this.test(data);
         if (testresult) {
             data['stub'] = stub;
-            data = await this.utils.remove_props(data, ['tenant']);
+            data = await this.utils.remove_props(data, ['tenant','token']);
             data = await this.utils.encrypt_values(data, ['apikey', 'secret']);
             if (await this.settings.set('accounts', stub, data)) {
                 this.output.success('account_create', stub);
@@ -165,7 +165,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         if (testresult) {
             data['stub'] = stub;
             this.output.success('account_test', stub);
-            data = await this.utils.remove_props(data, ['tenant'])
+            data = await this.utils.remove_props(data, ['tenant','token'])
             data = await this.utils.encrypt_values(data, ['apikey', 'secret'])
             if (await this.settings.set('accounts', stub, data)) {
                 this.output.success('account_update', stub);
