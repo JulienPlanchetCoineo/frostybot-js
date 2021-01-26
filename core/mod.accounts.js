@@ -103,6 +103,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         delete params.description;
         delete params.exchange;
         delete params.type;
+        if (params.hasOwnProperty('token')) delete params.token;
         var data = {
             description: description,
             exchange: exchange,
