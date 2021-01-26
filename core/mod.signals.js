@@ -58,7 +58,7 @@ module.exports = class frostybot_signals_module extends frostybot_module {
                 result[provider.uuid] = provider;
             })
         } 
-        if (provider != null && providers != false && this.utils.is_object(providers) && providers.hasOwnProperty('uuid')) {
+        if (providers != null && providers != false && this.utils.is_object(providers) && providers.hasOwnProperty('uuid')) {
             result[providers.uuid] = providers;
         }
         return result;
