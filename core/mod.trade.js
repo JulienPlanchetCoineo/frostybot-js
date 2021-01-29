@@ -711,6 +711,17 @@ module.exports = class frostybot_trade_module extends frostybot_module {
 
     }
 
+    // Get total base size of orders
+
+    total_order_base(orders) {
+        if (!this.utils.is_array(orders)) 
+            orders = [orders];
+        var total = 0;
+        for(var i = 0; i < orders.length; i++) {
+            total += (orders[i].amount * 1);
+        }
+        return total;
+    }
 
     // Parse params and create an order
 
@@ -745,9 +756,13 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         // Order includes a stoploss or takeprofit component (long and short orders only)
         if (['long', 'short'].includes(type)) {
             if (params.stoptrigger != undefined) {
+                if (order_params !== false && params.stopbase == undefined && params.stopquote == undefined && params.stopusd == undefined && params.stopsize == undefined)
+                    params['stopbase'] = this.total_order_base(order_params);
                 await this.create_order('stoploss', params);
             }
             if (params.profittrigger != undefined) {
+                if (order_params !== false && params.profitbase == undefined && params.profitquote == undefined && params.profitusd == undefined && params.profitsize == undefined)
+                    params['profitbase'] = this.total_order_base(order_params);
                 await this.create_order('takeprofit', params);
             }    
         }
