@@ -168,6 +168,7 @@ module.exports = {
 
         gui_enable:          'Failed to enable GUI',
         gui_disable:         'Failed to disable GUI',
+        gui_recaptcha:       'Recaptcha verification failed',
 
         add_provider:        'Failed to add signal provider: {0}',
         add_provider_exch:   'Failed to add {1} exchange to signal provider: {0}',
@@ -227,6 +228,7 @@ module.exports = {
 
         gui_enable:          'Successfully enabled GUI',
         gui_disable:         'Successfully disabled GUI',
+        gui_recaptcha:       'Recaptcha verification succeeded',
 
         add_provider:        'Successfully added signal provider: {0}',
         add_provider_exch:   'Successfully added {1} exchange to signal provider: {0}',

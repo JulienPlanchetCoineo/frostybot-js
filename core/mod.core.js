@@ -85,6 +85,7 @@ const api_methods = {
         'register',
         'login',
         'auth_callback',
+        'verify_recaptcha',
         'content',
     ],
 

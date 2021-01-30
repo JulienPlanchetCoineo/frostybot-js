@@ -1,5 +1,6 @@
-const frostybot_module = require('./mod.base')
+const frostybot_module = require('./mod.base');
 var context = require('express-http-context');
+var axios = require('axios');
 
 module.exports = class frostybot_gui_module extends frostybot_module {
 
@@ -21,16 +22,20 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                 password: {
                     required: 'string'
                 },
-                recaptchakey: {
+                recaptchasite: {
+                    optional: 'string'
+                },
+                recaptchasecret: {
                     optional: 'string'
                 }
             }
     
             if (!(params = this.utils.validator(params, schema))) return false; 
     
-            var [email, password, recaptchakey] = this.utils.extract_props(params, ['email', 'password', 'recaptchakey']);
+            var [email, password, recaptchasite, recaptchasecret] = this.utils.extract_props(params, ['email', 'password', 'recaptchasite', 'recaptchasecret']);
 
-            await this.settings.set('core','gui:recaptchakey', (recaptchakey != undefined ? recaptchakey : false));
+            await this.settings.set('core','gui:recaptchasite', (recaptchasite != undefined ? recaptchasite : false));
+            await this.settings.set('core','gui:recaptchasecret', (recaptchasecret != undefined ? recaptchasecret : false));
 
             if (await this.user.core(email, password)) {
                 if (await this.settings.set('core','gui:enabled', true)) {
@@ -121,8 +126,8 @@ module.exports = class frostybot_gui_module extends frostybot_module {
         return res.send(auth);        
         */
         var multiuser = await this.settings.get('core','multiuser:enabled');
-        var recaptchakey = await this.settings.get('core','gui:recaptchakey',false);
-        return this.render_page(res, "pages/login", { pageTitle: 'Login', regsuccess: regsuccess, sessiontimeout: sessiontimeout, showregister: (multiuser ? true: false), recaptchakey: recaptchakey });
+        var recaptchasite = await this.settings.get('core','gui:recaptchasite',false);
+        return this.render_page(res, "pages/login", { pageTitle: 'Login', regsuccess: regsuccess, sessiontimeout: sessiontimeout, showregister: (multiuser ? true: false), recaptchasite: recaptchasite });
     }
 
     // Register User
@@ -133,8 +138,8 @@ module.exports = class frostybot_gui_module extends frostybot_module {
             return this.render_error(res, 'Cannot register more users. Multi-user mode is not enabled.');
         if (!(await this.gui_is_enabled()))
             return this.render_error(res, 'GUI is not enabled.');
-        var recaptchakey = await this.settings.get('core','gui:recaptchakey',false);
-        return this.render_page(res, "pages/register", { pageTitle: 'Register', recaptchakey: recaptchakey });
+        var recaptchasite = await this.settings.get('core','gui:recaptchasite',false);
+        return this.render_page(res, "pages/register", { pageTitle: 'Register', recaptchasite: recaptchasite });
     }
 
     // Get Content
@@ -164,6 +169,22 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                 return res.send({'error' : 'invalid_key'});
             }
         }
+    }
+
+    // Verify Recaptcha Response
+
+    async verify_recaptcha(params) {
+        var response = params.response;
+        var recaptchasecret = await this.settings.get('core','gui:recaptchasecret',false);
+        if (recaptchasecret != false) {
+            var result = await axios.post('https://www.google.com/recaptcha/api/siteverify?secret='+recaptchasecret+'&response='+response,{},{headers: {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"},});
+            var data = result.data;
+            if ((data.success == true) && (data.score > 0.7)) {
+                return this.output.success('gui_recaptcha');
+            }
+                
+        }
+        return this.output.error('gui_recaptcha');
     }
 
     // Render Page

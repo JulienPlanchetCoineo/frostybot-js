@@ -1,11 +1,6 @@
 <%- include('../partials/header.ejs'); %>
-<% if (recaptchakey != false) { %>
-<script src="https://www.google.com/recaptcha/api.js"></script>
-<script>
-  function onSubmit(token) {
-    document.getElementById("registerform").submit();
-  }
-</script>
+<% if (recaptchasite != false) { %>
+  <script src="https://www.google.com/recaptcha/api.js?render=<%= recaptchasite %>"></script>
 <% } %>
 <div class="container">
   <div class="row justify-content-center">
@@ -13,7 +8,7 @@
       <div class="w-100 frostybot-panel-header"><p class="m-0"><span class="fa fa-user-plus"></span> <b>Register</b></p></div>
       <div class="w-100 frostybot-panel-content">
         <div class="container">
-          <form id="registerform">
+          <form id="registerform" data-recaptchasite="<%= recaptchasite %>">
             <div class="mb-3">
               <label for="inputemail" class="form-label">Email Address</label>
               <input type="email" class="form-control" id="inputemail">
@@ -27,7 +22,7 @@
               <input type="password" class="form-control" id="inputconfirm">
             </div>
             <div class="mb-3 text-center">
-              <button type="submit" <% if (recaptchakey != false) { %> data-sitekey="<%= recaptchakey %>" data-callback="onSubmit" data-action="submit"<% } %>  class="g-recaptcha btn btn-success frostybot-button-sm m-2"><span class="fa fa-user-plus"></span> Register</button><button type="button" id="cancelbutton" class="btn btn-primary frostybot-button-sm m-2"><span class="fa fa-ban"></span> Cancel</button>
+              <button type="submit" class="btn btn-success frostybot-button-sm m-2"><span class="fa fa-user-plus"></span> Register</button><button type="button" id="cancelbutton" class="btn btn-primary frostybot-button-sm m-2"><span class="fa fa-ban"></span> Cancel</button>
             </div>
           </form>
           <script>

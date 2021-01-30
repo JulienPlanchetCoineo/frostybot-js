@@ -19,6 +19,7 @@
     "array-flatten": "^3.0.0",
     "assertion-error": "^1.1.0",
     "async-hook-jl": "^1.7.6",
+    "axios": "^0.21.1",
     "balanced-match": "^1.0.0",
     "base64-js": "^1.5.1",
     "basic-auth": "^2.0.1",

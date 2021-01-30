@@ -230,7 +230,21 @@ $( document ).ready(function() {
 
     $("#registerform").submit(function(event){
         event.preventDefault();
-        submitRegistrationForm();
+        var recaptchasite = $("#registerform").data('recaptchasite');
+        if (recaptchasite == false) {
+            submitRegistrationForm();    
+        } else {
+            grecaptcha.ready(function() {
+                grecaptcha.execute(recaptchasite, {action: 'register'}).then(function(response) {
+                    api('gui:verify_recaptcha', {response: response}, function(json) {
+                        if (json.result == "success") 
+                            submitRegistrationForm();
+                        else
+                            showError('reCaptcha Failure');
+                    });
+                });
+            });
+        }
     });
 
     // ---------------------------------------------------------
@@ -263,7 +277,21 @@ $( document ).ready(function() {
 
     $("#loginform").submit(function(event){
         event.preventDefault();
-        submitLoginForm();
+        var recaptchasite = $("#loginform").data('recaptchasite');
+        if (recaptchasite == false) {
+            submitLoginForm();    
+        } else {
+            grecaptcha.ready(function() {
+                grecaptcha.execute(recaptchasite, {action: 'login'}).then(function(response) {
+                    api('gui:verify_recaptcha', {response: response}, function(json) {
+                        if (json.result == "success") 
+                            submitLoginForm();
+                        else
+                            showError('reCaptcha Failure');
+                    });
+                });
+            });
+        }
     });
 
 
