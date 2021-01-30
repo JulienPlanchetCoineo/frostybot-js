@@ -20,12 +20,17 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                 },
                 password: {
                     required: 'string'
+                },
+                recaptchakey: {
+                    optional: 'string'
                 }
             }
     
             if (!(params = this.utils.validator(params, schema))) return false; 
     
-            var [email, password] = this.utils.extract_props(params, ['email', 'password']);
+            var [email, password, recaptchakey] = this.utils.extract_props(params, ['email', 'password', 'recaptchakey']);
+
+            await this.settings.set('core','gui:recaptchakey', (recaptchakey != undefined ? recaptchakey : false));
 
             if (await this.user.core(email, password)) {
                 if (await this.settings.set('core','gui:enabled', true)) {
@@ -116,7 +121,8 @@ module.exports = class frostybot_gui_module extends frostybot_module {
         return res.send(auth);        
         */
         var multiuser = await this.settings.get('core','multiuser:enabled');
-        return this.render_page(res, "pages/login", { pageTitle: 'Login', regsuccess: regsuccess, sessiontimeout: sessiontimeout, showregister: (multiuser ? true: false) });
+        var recaptchakey = await this.settings.get('core','gui:recaptchakey',false);
+        return this.render_page(res, "pages/login", { pageTitle: 'Login', regsuccess: regsuccess, sessiontimeout: sessiontimeout, showregister: (multiuser ? true: false), recaptchakey: recaptchakey });
     }
 
     // Register User
@@ -127,7 +133,8 @@ module.exports = class frostybot_gui_module extends frostybot_module {
             return this.render_error(res, 'Cannot register more users. Multi-user mode is not enabled.');
         if (!(await this.gui_is_enabled()))
             return this.render_error(res, 'GUI is not enabled.');
-        return this.render_page(res, "pages/register", { pageTitle: 'Register' });
+        var recaptchakey = await this.settings.get('core','gui:recaptchakey',false);
+        return this.render_page(res, "pages/register", { pageTitle: 'Register', recaptchakey: recaptchakey });
     }
 
     // Get Content

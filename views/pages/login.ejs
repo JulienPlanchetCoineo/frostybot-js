@@ -1,5 +1,12 @@
 <%- include('../partials/header.ejs'); %>
-
+<% if (recaptchakey != false) { %>
+  <script src="https://www.google.com/recaptcha/api.js"></script>
+  <script>
+    function onSubmit(token) {
+      document.getElementById("loginform").submit();
+    }
+  </script>
+  <% } %>
 <div class="container">
   <div class="row justify-content-center">
     <div class="frostybot-panel w-50">
@@ -22,7 +29,7 @@
               <input type="password" class="form-control" id="inputpassword">
             </div>
             <div class="mb-3 text-center">
-              <button type="submit" class="btn btn-success m-2 frostybot-button-sm"><span class="fa fa-sign-in"></span> Login</button><% if (showregister) { %><button type="button" id="registerbutton" class="btn btn-primary frostybot-button-sm"><span class="fa fa-user-plus"></span> Register</button><% } %>
+              <button type="submit" <% if (recaptchakey != false) { %> data-sitekey="<%= recaptchakey %>" data-callback="onSubmit" data-action="submit"<% } %> class="g-recaptcha btn btn-success m-2 frostybot-button-sm"><span class="fa fa-sign-in"></span> Login</button><% if (showregister) { %><button type="button" id="registerbutton" class="btn btn-primary frostybot-button-sm"><span class="fa fa-user-plus"></span> Register</button><% } %>
             </div>
           </form>
           <script>
