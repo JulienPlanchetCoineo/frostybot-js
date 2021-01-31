@@ -179,12 +179,13 @@ module.exports = class frostybot_gui_module extends frostybot_module {
         if (recaptchasecret != false) {
             var result = await axios.post('https://www.google.com/recaptcha/api/siteverify?secret='+recaptchasecret+'&response='+response,{},{headers: {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"},});
             var data = result.data;
-            if ((data.success == true) && (data.score > 0.7)) {
-                return this.output.success('gui_recaptcha');
-            }
-                
+            if (data.success == true) 
+                if (data.score >= 0.5) 
+                    return this.output.success('gui_recaptcha', [data.score]);
+                else
+                    return this.output.error('gui_recaptcha', [data.score]);            
         }
-        return this.output.error('gui_recaptcha');
+        return this.output.error('gui_recaptcha', [false]);
     }
 
     // Render Page
