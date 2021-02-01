@@ -38,6 +38,17 @@
     width: 110px;
 }
 
+.frostybot-button-md {
+    width: 170px;
+}
+
+.frostybot-qrcode {
+    width: 225px;
+    height: 225px;
+    margin-bottom: 10px;
+    border: solid 1px #444444;
+}
+
 .frostybot-panel-header {
     height: 50px;
     vertical-align: middle;
@@ -126,7 +137,7 @@
 }
 
 .sims-selectable {
-    width: 160px;
+    width: 140px;
     font-family: var(--bs-font-sans-serif);
     font-size: 12px;
     margin-bottom: 0px;

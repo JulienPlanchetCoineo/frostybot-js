@@ -2,7 +2,8 @@
 
 const frostybot_module = require('./mod.base')
 var context = require('express-http-context');
-
+var speakeasy = require('speakeasy');
+var qrcode = require('qrcode');
 
 module.exports = class frostybot_user_module extends frostybot_module {
 
@@ -174,23 +175,32 @@ module.exports = class frostybot_user_module extends frostybot_module {
 
         var schema = {
             email: {
-                required: 'string',
+                required: 'string'
             },
             password: {
                 required: 'string'
+            },
+            token2fa: {
+                optional: 'string'
             }
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
 
-        var [email, password] = this.utils.extract_props(params, ['email', 'password']);
+        var [email, password, token2fa] = this.utils.extract_props(params, ['email', 'password', 'token2fa']);
 
         var result = await this.database.select('users', { email: email});
         if (result.length == 1) {
             var userdata = result[0];
             var uuid = userdata.uuid;
+            var key2fa = await this.get_2fa(uuid);
             var decr_pass = await this.encryption.decrypt(JSON.parse(userdata.password), uuid);
             if (password == decr_pass) {
+                if (key2fa !== false) {
+                    var verify = await this.verify_2fa(key2fa, token2fa);
+                    if (verify === false)
+                        return this.output.error('invalid_token')
+                }
                 this.output.success('user_auth', [email]);
                 var token = await this.create_token(uuid);
                 if (token !== false)
@@ -218,6 +228,117 @@ module.exports = class frostybot_user_module extends frostybot_module {
         return false;
     }
 
+    // Change password
+
+    async change_password(params) {
+
+        var schema = {
+            oldpassword: {
+                required: 'string'
+            },
+            newpassword: {
+                required: 'string'
+            }
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+
+        var [uuid, oldpassword, newpassword] = this.utils.extract_props(params, ['uuid', 'oldpassword', 'newpassword']);
+
+        if (uuid == undefined)
+            uuid = params.token.uuid;
+
+        var result = await this.database.select('users', { uuid: uuid});
+        if (result.length == 1) {
+            var userdata = result[0];
+            var uuid = userdata.uuid;
+            var decr_pass = await this.encryption.decrypt(JSON.parse(userdata.password), uuid);
+            if (oldpassword == decr_pass) {
+                var encr_pass = JSON.stringify(await this.encryption.encrypt(newpassword, uuid));
+                var result = await this.database.update('users', {password: encr_pass}, {uuid, uuid});
+                if (result.changes > 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+    }
+
+    // Enable 2FA for user
+
+    async enable_2fa(params) {
+        
+        var [token, key, checktoken] = this.utils.extract_props(params, ['token', 'key', 'checktoken']);
+
+        var uuid = token.uuid;
+
+        if (await this.verify_2fa(key, checktoken)) {
+            var result = await this.database.update('users',  {'2fa': key}, { uuid: uuid });
+            if (result.changes > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Disable 2FA for user
+
+    async disable_2fa(params) {
+
+        var [token, checktoken] = this.utils.extract_props(params, ['token', 'checktoken']);
+
+        var uuid = token.uuid;
+
+        if (await this.verify_2fa(uuid, checktoken)) {
+            var result = await this.database.update('users',  {'2fa': 'false'}, { uuid: uuid });
+            if (result.changes > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Create new 2FA barcode
+
+    async create_2fa_secret() {
+        var secret = speakeasy.generateSecret({length: 20, name: 'FrostyBot'});
+        var qrcodeurl = await qrcode.toDataURL(secret.otpauth_url);
+        return {secret: secret, qrcode: qrcodeurl};
+    }
+
+    // Check if 2FA is enabled
+
+    async get_2fa(uuid) {
+        var result = await this.database.select('users', {uuid: uuid});
+        if (result.length == 1) {
+            var secret = result[0]['2fa'];
+            if (String(secret) != "false")
+                return secret;
+        }
+        return false;
+    }
+
+    // Test Verify 2FA Token Before 
+
+    async verify_2fa(key, token) {
+    
+        if (key.length == 36)
+            var secret = await this.get_2fa(key);
+        else
+            var secret = key;
+
+        if (secret !== false) {
+            var verified = speakeasy.totp.verify({
+                secret: secret,
+                encoding: 'base32',
+                token: token
+              });
+            return verified;
+        }
+        return false;
+    }
 
     // Check if user email address already exists
 

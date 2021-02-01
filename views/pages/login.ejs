@@ -9,7 +9,7 @@
       <div class="w-100 frostybot-panel-content">
         <div class="container">
           <form id="loginform" data-recaptchasite="<%= recaptchasite %>">
-            <div class="mb-3">
+            <div class="mb-3 flex-nowrap">
               <% if (regsuccess) { %>
                 <p>You have successfully registered, please login below:<br /></p>
               <% } %>
@@ -19,9 +19,15 @@
               <label for="inputemail" class="form-label">Email Address</label>
               <input type="email" class="form-control" id="inputemail">
             </div>
-            <div class="mb-3">
-              <label for="inputpassword" class="form-label">Password</label>
-              <input type="password" class="form-control" id="inputpassword">
+            <div class="row mb-3 flex-nowrap">
+              <div class="col">
+                <label for="inputpassword" class="form-label">Password</label>
+                <input type="password" class="form-control frostybot-input-sm" id="inputpassword">  
+              </div>
+              <div class="col">
+                <label for="input2fa" class="form-label">2FA Token <i>(if enabled)</i></label>
+                <input type="text" class="form-control frostybot-input-sm" id="input2fa">
+              </div>
             </div>
             <div class="mb-3 text-center">
               <button type="submit" class="btn btn-success m-2 frostybot-button-sm"><span class="fa fa-sign-in"></span> Login</button><% if (showregister) { %><button type="button" id="registerbutton" class="btn btn-primary frostybot-button-sm"><span class="fa fa-user-plus"></span> Register</button><% } %>

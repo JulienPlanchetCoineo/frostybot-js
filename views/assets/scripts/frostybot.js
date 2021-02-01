@@ -254,13 +254,15 @@ $( document ).ready(function() {
     function submitLoginForm() {
         var email = $("#inputemail").val();
         var password = $("#inputpassword").val();
+        var token2fa = $("#input2fa").val();
         if (!validateEmail(email)) {
             showError('Invalid email address');
             return false;
         }
         var data = {
             email: email,
-            password: password
+            password: password,
+            token2fa: token2fa
         }
         api('user:login', data, function(json) {
             if (json.result == "success") {
@@ -497,6 +499,99 @@ $( document ).ready(function() {
     $("#signalprovidersform").submit(function(event){
         event.preventDefault();
         submitSignalProvidersForm();
+    });
+
+    // ---------------------------------------------------------
+    //   Change Password
+    // ---------------------------------------------------------
+
+    
+    function submitChangePasswordForm() {
+        var oldpassword = $('#inputoldpassword').val();
+        var newpassword = $('#inputnewpassword').val();
+        var confirmpassword = $('#inputconfirmpassword').val();
+        if (newpassword != confirmpassword) {
+            showError('New password and confirm password do not match');
+            return false;
+        }
+        var uuid = getUUID();
+        var data = {
+            uuid: uuid,
+            oldpassword: oldpassword,
+            newpassword: newpassword
+        }
+        api('user:change_password', data, function(json) {
+            if ((json.result == "success") && (json.data == true)) {
+                showSuccess("Successfully changed password", 5000);
+                $('#inputoldpassword').val('');
+                $('#inputnewpassword').val('');
+                $('#inputconfirmpassword').val('');
+            } else {
+                showError("Failed to change password, please ensure you supplied the correct old password.", 5000)
+            }
+        });
+
+    }
+
+    $("#changepasswordform").submit(function(event){
+        event.preventDefault();
+        submitChangePasswordForm();
+    });
+
+    // ---------------------------------------------------------
+    //   2FA Form
+    // ---------------------------------------------------------
+
+
+    function showEnable2FAForm() {
+        updateContent('form_2fa', {enable: true}, function() {
+            $( "#verify2fabutton" ).on( "click", function() {
+                var token = $( "#input2faverify" ).val();
+                var secret = $('#input2fasecret').val();
+                var data = {
+                    key: secret,
+                    checktoken: token
+                }
+                api('user:enable_2fa', data, function(json) {
+                    if ((json.result == "success") && (json.data == true)) {
+                        showSuccess('2FA Enabled');
+                        refresh2FAForm();
+                    } else {
+                        showError('There was an error enabling 2FA, please verify your token');
+                    }
+                });
+            });        
+        });
+    }
+
+    function disable2FA() {
+        var token = $('#input2faverify').val();
+        var data = {
+            checktoken: token
+        }
+        api('user:disable_2fa', data, function(json) {
+            if ((json.result == "success") && (json.data == true)) {
+                showSuccess('2FA Disabled');
+                refresh2FAForm();
+            } else {
+                showError('There was an error disbling 2FA, please verify your token');
+            }
+        });
+    }
+
+    function refresh2FAForm() {
+        updateContent('form_2fa', {}, function() {
+            $( "#enable2fabutton" ).on( "click", showEnable2FAForm);        
+            $( "#disable2fabutton" ).on( "click", disable2FA);        
+        });
+    }
+
+    refresh2FAForm();
+
+    $( "#enable2fabutton" ).on( "click", function() {
+        updateContent('form_2fa', {enable: true}, function() {
+
+        });        
     });
 
     // ---------------------------------------------------------

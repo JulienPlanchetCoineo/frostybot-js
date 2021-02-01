@@ -188,7 +188,7 @@ class frostybot_output extends frostybot_base {
     super ();
     this.command = command;
     this.params = params != null
-      ? helper.censorProps (params, ['apikey', 'secret'])
+      ? helper.censorProps (params, ['apikey', 'secret', 'password', 'oldpassword', 'newpassword'])
       : undefined;
     this.result = result;
     this.type = type;

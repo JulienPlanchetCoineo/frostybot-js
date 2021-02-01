@@ -67,10 +67,14 @@ const api_methods = {
     user: [
         'multiuser_enable',
         'multiuser_disable',
+        'enable_2fa',
+        'disable_2fa',
+        'verify_2fa',
         'register',
         'login',
         'add',
         'delete',
+        'change_password',
     ],
 
     websocket: [

@@ -162,6 +162,24 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                     case 'table_apikeys'    :   var accounts = await this.accounts.get();
                                                 data[key] = accounts;
                                                 break;
+                    case 'form_2fa'         :   if (params.hasOwnProperty('enable') && String(params.enable) == 'true') {
+                                                    var secret = await this.user.create_2fa_secret();
+                                                    var config = {
+                                                        enabled: false,
+                                                        enable: true,
+                                                        secret: secret.secret.base32,
+                                                        qrcode: secret.qrcode
+                                                    }
+                                                } else {
+                                                    var user2fa = await this.user.get_2fa(uuid);
+                                                    var config = {
+                                                        enabled: (user2fa == false ? false : true),
+                                                        enable: false,
+                                                    };
+                                                }
+                                                data[key] = config;    
+                                                break;
+
                 }
                 var template = key.split('_').join('.');
                 return this.render_page(res, "partials/" + template + ".ejs", data);   
