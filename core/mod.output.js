@@ -274,7 +274,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
             var objmsgs = [];
             //this.add_message(type, "{".padStart(3, " "), { toLog: false, toResults: false, noTrim: true });
             for (const [prop, val] of Object.entries(message)) {
-                if (['apikey','secret','password'].includes(prop.toLowerCase())) {
+                if (['apikey','secret','password','oldpassword','newpassword'].includes(prop.toLowerCase())) {
                     var outstr = '********';
                 } else {
                     var outstr = this.utils.is_empty(val) ? null : this.utils.serialize(val);
