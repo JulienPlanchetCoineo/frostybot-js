@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../core/core.gui');
+const fs = require('fs'); 
 
 // Create routes
 

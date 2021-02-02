@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../core/core.api');
+const fs = require('fs'); \
 
 // Create routes
 
@@ -44,9 +45,6 @@ Object.keys(api).forEach(baseapi => {
                 body: {...command, ...req.params, ...req.query, ...body}
             }
             
-            // Uncomment the second line below if using Frostybot behind a reverse proxy
-            // Current commented out to prevent source address spoofing using x-forwarded-for headers
-
             // Get Reverse Proxy Address 
 
             const proxyfile = '../.proxy';

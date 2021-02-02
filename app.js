@@ -33,7 +33,7 @@ try {
   var port = (process.env.FROSTYBOT_PORT || 80);
 }
 app.set('port', port);
-fs.writeFileSync(portfile, port)
+fs.writeFileSync(portfile, port.toString())
 
 // Get Reverse Proxy Address 
 
