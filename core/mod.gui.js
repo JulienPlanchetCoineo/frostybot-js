@@ -159,7 +159,7 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                 var key = params.key;
                 var data = { uuid : uuid };
                 switch (key) {
-                    case 'table_apikeys'    :   var accounts = await this.accounts.get();
+                    case 'table_accounts'   :   var accounts = await this.accounts.get();
                                                 data[key] = accounts;
                                                 break;
                     case 'form_2fa'         :   if (params.hasOwnProperty('enable') && String(params.enable) == 'true') {

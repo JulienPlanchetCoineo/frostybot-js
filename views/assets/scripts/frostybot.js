@@ -298,11 +298,11 @@ $( document ).ready(function() {
 
 
     // ---------------------------------------------------------
-    //   API Key Management
+    //   Account Management
     // ---------------------------------------------------------
 
 
-    function submitApiKeysForm() {
+    function submitAccountsForm() {
         var ex = $("#inputexchange").val();
         var [exchange, type] = ex.split('_');
         var data = {
@@ -321,21 +321,21 @@ $( document ).ready(function() {
         api('accounts:add', data, function(json) {
             if (json.result == "success") {
                 showSuccess("Successfully added API key", 5000);
-                hideApiKeyForm();
-                showApiKeyTable();
-                refreshApiKeyTable();
+                hideAccountsForm();
+                showAccountsTable();
+                refreshAccountsTable();
             } else {
                 showError("Failed to add account, please check the API key and secret and try again.", 5000)
             }
         });
     }
 
-    $("#apikeysform").submit(function(event){
+    $("#accountsform").submit(function(event){
         event.preventDefault();
-        submitApiKeysForm();
+        submitAccountsForm();
     });
 
-    function updateApiKeyFormFields() {
+    function updateAccountsFormFields() {
         var val = $( "#inputexchange" ).val();
         if (val == 'ftx') {
             $( "#subaccountfield" ).show();
@@ -346,23 +346,23 @@ $( document ).ready(function() {
         }
     }
 
-    function setApiKeyTitle(title) {
-        $( "#apikeystitle" ).html(title);
+    function setAccountsTitle(title) {
+        $( "#accountstitle" ).html(title);
     }
 
-    function hideApiKeyTableButtons() {
-        $( "#apikeysnavbar" ).hide();
+    function hideAccountsTableButtons() {
+        $( "#accountsnavbar" ).hide();
     }
 
-    function showApiKeyTableButtons() {
-        $( "#apikeysnavbar" ).show();
+    function showAccountsTableButtons() {
+        $( "#accountsnavbar" ).show();
     }
 
-    function hideApiKeyForm() {
-        $( "#form_apikeys" ).hide();
+    function hideAccountsForm() {
+        $( "#form_accounts" ).hide();
     }
 
-    function showApiKeyForm(stub = null) {
+    function showAccountsForm(stub = null) {
         if (stub != null) {
             api('accounts:get', {stub: stub}, function(json) {
                 if (json.result == "success") {
@@ -377,9 +377,9 @@ $( document ).ready(function() {
                     $('#inputtestnet').prop( "checked", account.parameters.testnet == "true" ? true : false);
                     $('#inputdescription').val(account.description);
                     $('#inputsubaccount').val(account.parameters.subaccount);
-                    updateApiKeyFormFields();
-                    setApiKeyTitle('Configure API Key');
-                    $( "#form_apikeys" ).show();
+                    updateAccountsFormFields();
+                    setAccountsTitle('Configure API Key');
+                    $( "#form_accounts" ).show();
                 } else {
                     showError('Failed to load account details');
                 }
@@ -394,25 +394,115 @@ $( document ).ready(function() {
             $("#inputsecret").attr("placeholder", "");
             $('#inputtestnet').prop( "checked", false);
             $('#inputdescription').val('');
-            updateApiKeyFormFields();
-            setApiKeyTitle('Configure API Key');
-            $( "#form_apikeys" ).show();
+            updateAccountsFormFields();
+            setAccountsTitle('Configure Account');
+            $( "#form_accounts" ).show();
         }
         $( "inputstub" ).focus();
     }
 
-    // ---------------------------------------------------------
-    //   Signal Provider Management
-    // ---------------------------------------------------------
 
-    function hideSignalProvidersForm() {
-        showApiKeyTableButtons();
-        $( "#form_signalproviders" ).hide();
+    function hideAccountsTable() {
+        hideAccountsTableButtons();
+        $( "#table_accounts" ).hide();
     }
 
-    function showSignalProvidersForm(stub) {
+    function showAccountsTable() {
+        setAccountsTitle('Accounts');
+        showAccountsTableButtons()
+        $( "#table_accounts" ).show();
+    }
+
+    function testAccount(stub) {
+        api('accounts:test', { stub: stub}, function(json) {
+            if (json.result == "success") {
+                showSuccess('Account tested successfully');
+            } else {
+                showFail('Account test failed')
+            }
+        });
+    }
+
+    function deleteAccount(stub) {
+        api('accounts:delete', { stub: stub}, function(json) {
+            if (json.result == "success") {
+                showSuccess('Account deleted successfully');
+                refreshAccountsTable();
+            } else {
+                showFail('Failed to delete Account')
+            }
+        });    
+    }
+
+    function refreshAccountsTable() {
+        updateContent('table_accounts', {}, function() {
+            $( ".testaccountlink" ).on( "click", function() {
+                var stub = $(this).attr('data-stub');
+                testAccount(stub);
+            });
+            $( ".editaccountlink" ).on( "click", function() {
+                var stub = $(this).attr('data-stub');
+                showAccountsForm(stub);
+                hideConfigForm(stub);
+                hideAccountsTable();
+            });
+            $( ".deleteaccountlink" ).on( "click", function() {
+                if (confirm("Are you sure you wish to delete this account?")) {
+                    var stub = $(this).attr('data-stub');
+                    deleteAccount(stub);
+                }
+            });
+            $( ".configlink" ).on( "click", function() {
+                var stub = $(this).attr('data-stub');
+                showConfigForm(stub);
+                hideAccountsForm(stub);
+                hideAccountsTable();
+            });
+
+        });
+    }
+
+    refreshAccountsTable();
+    hideAccountsForm();
+    hideConfigForm();
+    showAccountsTable();
+    updateAccountsFormFields();
+
+    $( "#inputexchange" ).on( "change", function() {
+        updateAccountsFormFields();
+    });
+
+    $( "#accountscancel" ).on( "click", function() {
+        hideAccountsForm();
+        hideConfigForm();
+        showAccountsTable();
+    });
+
+    $( "#addaccountlink" ).on( "click", function() {
+        showAccountsForm();
+        hideAccountsTable();
+        hideConfigForm();
+    });
+    
+    $( "#accountsrefreshlink" ).on( "click", function() {
+        hideAccountsForm();
+        hideConfigForm();
+        showAccountsTable();
+        refreshAccountsTable();
+    });
+
+    // ---------------------------------------------------------
+    //   Account Config Management
+    // ---------------------------------------------------------
+
+    function hideConfigForm() {
+        showAccountsTableButtons();
+        $( "#form_config" ).hide();
+    }
+
+    function showConfigForm(stub) {
         $('.loadingmessage').show();
-        $('#signalprovidersubmit').prop( "disabled", true );
+        $('#configsubmit').prop( "disabled", true );
         $('#inputproviderstub').val(stub).prop( "disabled", true );
         $('#inputprovider').empty().append('<option selected="selected" value="">None</option>');
         $('#inputmaxposqty').empty().append('<option selected="selected" value="">Unlimited</option>');
@@ -458,14 +548,14 @@ $( document ).ready(function() {
                 $('#inputdefsize').val(defsize == false ? '' : defsize);
                 $('#inputmaxposqty').val(maxposqty == false ? '' : maxposqty);
             }
-            $('#signalprovidersubmit').prop( "disabled", false );
-            setApiKeyTitle('Configuration Options');
-            hideApiKeyTableButtons()
-            $( "#form_signalproviders").show();    
+            $('#configsubmit').prop( "disabled", false );
+            setAccountsTitle('Configuration Options');
+            hideAccountsTableButtons()
+            $( "#form_config").show();    
         });
     }
 
-    function submitSignalProvidersForm() {
+    function submitConfigForm() {
         var stub = $("#inputproviderstub").val();
         var provider = $("#inputprovider").val();
         var defsize = $("#inputdefsize").val();
@@ -486,20 +576,27 @@ $( document ).ready(function() {
         api('config:set', data, function(json) {
             if (json.result == "success") {
                 showSuccess("Successfully set configuration options", 5000);
-                hideSignalProvidersForm();
-                hideApiKeyForm();
-                showApiKeyTable();
-                refreshApiKeyTable();
+                hideConfigForm();
+                hideAccountsForm();
+                showAccountsTable();
+                refreshAccountsTable();
             } else {
                 showError("Failed to set the configuration options for this account.", 5000)
             }
         });
     }
 
-    $("#signalprovidersform").submit(function(event){
+    $("#configform").submit(function(event){
         event.preventDefault();
-        submitSignalProvidersForm();
+        submitConfigForm();
     });
+
+    $( "#configcancel" ).on( "click", function() {
+        hideAccountsForm();
+        hideConfigForm();
+        showAccountsTable();
+    });
+
 
     // ---------------------------------------------------------
     //   Change Password
@@ -597,102 +694,6 @@ $( document ).ready(function() {
     // ---------------------------------------------------------
     //   Other
     // ---------------------------------------------------------
-
-
-    function hideApiKeyTable() {
-        hideApiKeyTableButtons();
-        $( "#table_apikeys" ).hide();
-    }
-
-    function showApiKeyTable() {
-        setApiKeyTitle('API Keys');
-        showApiKeyTableButtons()
-        $( "#table_apikeys" ).show();
-    }
-
-    function testApiKey(stub) {
-        api('accounts:test', { stub: stub}, function(json) {
-            if (json.result == "success") {
-                showSuccess('API Key tested successfully');
-            } else {
-                showFail('API Key test failed')
-            }
-        });
-    }
-
-    function deleteApiKey(stub) {
-        api('accounts:delete', { stub: stub}, function(json) {
-            if (json.result == "success") {
-                showSuccess('API Key deleted successfully');
-                refreshApiKeyTable();
-            } else {
-                showFail('Failed to delete API key')
-            }
-        });    
-    }
-
-    function refreshApiKeyTable() {
-        updateContent('table_apikeys', {}, function() {
-            $( ".testapikeylink" ).on( "click", function() {
-                var stub = $(this).attr('data-stub');
-                testApiKey(stub);
-            });
-            $( ".editapikeylink" ).on( "click", function() {
-                var stub = $(this).attr('data-stub');
-                showApiKeyForm(stub);
-                hideSignalProvidersForm(stub);
-                hideApiKeyTable();
-            });
-            $( ".deleteapikeylink" ).on( "click", function() {
-                if (confirm("Are you sure you wish to delete this API key?")) {
-                    var stub = $(this).attr('data-stub');
-                    deleteApiKey(stub);
-                }
-            });
-            $( ".signalslink" ).on( "click", function() {
-                var stub = $(this).attr('data-stub');
-                showSignalProvidersForm(stub);
-                hideApiKeyForm(stub);
-                hideApiKeyTable();
-            });
-
-        });
-    }
-
-    refreshApiKeyTable();
-    hideApiKeyForm();
-    hideSignalProvidersForm();
-    showApiKeyTable();
-    updateApiKeyFormFields();
-
-    $( "#inputexchange" ).on( "change", function() {
-        updateApiKeyFormFields();
-    });
-
-    $( "#apiformcancel" ).on( "click", function() {
-        hideApiKeyForm();
-        hideSignalProvidersForm();
-        showApiKeyTable();
-    });
-
-    $( "#signalproviderscancel" ).on( "click", function() {
-        hideApiKeyForm();
-        hideSignalProvidersForm();
-        showApiKeyTable();
-    });
-
-    $( "#addapikeylink" ).on( "click", function() {
-        showApiKeyForm();
-        hideApiKeyTable();
-        hideSignalProvidersForm();
-    });
-    
-    $( "#apikeyrefreshlink" ).on( "click", function() {
-        hideApiKeyForm();
-        hideSignalProvidersForm();
-        showApiKeyTable();
-        refreshApiKeyTable();
-    });
 
     
 });

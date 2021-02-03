@@ -1,4 +1,4 @@
-<form id="apikeysform" autocomplete="off">
+<form id="accountsform" autocomplete="off">
     <div class="row mb-2">
       <label for="inputstub" class="col-sm-2 col-form-label-sm frostybot-form-label">Stub</label>
       <div class="col-sm-2" style="width: 160px;">
@@ -12,8 +12,8 @@
     </div>
     <div class="row mb-2">
       <label for="inputexchange" class="col-sm-2 col-form-label-sm frostybot-form-label">Exchange</label>
-      <div class="col-sm-2" style="width: 160px;">
-        <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputexchange">
+      <div class="col-sm-2" style="width: 220px;">
+        <select class="form-select form-select-sm form-control-md frostybot-input frostybot-input-md" style="width: 200px;" aria-label=".form-select-sm example" id="inputexchange">
 
             <%
 
@@ -21,7 +21,9 @@
                 deribit: "Deribit",
                 ftx: "FTX",
                 binance_spot: "Binance Spot",
-                binance_futures: "Binance Futures",
+                binance_futures: "Binance USDT Futures",
+                binance_coinm: "Binance COIN-M Futures",
+                binanceus: "Binance US",
                 bitmex: "Bitmex",
                 binance_spot: "Binance Spot",
               };
@@ -78,8 +80,8 @@
     </div>
     <div class="row mt-3">
       <div class="col-sm-8 offset-sm-1">
-        <button type="submit" class="btn btn-success frostybot-button-sm" id="apiformsubmit"><span class="fa fa-check"></span> Submit</button>
-        <button type="button" class="btn btn-primary frostybot-button-sm" id="apiformcancel"><span class="fa fa-ban"></span> Cancel</button>
+        <button type="submit" class="btn btn-success frostybot-button-sm" id="accountssubmit"><span class="fa fa-check"></span> Submit</button>
+        <button type="button" class="btn btn-primary frostybot-button-sm" id="accountscancel"><span class="fa fa-ban"></span> Cancel</button>
       </div>
     </div>
   </form>
