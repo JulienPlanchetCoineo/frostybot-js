@@ -6,9 +6,9 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
 
     constructor(stub) {
         super(stub);
-        this.stablecoins = ['USDT','BUSD'];          // Stablecoins supported on this exchange
+        this.stablecoins = ['USD'];                  // Stablecoins supported on this exchange
         this.order_sizing = 'base';                  // Exchange requires base size for orders
-        this.collateral_assets = ['USDT','BUSD'];    // Assets that are used for collateral
+        this.collateral_assets = ['BTC','BNB'];      // Assets that are used for collateral
         this.balances_market_map = '{currency}/USD'  // Which market to use to convert non-USD balances to USD
         this.param_map = {                           // Order parameter mappings
             limit             : 'LIMIT',
@@ -43,7 +43,7 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
         var type = (type == 'cross' ? 'CROSSED' : (type == 'isolated' ? 'ISOLATED' : null));
         var leverage = leverage.toLowerCase().replace('x', '');
         await this.ccxt('fapiPrivate_post_margintype', { symbol: symbol, marginType: type});
-        var leverageResult = await this.ccxt('fapiPrivate_post_leverage', { symbol: symbol, leverage: leverage});
+        var leverageResult = await this.ccxt('dapiPrivate_post_leverage', { symbol: symbol, leverage: leverage});
         if ((leverageResult.hasOwnProperty('leverage')) && (leverageResult.leverage == leverage)) {
             return true;
         } else {
@@ -60,7 +60,7 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
     // Get list of current positions
 
     async positions() { 
-        let raw_positions = await this.ccxt('fapiPrivate_get_positionrisk');
+        let raw_positions = await this.ccxt('dapiPrivate_get_positionrisk');
         await this.markets();
         // Get futures positions
         var positions = []; 
@@ -87,7 +87,7 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
         if (this.data.markets != null) {
             return this.data.markets;
         }
-        var tickers = await this.ccxt('dapiPublicGetTickerBookTicker');
+        await this.fetch_tickers();
         let results = await this.ccxt('fetchMarkets')
         var raw_markets = results;
         this.data.markets = [];
@@ -100,9 +100,9 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
                 const type = 'futures';
                 const base = raw_market.base;
                 const quote = raw_market.quote;
-                var ticker = tickers.filter(tick => tick.symbol == raw_market.id)[0];
-                const bid = ticker != null ? ticker.bidPrice : null;
-                const ask = ticker != null ? ticker.askPrice : null;
+                var ticker = this.data.tickers.hasOwnProperty(id) ? this.data.tickers[id] : null;
+                const bid = ticker != null ? ticker.bid : null;
+                const ask = ticker != null ? ticker.ask : null;
                 const expiration = (raw_market.expiration != null ? raw_market.expiration : null);
                 const contract_size = (raw_market.info.contractSize != null ? raw_market.info.contractSize : 1);
                 const price_filter  = this.utils.filter_objects(raw_market.info.filters, {filterType: 'PRICE_FILTER'} );
@@ -126,7 +126,7 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
-        var tickersRaw = await this.ccxt('fapiPublic_get_ticker_bookticker')
+        var tickersRaw = await this.ccxt('dapiPublic_get_ticker_bookticker')
         for (var i = 0; i < tickersRaw.length; i++) {
             var tickerRaw = tickersRaw[i];
             var symbol = tickerRaw.symbol;
