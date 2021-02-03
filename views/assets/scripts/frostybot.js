@@ -514,6 +514,7 @@ $( document ).ready(function() {
             if (json.result == "success") {
                 var data = json.data;
                 var list = '';
+                data = data.sort((a, b) => (a.ignored > b.ignored) ? 1 : -1).sort((a, b) => (a.ignored == b.ignored && a.symbol > b.symbol) ? 1 : -1)
                 data.forEach(item => {
                     var symbol = item.symbol;
                     var ignored = item.ignored;
