@@ -206,12 +206,17 @@ module.exports = class frostybot_exchange_base {
             price = 1;
             return price;
         } else {
-            var mapsymbol = this.balances_market_map.replace('{currency}', currency);
-            var market = this.data.markets_by_symbol[mapsymbol];
-            if (market != null) {
-                price = (market.bid + market.ask) / 2;
-                return price;
-            }
+            for (var i = 0; i < this.stablecoins.length; i++) {
+                var stablecoin = this.stablecoins[i];
+                var mapsymbol = this.balances_market_map.replace('{currency}', currency).replace('{stablecoin}', stablecoin);
+                if (this.data.markets_by_symbol.hasOwnProperty(mapsymbol)) {
+                    var market = this.data.markets_by_symbol[mapsymbol];
+                    if (market != null) {
+                        price = (market.bid + market.ask) / 2;
+                        return price;
+                    }        
+                }    
+            };
         }
         return false;
     }
