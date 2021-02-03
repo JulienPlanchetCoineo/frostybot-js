@@ -235,7 +235,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
             case  'base'    :   amount = (basesize != null ? basesize : quotesize / price);
                                 this.output.debug('exchange_size_base', market.base)
                                 break;
-            case  'quote'   :   amount = (quotesize != null ? quotesize : basesize * price);
+            case  'quote'   :   amount = (quotesize != null ? quotesize : basesize * price) / market.contract_size;
                                 this.output.debug('exchange_size_quote', market.quote)
                                 break;
         }

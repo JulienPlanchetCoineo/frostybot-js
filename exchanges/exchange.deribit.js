@@ -184,7 +184,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
                     const bid = ticker != null ? ticker.bid : null;
                     const ask = ticker != null ? ticker.ask : null;
                     const expiration = (raw_market.info.expiration_timestamp != null ? raw_market.info.expiration_timestamp : null);
-                    const contract_size = (raw_market.info.contract_size != null ? raw_market.info.contract_size : 1);
+                    const contract_size = (raw_market.info.contract_size != null ? (symbol == 'BTC-PERPETUAL' ? 1 : raw_market.info.contract_size) : 1);
                     const precision = raw_market.precision;
                     const raw = raw_market.info;
                     const market = new this.classes.market(id, symbol, type, base, quote, bid, ask, expiration, contract_size, precision, tvsymbol, raw)

@@ -7,7 +7,7 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
     constructor(stub) {
         super(stub);
         this.stablecoins = ['USD'];                  // Stablecoins supported on this exchange
-        this.order_sizing = 'base';                  // Exchange requires base size for orders
+        this.order_sizing = 'quote';                  // Exchange requires base size for orders
         this.collateral_assets = ['BTC','BNB'];      // Assets that are used for collateral
         this.balances_market_map = '{currency}/USD'  // Which market to use to convert non-USD balances to USD
         this.param_map = {                           // Order parameter mappings
@@ -70,11 +70,11 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
                 const symbol = raw_position.symbol;
                 const market = await this.get_market_by_id_or_symbol(symbol);
                 const direction = (raw_position.positionAmt > 0 ? 'long' : (raw_position.positionAmt <  0 ? 'short' : 'flat'));
-                const base_size = (raw_position.positionAmt * 1);
+                const quote_size = (raw_position.positionAmt * market.contract_size);
                 const entry_price = (raw_position.entryPrice * 1);
                 const liquidation_price = this.utils.is_numeric(raw_position.liquidationPrice) ? (raw_position.liquidationPrice * 1) : null;
                 const raw = raw_position;
-                const position = new this.classes.position_futures(market, direction, base_size, null, entry_price, liquidation_price, raw);
+                const position = new this.classes.position_futures(market, direction, null, quote_size, entry_price, liquidation_price, raw);
                 positions.push(position)
             })
         this.positions = positions;
