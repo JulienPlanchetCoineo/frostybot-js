@@ -92,7 +92,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         var raw_markets = results;
         this.data.markets = [];
         raw_markets
-            .filter(raw_market => raw_market.active == true)
+            .filter(raw_market => raw_market.active == true && raw_market.info.contractType.toLowerCase() == 'perpetual')
             .forEach(raw_market => {
                 const id = raw_market.id;
                 const symbol = raw_market.symbol;
