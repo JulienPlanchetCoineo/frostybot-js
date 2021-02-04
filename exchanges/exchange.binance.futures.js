@@ -29,7 +29,16 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
 
     // Custom params
 
-    custom_params(type, order_params, custom_params) {
+    async custom_params(type, order_params, custom_params) {
+        /*
+        if (!order_params.hasOwnProperty('params')) {
+            order_params.params = {};
+        }
+        console.log('custom');
+        var position_mode = await this.ccxtobj.fapiPrivateGetPositionSideDual();
+        var dual = position_mode.hasOwnProperty('dualSidePosition') ? position_mode.dualSidePosition : false;
+        console.log(dual);
+        */
         return order_params;
     }    
 
@@ -92,7 +101,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         var raw_markets = results;
         this.data.markets = [];
         raw_markets
-            .filter(raw_market => raw_market.active == true)
+            .filter(raw_market => raw_market.active == true && raw_market.info.contractType.toLowerCase() == 'perpetual')
             .forEach(raw_market => {
                 const id = raw_market.id;
                 const symbol = raw_market.symbol;
