@@ -27,18 +27,20 @@
 %>
 
 <form id="formregister2fa">
-    <input type="hidden" id="input2fasecret" value="<%= secret %>" />
-    <div class="row">
-        <div class="col">
-            <img class="frostybot-qrcode" src="<%= qrcode %>" />
-        </div>
-        <div class="col">
-            <label class="mb-3">2FA is currently disabled. To enable it, scan the QR code using Google Authenticator. After that, verify your authenticator token below.</label>
-            <label for="input2faverify" class="col-sm-2">Token</label>
-            <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="input2faverify" style="width: 100px;">
-            <button type="button" class="btn btn-success frostybot-button-sm" style="width: 80px; margin-left: 5px; height: 31px; padding: 2px;" id="verify2fabutton"><span class="fa fa-check"></span> Verify</button>
-        </div>
+  <div class="row mb-2">
+    <input type="text" class="frostybot-input" id="input2fasecret" disabled value="<%= secret %>" style="width: 520px; margin-left: 12px; font-family:'Courier New', Courier, monospace; font-size: 16pt">
+  </div>
+  <div class="row">
+    <div class="col">
+        <img class="frostybot-qrcode" src="<%= qrcode %>" /><br />
     </div>
+    <div class="col">
+        <label class="mb-3">2FA is currently disabled. To enable it, scan the QR code or enter the key above using Google Authenticator. After that, verify your authenticator token below.</label>
+        <label for="input2faverify" class="col-sm-2">Token</label>
+        <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="input2faverify" style="width: 100px;">
+        <button type="button" class="btn btn-success frostybot-button-sm" style="width: 80px; margin-left: 5px; height: 31px; padding: 2px;" id="verify2fabutton"><span class="fa fa-check"></span> Verify</button>
+    </div>
+</div>
 </form>
 
 
