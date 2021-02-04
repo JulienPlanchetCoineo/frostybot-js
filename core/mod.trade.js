@@ -770,9 +770,9 @@ module.exports = class frostybot_trade_module extends frostybot_module {
 
     }
 
-    // Get total base size of orders
+    // Get total size of orders
 
-    total_order_base(orders) {
+    total_order_size(orders) {
         if (!this.utils.is_array(orders)) 
             orders = [orders];
         var total = 0;
@@ -822,16 +822,20 @@ module.exports = class frostybot_trade_module extends frostybot_module {
 
         // Order includes a stoploss or takeprofit component (long and short orders only)
         if (['long', 'short'].includes(type)) {
-            if (params.stoptrigger != undefined) {
-                if (order_params !== false && params.stopbase == undefined && params.stopquote == undefined && params.stopusd == undefined && params.stopsize == undefined)
-                    params['stopbase'] = this.total_order_base(order_params);
-                await this.create_order('stoploss', params);
+            if ((params.stoptrigger != undefined) || (params.profittrigger != undefined)) {
+                var order_sizing = this.exchange[stub].get('order_sizing');
+                var totalsize = this.total_order_size(order_params) * (order_sizing  == 'base' ? 1 : params.market.contract_size); 
+                if (params.stoptrigger != undefined) {
+                    if (order_params !== false && params.stopbase == undefined && params.stopquote == undefined && params.stopusd == undefined && params.stopsize == undefined) 
+                        params['stop' + order_sizing] = totalsize;            
+                    await this.create_order('stoploss', params);
+                }
+                if (params.profittrigger != undefined) {
+                    if (order_params !== false && params.profitbase == undefined && params.profitquote == undefined && params.profitusd == undefined && params.profitsize == undefined)
+                        params['profit' + order_sizing] = totalsize;
+                    await this.create_order('takeprofit', params);
+                }    
             }
-            if (params.profittrigger != undefined) {
-                if (order_params !== false && params.profitbase == undefined && params.profitquote == undefined && params.profitusd == undefined && params.profitsize == undefined)
-                    params['profitbase'] = this.total_order_base(order_params);
-                await this.create_order('takeprofit', params);
-            }    
         }
     }
     
