@@ -126,7 +126,7 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
             secret: {      required: 'string'  },
             testnet: {     optional: 'boolean' },
             subaccount: {  optional: 'string'  },
-            type: {        optional: 'string', format: 'lowercase', oneof: ['spot', 'futures', 'coinm'] },
+            type: {        optional: 'string', format: 'lowercase', oneof: ['spot', 'margin', 'futures', 'coinm'] },
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
@@ -240,8 +240,8 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
         }
         if (result.exchange == 'binance') {
             var type = (account.hasOwnProperty('type') ? account.type.replace('futures','future').replace('coinm','delivery') : 'future');
-            if (!['spot', 'future', 'delivery'].includes(type)) {
-                return this.output.error('param_val_oneof', ['type', this.serialize_array(['spot', 'futures', 'coinm'])])
+            if (!['spot', 'margin', 'future', 'delivery'].includes(type)) {
+                return this.output.error('param_val_oneof', ['type', this.serialize_array(['spot', 'margin', 'futures', 'coinm'])])
             } else {
                 result.parameters['options'] = {
                     defaultType : type,

@@ -88,6 +88,7 @@ module.exports = class frostybot_exchange_base {
                 'v3_get_ticker_bookticker': 5,
                 'fapiPublic_get_ticker_bookticker': 5,
                 'fapiPrivate_get_positionrisk' : 5,
+                'sapiGetMarginAllPairs' : 3600,
             }
             if (cache_methods.hasOwnProperty(method)) {
                 var cachetime = cache_methods[method]
