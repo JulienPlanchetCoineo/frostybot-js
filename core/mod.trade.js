@@ -218,7 +218,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
                 this.output.debug('convert_size_usd')
                 quotesize = usd;
             } else {
-                var conversion_pairs = Object.values(market.usd.pairs).join(', ');
+                var conversion_pairs = Object.values(market.usd.pairs).filter(val => val !== null).join(', ');
                 this.output.debug('convert_size_pair', conversion_pairs)
                 if (market.hasOwnProperty('usd')) {
                     basesize  = usd / market.usd.base;
@@ -668,6 +668,13 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         if (type == 'close') {
             order_params.params[this.param_map.reduce] = (String(reduce) == "true" ? true : undefined);
         }
+
+        var custom_params = {
+            tag         :   tag
+        }
+
+        // Get normalizer custom params (if defined)
+        order_params = await this.exchange[stub].custom_params([type, order_params, custom_params])
 
         return this.utils.remove_values(order_params, [null, undefined]);
 
