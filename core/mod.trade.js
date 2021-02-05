@@ -219,7 +219,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
                 this.output.debug('convert_size_usd')
                 quotesize = usd;
             } else {
-                var conversion_pairs = Object.values(market.usd.pairs).join(', ');
+                var conversion_pairs = Object.values(market.usd.pairs).filter(val => val !== null).join(', ');
                 this.output.debug('convert_size_pair', conversion_pairs)
                 if (market.hasOwnProperty('usd')) {
                     basesize  = usd / market.usd.base;

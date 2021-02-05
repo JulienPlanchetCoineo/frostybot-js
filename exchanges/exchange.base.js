@@ -188,6 +188,9 @@ module.exports = class frostybot_exchange_base {
                         market.usd.pairs.quote = pair;
                     }
                 });
+                if ((market.usd.quote != null) && (market.usd.base == null)) {
+                    market.usd.base = market.usd.quote * market.avg;
+                }
             } else {
                 market.usd = market.avg;
             }
