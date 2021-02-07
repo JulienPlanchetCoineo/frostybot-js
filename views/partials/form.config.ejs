@@ -6,7 +6,7 @@ if (typeof(form_config) != undefined) {
 
 %>
 <form id="configform" class="row">
-  <div class="row">
+  <div class="row flex-nowrap">
 
     <div class="col" style="margin-left: 10px">     <!--  LEFT COLUMN -->
 
@@ -55,7 +55,7 @@ if (typeof(form_config) != undefined) {
           <div class="row mb-2 flex-nowrap">
             <label for="inputexchange" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Signal Provider</label>
             <div class="col">
-              <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputprovider">
+              <select id="inputprovider" style="background-color: #FFFFFF;">
                 <option value="" <%= (provider == '' ? 'selected' : '')%>>None</option>
                 <%
                   for(var i=0; i < providers.length; i++) {
@@ -76,7 +76,7 @@ if (typeof(form_config) != undefined) {
           <div class="row mb-2 flex-nowrap">
             <label for="inputmaxposqty" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Max Positions</label>
             <div class="col">
-              <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputmaxposqty">
+              <select id="inputmaxposqty" style="background-color: #FFFFFF;">
                 <option value="">Unlimited</option>
                 <%
                   for(var i=1; i <= 20; i++) {
@@ -264,10 +264,12 @@ $(document).ready(function () {
   };
   
   var gridadapter = new $.jqx.dataAdapter(gridsource);
+
+  var gridheight = $(window).height() - 450;
        
   $("#configpairs").jqxGrid({
     width: '100%',
-    height: '400px',
+    height: gridheight,
     source: gridadapter,
     selectionmode: 'singlecell',
     columnsresize: true,
@@ -292,7 +294,6 @@ $(document).ready(function () {
               }  }
     ]
   });
-
 
   $("#configpairs").on('cellselect', function (event) {
     var column = $("#configpairs").jqxGrid('getcolumn', event.args.datafield);

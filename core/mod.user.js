@@ -211,6 +211,19 @@ module.exports = class frostybot_user_module extends frostybot_module {
     
     }
 
+    // Logout
+
+    async logout(params) {
+
+        var uuid = params.hasOwnProperty('uuid') ? params.uuid : false;
+        if (uuid != false) {
+            var result = await this.database.update('users', { token: null, expiry: null }, {uuid: uuid});
+            if (result.changes > 0)
+                return true;
+        }
+        return false;
+    }
+
     // Create a new user token
 
     async create_token(uuid) {

@@ -43,6 +43,9 @@ module.exports = class frostybot_exchange_base {
                 'fetch_orders' : 5,
                 'fetch_open_orders' : 5,
                 'fetch_closed_orders' : 5,
+                'get_market_by_id' : 5,
+                'get_market_by_symbol' : 5,
+                'get_market_by_id_or_symbol' : 5,
             }
         }
         this.stub = stub;

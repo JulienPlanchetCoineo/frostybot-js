@@ -1,0 +1,82 @@
+<div class="frostybot-panel-header">
+  <div class="row">
+    <div class="col "><p class="m-0" id="logstitle">Logs</p></div>
+    <div class="col text-right">
+      <div class="float-right" id="logsnavbar">
+        <!-- For nav bar butttons-->
+      </div>
+    </div>
+  </div>
+</div>
+<div class="frostybot-panel-content pb-3">
+    <div class="row">
+      <div class="col">  
+        <div id="loggrid"></div>
+      </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+  
+  // --------------------------------------------------------------------------------------
+  //  Log Grid
+  // --------------------------------------------------------------------------------------
+ 
+  /*
+
+  var logsource = {
+    localdata: [],
+    datafields: [
+      { name: 'timestamp', type: 'date'},
+      { name: 'type', type: 'string', },
+      { name: 'message', type: 'string', },
+    ],
+    datatype: "json"
+  };
+
+  var logadapter = new $.jqx.dataAdapter(logsource);
+
+  function scrollLogToBottom() {
+    var rows = $('#loggrid').jqxGrid('getrows');
+    if (rows != undefined) {
+      if (rows.length > 5) {
+        var id = rows.length - 1;
+        if (rows.hasOwnProperty(id)) {
+          var lastid = rows[id].uid;
+          if (lastid != 0) {
+            $('#loggrid').jqxGrid('ensurerowvisible', lastid);    
+          }
+        }
+      }  
+    }
+  }
+
+  function updateLogGrid(msg) {
+    if (msg.message_type == 'log') {
+      logsource.localdata.push(msg);
+      if (logsource.localdata.length > 50) {
+        logsource.localdata = logsource.localdata.slice(-50);
+      }
+      $('#loggrid').jqxGrid('updatebounddata');
+      scrollLogToBottom();
+    }
+  }
+
+  $("#loggrid").jqxGrid({
+    width: '100%',
+    height: '100%',
+    source: logadapter,
+    columnsresize: true,
+    filterable: true,
+    sortable: true,
+    columnsheight: 20,
+    rowsheight: 20,
+    theme: 'dark',
+    columns: [
+      { text: 'Date', datafield: 'timestamp', cellsformat: 'S', width: 150 },
+      { text: 'Type', datafield: 'type', filtertype: 'checkedlist', width: 70 },
+      { text: 'Message', datafield: 'message', align: 'left', cellsalign: 'left'},
+    ],
+  });
+  */
+</script>

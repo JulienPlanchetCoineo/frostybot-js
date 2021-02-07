@@ -1,0 +1,18 @@
+<%
+
+  if (typeof(tab_logout) != undefined) {
+    var logout = tab_logout.hasOwnProperty('logout') ? tab_logout.logout : false;
+    console.log('LOGOUT: ' + logout);
+%>
+<script>
+  if (localStorage) {
+      localStorage.setItem("token", JSON.stringify(null));
+      document.location.href = '/ui/login';
+  }
+</script>
+
+<%
+
+  }
+
+%>

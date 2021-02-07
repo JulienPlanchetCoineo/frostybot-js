@@ -5,6 +5,7 @@ const md5 = require('md5');         // Used to ensure that the same message is n
 const fs  = require('fs');          // Filesystem 
 const eol = require('os').EOL;      // Operating system end of line character(s)
 const ccxt = require('ccxt');       // CCXT Error Messages
+const context = require('express-http-context'); // HTTP Context
 
 const frostybot_module = require('./mod.base')
 
@@ -75,6 +76,22 @@ module.exports = class frostybot_output_module extends frostybot_module {
             return false;
         }
         return true;
+    }
+
+    // Output log message to the database
+    outdb(uuid, type, message) {
+        try {
+            return this.database.insert('logs', {uuid: uuid, type: type, message: message});
+        } catch(error) {
+            return false;
+        }
+    }
+
+    // Outpuyt log message tp websocket
+    outws(uuid, type, message) {
+        if (global.hasOwnProperty('frostybot'))
+            if (global.frostybot.hasOwnProperty('wss'))
+                    global.frostybot.wss.emit('proxy', logentry)
     }
 
     // Expand object in console output
@@ -355,7 +372,11 @@ module.exports = class frostybot_output_module extends frostybot_module {
             if ((this.mode == 'normal') && (settings.toLog !== false)) {
                 fs.appendFileSync(this.logfile, logmessage);
             }
+            var uuid = context.get('uuid');
+            if (uuid == undefined) uuid = '00000000-0000-0000-0000-000000000000';
+            this.outdb(uuid, type, message);
             var logentry = {
+                uuid :  uuid,
                 message_type : 'log',
                 timestamp: ts,
                 datetime: dateobj.toJSON(),

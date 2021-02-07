@@ -4,33 +4,42 @@ $( document ).ready(function() {
     //   Show Toast Message
     // ---------------------------------------------------------
 
-    var showToast = function(message, color, time=2000) {
-        $.toast({ 
-            text : message, 
-            showHideTransition : 'slide',   // It can be plain, fade or slide
-            bgColor : color,                // Background color for toast
-            textColor : '#eee',             // text color
-            allowToastClose : true,         // Show the close button or not
-            hideAfter : time,               // `false` to make it sticky or time in miliseconds to hide after
-            stack : 2,                      // `false` to show one stack at a time count showing the number of toasts that can be shown at once
-            textAlign : 'left',             // Alignment of text i.e. left, right, center
-            position : 'bottom-right'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
-        });                
+    $("#info").jqxNotification({ width: 300, appendContainer: "#frostybot-notifications", opacity: 0.9, autoClose: true, autoCloseDelay: 5000, template: "info" });
+    $("#warning").jqxNotification({ width: 300, appendContainer: "#frostybot-notifications", opacity: 0.9, autoClose: true, autoCloseDelay: 5000, template: "warning" });
+    $("#success").jqxNotification({ width: 300, appendContainer: "#frostybot-notifications", opacity: 0.9, autoClose: true, autoCloseDelay: 5000, template: "success" });
+    $("#error").jqxNotification({ width: 300, appendContainer: "#frostybot-notifications", opacity: 0.9, autoClose: true, autoCloseDelay: 5000, template: "error" });
+
+    function createNotification(type, message) {
+        var icons = {
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle',
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+        }
+        var id = "#" + type.toLowerCase()
+        $(id).html('<div><span class="fa ' + icons[type] + '"></span> ' + message + '</div>');
+        $(id).jqxNotification("open");
+
     }
 
     // Show success toast message
     var showSuccess = function(message, time=2000) {
-        showToast('SUCCESS: ' + message,'green',time);
+        createNotification('success', message);
     }
 
     // Show notice toast message
     var showNotice = function(message, time=2000) {
-        showToast('NOTICE: ' + message,'blue',time);
+        createNotification('info', message);
+    }
+
+    // Show warning toast message
+    var showWarning = function(message, time=2000) {
+        createNotification('warning', message);
     }
 
     // Show error toast message
     var showError = function(message, time=2000) {
-        showToast('ERROR: ' + message,'red',time);
+        createNotification('error', message);
     }
 
     // ---------------------------------------------------------
@@ -122,6 +131,13 @@ $( document ).ready(function() {
         document.location.href = key;
     }
 
+
+    var defaultContent = {
+    }
+
+    var contentHooks = {
+    }
+
     function updateContent(key, params = {}, callback = null) {
         var token = getToken();
         if (token != null) {
@@ -130,6 +146,14 @@ $( document ).ready(function() {
         $.get( "/ui/content/" + key, params)
         .done(function( html ) {
             $('#'+key).html( html);
+            if (defaultContent.hasOwnProperty(key)) {
+                defaultContent[key].forEach(subkey => {
+                    updateContent(subkey, {});
+                });
+            }
+            if (contentHooks.hasOwnProperty(key)) {
+                contentHooks[key]();
+            }
             if (callback != null)
                 callback();
         })
@@ -310,485 +334,404 @@ $( document ).ready(function() {
 
 
     // ---------------------------------------------------------
-    //   Account Management
+    //   Main Menu
     // ---------------------------------------------------------
 
-
-    function submitAccountsForm() {
-        var ex = $("#inputexchange").val();
-        var [exchange, type] = ex.split('_');
-        var data = {
-            uuid: getUUID(),
-            stub: $("#inputstub").val(),
-            exchange: exchange,
-            testnet: exchange == 'ftx' ? false : $("#inputtestnet").is(":checked"),
-            apikey: $("#inputapikey").val(),
-            secret: $("#inputsecret").val(),
-            description: $("#inputdescription").val(),
+    $(".frostybot-tab-main").each(function( index, element ) {
+        if (!$(this).is( "#tab_accounts")) {
+            $(this).hide();
         }
-        var subaccount = $("#inputsubaccount").val();
-        if ((exchange == 'ftx') && (subaccount != ''))
-            data['subaccount'] = subaccount; 
-        if (type != undefined) data['type'] = type;
-        api('accounts:add', data, function(json) {
-            if (json.result == "success") {
-                showSuccess("Successfully added API key", 5000);
-                hideAccountsForm();
-                showAccountsTable();
-                refreshAccountsTable();
-            } else {
-                showError("Failed to add account, please check the API key and secret and try again.", 5000)
-            }
-        });
-    }
-
-    $("#accountsform").submit(function(event){
-        event.preventDefault();
-        submitAccountsForm();
     });
 
-    function updateAccountsFormFields() {
-        var val = $( "#inputexchange" ).val();
-        if (val == 'ftx') {
-            $( "#subaccountfield" ).show();
-            $( "#testnetfield" ).hide();
-        } else {
-            $( "#subaccountfield" ).hide();
-            $( "#testnetfield" ).show();
-        }
-    }
+    $('#mainmenu').on('itemclick', function (event) {
+        // get the clicked LI element.
+        var element = event.args;
+        var tab_id = $('#' + element.id).data('content');
+        $(".frostybot-tab-main").each(function( index, element ) {
+            if ($(this).is( "#" + tab_id)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+        updateContent(tab_id, {}, function() {
+            $("#" + tab_id).show();
+            //if (tab_id == 'tab_accounts') {
+            //    updateContent('table_accounts', {});
+            //}
+        });
+    });
 
-    function setAccountsTitle(title) {
-        $( "#accountstitle" ).html(title);
-    }
+    // ---------------------------------------------------------
+    //   Accounts Tab : Accounts Table
+    // ---------------------------------------------------------
+    
+    updateContent('tab_accounts');
 
-    function hideAccountsTableButtons() {
-        $( "#accountsnavbar" ).hide();
-    }
+    // Accounts Tab Default Content
+    defaultContent['tab_accounts'] = ['table_accounts'];
 
-    function showAccountsTableButtons() {
-        $( "#accountsnavbar" ).show();
-    }
+    // Account Table Content Hooks
+    contentHooks['table_accounts'] = function() {
 
-    function hideAccountsForm() {
-        $( "#form_accounts" ).hide();
-    }
+        // Set Page Title
+        $( "#accountstitle" ).html('Accounts');
 
-    function showAccountsForm(stub = null) {
-        if (stub != null) {
-            api('accounts:get', {stub: stub}, function(json) {
-                if (json.result == "success") {
-                    var account = Object.values(json.data)[0];
-                    $('#inputstub').val(account.stub);
-                    $('#inputstub').prop( "disabled", true );
-                    $('#stubinlinehelp').hide();
-                    $('#inputexchange').val(account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : ''));
-                    $('#inputapikey').val(account.parameters.apikey);
-                    $('#inputsecret').val('');
-                    $("#inputsecret").attr("placeholder", "For security reasons, you must re-enter your secret to edit this stub");
-                    $('#inputtestnet').prop( "checked", account.parameters.testnet == "true" ? true : false);
-                    $('#inputdescription').val(account.description);
-                    $('#inputsubaccount').val(account.parameters.subaccount);
-                    updateAccountsFormFields();
-                    setAccountsTitle('Configure API Key');
-                    $( "#form_accounts" ).show();
-                } else {
-                    showError('Failed to load account details');
-                }
-            });
-        } else {
-            $('#inputstub').val('');
-            $('#inputstub').prop( "disabled", false );
-            $('#stubinlinehelp').show();
-            $('#inputexchange').val('');
-            $('#inputapikey').val('');
-            $('#inputsecret').val('');
-            $("#inputsecret").attr("placeholder", "");
-            $('#inputtestnet').prop( "checked", false);
-            $('#inputdescription').val('');
-            updateAccountsFormFields();
-            setAccountsTitle('Configure Account');
-            $( "#form_accounts" ).show();
-        }
-        $( "inputstub" ).focus();
-    }
-
-
-    function hideAccountsTable() {
-        hideAccountsTableButtons();
-        $( "#table_accounts" ).hide();
-    }
-
-    function showAccountsTable() {
-        setAccountsTitle('Accounts');
-        showAccountsTableButtons()
+        // Show/Hide Content
         $( "#table_accounts" ).show();
-    }
-
-    function testAccount(stub) {
-        api('accounts:test', { stub: stub}, function(json) {
-            if (json.result == "success") {
-                showSuccess('Account tested successfully');
-            } else {
-                showFail('Account test failed')
-            }
+        $( "#accountsnavbar" ).show();
+        $( "#form_accounts" ).hide();
+        
+        // Add Account Button
+        $( "#addaccountlink" ).on( "click", function() {
+            updateContent('form_accounts');
         });
-    }
 
-    function deleteAccount(stub) {
-        api('accounts:delete', { stub: stub}, function(json) {
-            if (json.result == "success") {
-                showSuccess('Account deleted successfully');
-                refreshAccountsTable();
-            } else {
-                showFail('Failed to delete Account')
-            }
+        // Refresh Accounts Table
+        $( "#accountsrefreshlink" ).on( "click", function() {
+            updateContent('table_accounts');
         });    
-    }
 
-    function refreshAccountsTable() {
-        updateContent('table_accounts', {}, function() {
-            $( ".testaccountlink" ).on( "click", function() {
-                var stub = $(this).attr('data-stub');
-                testAccount(stub);
-            });
-            $( ".editaccountlink" ).on( "click", function() {
-                var stub = $(this).attr('data-stub');
-                showAccountsForm(stub);
-                hideConfigForm(stub);
-                hideAccountsTable();
-            });
-            $( ".deleteaccountlink" ).on( "click", function() {
-                if (confirm("Are you sure you wish to delete this account?")) {
-                    var stub = $(this).attr('data-stub');
-                    deleteAccount(stub);
-                }
-            });
-            $( ".configlink" ).on( "click", function() {
-                var stub = $(this).attr('data-stub');
-                showConfigForm(stub);
-                hideAccountsForm(stub);
-                hideAccountsTable();
-            });
-
-        });
-    }
-
-    refreshAccountsTable();
-    hideAccountsForm();
-    hideConfigForm();
-    showAccountsTable();
-    updateAccountsFormFields();
-
-    $( "#inputexchange" ).on( "change", function() {
-        updateAccountsFormFields();
-    });
-
-    $( "#accountscancel" ).on( "click", function() {
-        hideAccountsForm();
-        hideConfigForm();
-        showAccountsTable();
-    });
-
-    $( "#addaccountlink" ).on( "click", function() {
-        showAccountsForm();
-        hideAccountsTable();
-        hideConfigForm();
-    });
-    
-    $( "#accountsrefreshlink" ).on( "click", function() {
-        hideAccountsForm();
-        hideConfigForm();
-        showAccountsTable();
-        refreshAccountsTable();
-    });
-
-    // ---------------------------------------------------------
-    //   Account Config Management
-    // ---------------------------------------------------------
-
-    function hideConfigForm() {
-        showAccountsTableButtons();
-        $( "#form_config" ).hide();
-    }
-
-    function showConfigForm(stub) {
-        updateContent('form_config', {stub: stub}, function() {
-            setAccountsTitle('Configuration Options');
-            hideAccountsTableButtons()
-            $( "#form_config").show();   
-            
-            function update(keyname, val) {
-                var data = {};
-                data[keyname] = String(val == '' ? "null" : val).replace('None','null');
-                api('config:set', data, function(json) {
-                    if (json.result == "success") {
-                        showSuccess("Successfully set configuration option: " + keyname, 5000);
-                        return true;
-                    } else {
-                        showError("Failed to set set configuration option: " + keyname, 5000);
-                    }
-                    return false;
-                });
-            }
-
-            // Load Pair Config Grid
-            $("#configpairs").on('cellendedit', function (event) {
-                var column = $("#configpairs").jqxGrid('getcolumn', event.args.datafield);
-                var symbol = event.args.row.symbol;
-                var keyname = stub + ":" + symbol + ":" + event.args.datafield;
-                if (column.displayfield != column.datafield) {
-                  var val = event.args.value.value;
+        // Test Account
+        $( ".testaccountlink" ).on( "click", function() {
+            var stub = $(this).attr('data-stub');
+            api('accounts:test', { stub: stub}, function(json) {
+                if (json.result == "success") {
+                    showSuccess('Account tested successfully: ' + stub);
                 } else {
-                  var val = event.args.value;
+                    showFail('Account test failed: ' + stub)
                 }
-                update(keyname, val);
-                
-            });
-
-            // Load Combo Boxes
-
-            $("#inputdefstoptrigger").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
-            $("#inputdefprofittrigger").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
-            $("#inputdefprofitsize").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
-                      
-            // Signal Provider Update
-
-            $( "#inputprovider").on('change', function() {
-                var val = $( "#inputprovider" ).val();
-                update(stub + ':provider', val);
-            });
-
-            // Max Positions Update
-
-            $( "#inputmaxposqty").on('change', function() {
-                var val = $( "#inputmaxposqty" ).val();
-                update(stub + ':maxposqty', val);
-            });
-
-            // Default Size Update
-
-            $( "#inputdefsize").on('blur', function() {
-                var val = $( "#inputdefsize" ).val();
-                update(stub + ':defsize', val);
-            });
-
-            // Default Stop Trigger Update
-
-            $( "#inputdefstoptrigger").on('change', function() {
-                var val = $( "#inputdefstoptrigger" ).val();
-                update(stub + ':defstoptrigger', val);
-            });
-
-            // Default Take Profit Update
-            $( "#inputdefprofittrigger").on("change", function() {
-                var val = $( "#inputdefprofittrigger" ).val();
-                update(stub + ':defprofittrigger', val);
-            });
-
-            // Default Profit Size Update
-            $( "#inputdefprofitsize").on("change", function() {
-                var val = $( "#inputdefprofitsize" ).val();
-                update(stub + ':defprofitsize', val);
-            });
-
-            // Cancel Button
-            $( "#configcancel" ).on( "click", function() {
-                hideAccountsForm();
-                hideConfigForm();
-                showAccountsTable();
-            }); 
-
-        });
-        /*
-        $('.loadingmessage').show();
-        $('#configsubmit').prop( "disabled", true );
-        $('#inputproviderstub').val(stub).prop( "disabled", true );
-        $('#inputprovider').empty().append('<option selected="selected" value="">None</option>');
-        $('#inputmaxposqty').empty().append('<option selected="selected" value="">Unlimited</option>');
-        for(var i=1; i<21; i++) {
-            $('#inputmaxposqty').append('<option value="'+ i + '">' + i + '</option>');
-        }
-        $('#ignoredpairs').empty();
-        api('signals:get_ignore_list', {stub: stub}, function (json) {
-            if (json.result == "success") {
-                var data = json.data;
-                var list = '';
-                data = data.sort((a, b) => (a.ignored > b.ignored) ? 1 : -1).sort((a, b) => (a.ignored == b.ignored && a.symbol > b.symbol) ? 1 : -1)
-                data.forEach(item => {
-                    var symbol = item.symbol;
-                    var ignored = item.ignored;
-                    list += '<li' + (ignored ? ' class="checked"' : '') + ' data-symbol="' + symbol + '">' + symbol + '</li>';
-                });
-                $('#ignoredpairs').append(list);
-                $('.loadingmessage').hide();
-                $(".ignoredpairs").simsCheckbox({
-                    btnStyle: 'checkbox',
-                    height: 'auto',    
-                    element: "li",
-                    titleIcon: "square-o",
-                    uncheckedClass: "btn-default unchecked",
-                    checkedClass: "btn-default checked",
-                    selectAllBtn: false,
-                    selectAllText: 'Select/Unselect All',
-                });
-            }
-        });
-        api('signals:get_providers_by_stub', {stub: stub}, function(json) {
-            if (json.result == "success") {
-                var options = json.data.options;
-                var curprovider = options.hasOwnProperty('provider') ? options.provider : 'null';
-                var defsize = options.hasOwnProperty('defsize') ? options.defsize : '';
-                var maxposqty = options.hasOwnProperty('maxposqty') ? options.maxposqty : '';
-                var providers = json.data.data;
-                providers.forEach(provider => {
-                    $('#inputprovider').append('<option value="' + provider.uuid + '">' + provider.name + '</option>');
-                })
-                $('#inputprovider').prop( "disabled", (providers.length == 0 ));
-                $('#inputprovider').val(curprovider == false ? '' : curprovider);
-                $('#inputdefsize').val(defsize == false ? '' : defsize);
-                $('#inputmaxposqty').val(maxposqty == false ? '' : maxposqty);
-            }
-            $('#configsubmit').prop( "disabled", false );
-            setAccountsTitle('Configuration Options');
-            hideAccountsTableButtons()
-            $( "#form_config").show();    
-        });
-        */
-    }
-
-    function submitConfigForm() {
-        var stub = $("#inputproviderstub").val();
-        var provider = $("#inputprovider").val();
-        var defsize = $("#inputdefsize").val();
-        var maxposqty = $("#inputmaxposqty").val();
-        var data = {};
-        data[stub + ':provider'] = provider;
-        data[stub + ':defsize'] = defsize;
-        data[stub + ':maxposqty'] = maxposqty;
-        var ignorelist = [];
-        $('.ignoredpairs li').each(function(idx, li) {
-            var checked = $(li).hasClass('checked');
-            var symbol = $(li).attr('data-symbol');
-            if (checked) {
-                ignorelist.push(symbol);
-            }
-        });
-        data[stub + ':ignored'] = ignorelist.join(',');
-        api('config:set', data, function(json) {
-            if (json.result == "success") {
-                showSuccess("Successfully set configuration options", 5000);
-                hideConfigForm();
-                hideAccountsForm();
-                showAccountsTable();
-                refreshAccountsTable();
-            } else {
-                showError("Failed to set the configuration options for this account.", 5000)
-            }
-        });
-    }
-
-    $("#configform").submit(function(event){
-        event.preventDefault();
-        submitConfigForm();
-    });
-
-    // ---------------------------------------------------------
-    //   Change Password
-    // ---------------------------------------------------------
-
-    
-    function submitChangePasswordForm() {
-        var oldpassword = $('#inputoldpassword').val();
-        var newpassword = $('#inputnewpassword').val();
-        var confirmpassword = $('#inputconfirmpassword').val();
-        if (newpassword != confirmpassword) {
-            showError('New password and confirm password do not match');
-            return false;
-        }
-        var uuid = getUUID();
-        var data = {
-            uuid: uuid,
-            oldpassword: oldpassword,
-            newpassword: newpassword
-        }
-        api('user:change_password', data, function(json) {
-            if ((json.result == "success") && (json.data == true)) {
-                showSuccess("Successfully changed password", 5000);
-                $('#inputoldpassword').val('');
-                $('#inputnewpassword').val('');
-                $('#inputconfirmpassword').val('');
-            } else {
-                showError("Failed to change password, please ensure you supplied the correct old password.", 5000)
-            }
+            });    
         });
 
-    }
+        // Edit Account
+        $( ".editaccountlink" ).on( "click", function() {
+            var stub = $(this).attr('data-stub');
+            updateContent('form_accounts', {stub: stub});
+        });
 
-    $("#changepasswordform").submit(function(event){
-        event.preventDefault();
-        submitChangePasswordForm();
-    });
-
-    // ---------------------------------------------------------
-    //   2FA Form
-    // ---------------------------------------------------------
-
-
-    function showEnable2FAForm() {
-        updateContent('form_2fa', {enable: true}, function() {
-            $( "#verify2fabutton" ).on( "click", function() {
-                var token = $( "#input2faverify" ).val();
-                var secret = $('#input2fasecret').val();
-                var data = {
-                    key: secret,
-                    checktoken: token
-                }
-                api('user:enable_2fa', data, function(json) {
-                    if ((json.result == "success") && (json.data == true)) {
-                        showSuccess('2FA Enabled');
-                        refresh2FAForm();
+        // Delete Account
+        $( ".deleteaccountlink" ).on( "click", function() {
+            if (confirm("Are you sure you wish to delete this account?")) {
+                var stub = $(this).attr('data-stub');
+                api('accounts:delete', { stub: stub}, function(json) {
+                    if (json.result == "success") {
+                        showSuccess('Account deleted successfully');
+                        updateContent('table_accounts');
                     } else {
-                        showError('There was an error enabling 2FA, please verify your token');
+                        showFail('Failed to delete Account')
                     }
-                });
-            });        
-        });
-    }
-
-    function disable2FA() {
-        var token = $('#input2faverify').val();
-        var data = {
-            checktoken: token
-        }
-        api('user:disable_2fa', data, function(json) {
-            if ((json.result == "success") && (json.data == true)) {
-                showSuccess('2FA Disabled');
-                refresh2FAForm();
-            } else {
-                showError('There was an error disbling 2FA, please verify your token');
+                });            
             }
         });
-    }
 
-    function refresh2FAForm() {
-        updateContent('form_2fa', {}, function() {
-            $( "#enable2fabutton" ).on( "click", showEnable2FAForm);        
-            $( "#disable2fabutton" ).on( "click", disable2FA);        
+        // Account Config
+        $( ".configlink" ).on( "click", function() {
+            var stub = $(this).attr('data-stub');
+            updateContent('form_config', {stub: stub})
         });
+
     }
 
-    refresh2FAForm();
+    // ---------------------------------------------------------
+    //   Accounts Tab : Accounts Form
+    // ---------------------------------------------------------
+    
 
-    $( "#enable2fabutton" ).on( "click", function() {
-        updateContent('form_2fa', {enable: true}, function() {
+    // Accounts Form Content Hooks
+    contentHooks['form_accounts'] = function() {
 
-        });        
-    });
+        // Show/Hide Content
+        $( "#table_accounts" ).hide();
+        $( "#accountsnavbar" ).hide();
+        $( "#form_accounts" ).show();
+        
+        // Set Page Title
+        $( "#accountstitle" ).html('Configure Account');
+
+        // Dynamic Form Fields        
+        function accountsFormDynamicFields() {
+            var val = $( "#inputexchange").val();
+            if (['binanceus','ftx'].includes(val)) {
+                $( "#testnetfield" ).hide();
+            } else {
+                $( "#testnetfield" ).show();
+            }
+            if (['ftx'].includes(val)) {
+                $( "#subaccountfield" ).show();
+            } else {
+                $( "#subaccountfield" ).hide();
+            }
+        }
+
+        $( "#inputexchange" ).on( "change", function() {
+            accountsFormDynamicFields();
+        });
+
+        $( "#inputexchange" ).on( "click", function() {
+            $("#inputexchange option[value='']").remove();
+        });
+
+        accountsFormDynamicFields();
+
+        // Submit  Form
+        $("#accountsform").submit(function(event){
+            event.preventDefault();
+            var ex = $("#inputexchange").val();
+            var [exchange, type] = ex.split('_');
+            var data = {
+                uuid: getUUID(),
+                stub: $("#inputstub").val(),
+                exchange: exchange,
+                testnet: exchange == 'ftx' ? false : $("#inputtestnet").is(":checked"),
+                apikey: $("#inputapikey").val(),
+                secret: $("#inputsecret").val(),
+                description: $("#inputdescription").val(),
+            }
+            var subaccount = $("#inputsubaccount").val();
+            if ((exchange == 'ftx') && (subaccount != ''))
+                data['subaccount'] = subaccount; 
+            if (type != undefined) data['type'] = type;
+            api('accounts:add', data, function(json) {
+                if (json.result == "success") {
+                    showSuccess("Successfully added API key", 5000);
+                    updateContent('table_accounts');
+                } else {
+                    showError("Failed to add account, please check the API key and secret and try again.", 5000)
+                }
+            });
+        });
+    
+        // Cancel Form
+        $( "#accountscancel" ).on( "click", function() {
+            // Show/Hide Content
+            $( "#table_accounts" ).show();
+            $( "#accountsnavbar" ).show();
+            $( "#form_accounts" ).hide();
+            // Set Page Title
+            $( "#accountstitle" ).html('Accounts');
+        });
+
+    }
+
 
     // ---------------------------------------------------------
-    //   Other
+    //   Accounts Tab : Account Config Management
     // ---------------------------------------------------------
 
+    // Account Config Form Content Hooks
+    contentHooks['form_config'] = function() {
+
+        // Show Form
+        $( "#table_accounts" ).hide();
+        $( "#accountsnavbar" ).hide();
+        $( "#form_config" ).show();
+
+        // Set title
+        $( "#accountstitle" ).html('Configuration Options');
+
+        // Update Function
+        function update(keyname, val) {
+            var data = {};
+            data[keyname] = String(val == '' ? "null" : val).replace('None','null');
+            api('config:set', data, function(json) {
+                if (json.result == "success") {
+                    showSuccess("Successfully set configuration option: " + keyname, 5000);
+                    return true;
+                } else {
+                    showError("Failed to set set configuration option: " + keyname, 5000);
+                }
+                return false;
+            });
+        }
+
+        // Load Pair Config Grid
+        $("#configpairs").on('cellendedit', function (event) {
+            var stub = $( "#inputproviderstub" ).val();
+            var column = $("#configpairs").jqxGrid('getcolumn', event.args.datafield);
+            var symbol = event.args.row.symbol;
+            var keyname = stub + ":" + symbol + ":" + event.args.datafield;
+            if (column.displayfield != column.datafield) {
+                var val = event.args.value.value;
+            } else {
+                var val = event.args.value;
+            }
+            update(keyname, val);
+            
+        });
+
+        // Load Combo Boxes
+        if ( $("#inputprovider").length ) {
+            $("#inputprovider").jqxDropDownList({ dropDownHeight: 250, width: 150, height: 30});
+        }
+        $("#inputmaxposqty").jqxDropDownList({ dropDownHeight: 250, width: 150, height: 30});
+        $("#inputdefstoptrigger").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
+        $("#inputdefprofittrigger").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
+        $("#inputdefprofitsize").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
+                    
+        // Signal Provider Update
+
+        $( "#inputprovider").on('change', function() {
+            var stub = $( "#inputproviderstub" ).val();
+            var val = $( "#inputprovider" ).val();
+            update(stub + ':provider', val);
+        });
+
+        // Max Positions Update
+
+        $( "#inputmaxposqty").on('change', function() {
+            var stub = $( "#inputproviderstub" ).val();
+            var val = $( "#inputmaxposqty" ).val();
+            update(stub + ':maxposqty', val);
+        });
+
+        // Default Size Update
+
+        $( "#inputdefsize").on('blur', function() {
+            var stub = $( "#inputproviderstub" ).val();
+            var val = $( "#inputdefsize" ).val();
+            update(stub + ':defsize', val);
+        });
+
+        // Default Stop Trigger Update
+
+        $( "#inputdefstoptrigger").on('change', function() {
+            var stub = $( "#inputproviderstub" ).val();
+            var val = $( "#inputdefstoptrigger" ).val();
+            update(stub + ':defstoptrigger', val);
+        });
+
+        // Default Take Profit Update
+        $( "#inputdefprofittrigger").on("change", function() {
+            var stub = $( "#inputproviderstub" ).val();
+            var val = $( "#inputdefprofittrigger" ).val();
+            update(stub + ':defprofittrigger', val);
+        });
+
+        // Default Profit Size Update
+        $( "#inputdefprofitsize").on("change", function() {
+            var stub = $( "#inputproviderstub" ).val();
+            var val = $( "#inputdefprofitsize" ).val();
+            update(stub + ':defprofitsize', val);
+        });
+
+        // Cancel Button
+        $( "#configcancel" ).on( "click", function() {
+            $( "#table_accounts" ).show();
+            $( "#accountsnavbar" ).show();
+            $( "#form_config" ).hide();
+            $( "#accountstitle" ).html('Accounts');
+    
+        }); 
+
+    }
+
+
+    // ---------------------------------------------------------
+    //   Security Tab : Change Password Form
+    // ---------------------------------------------------------
+
+    // Secuurity Tab Content Hooks
+    contentHooks['tab_security'] = function () {
+        
+        // Load 2FA form
+        updateContent('form_2fa', {});
+
+        // Submit Change Password Form
+        $("#changepasswordform").submit(function(event){
+            event.preventDefault();
+            var oldpassword = $('#inputoldpassword').val();
+            var newpassword = $('#inputnewpassword').val();
+            var confirmpassword = $('#inputconfirmpassword').val();
+            if (newpassword != confirmpassword) {
+                showError('New password and confirm password do not match');
+                return false;
+            }
+            var uuid = getUUID();
+            var data = {
+                uuid: uuid,
+                oldpassword: oldpassword,
+                newpassword: newpassword
+            }
+            api('user:change_password', data, function(json) {
+                if ((json.result == "success") && (json.data == true)) {
+                    showSuccess("Successfully changed password", 5000);
+                    $('#inputoldpassword').val('');
+                    $('#inputnewpassword').val('');
+                    $('#inputconfirmpassword').val('');
+                } else {
+                    showError("Failed to change password, please ensure you supplied the correct old password.", 5000)
+                }
+            });
+        });
+
+    };
+
+    // ---------------------------------------------------------
+    //   Security Tab : 2FA Form
+    // ---------------------------------------------------------
+
+    // Account Config Form Content Hooks
+    contentHooks['form_2fa'] = function() {
+
+        // Enable 2FA button
+        $( "#enable2fabutton" ).on( "click", function() {
+            updateContent('form_2fa', {enable: true});        
+        });
+
+        // Verify 2FA Submit
+
+        $( "#formregister2fa" ).submit(function(event){
+            event.preventDefault();
+            var token = $( "#input2faverify" ).val();
+            var secret = $('#input2fasecret').val();
+            var data = {
+                key: secret,
+                checktoken: token
+            }
+            api('user:enable_2fa', data, function(json) {
+                if ((json.result == "success") && (json.data == true)) {
+                    showSuccess('2FA Enabled');
+                    updateContent('form_2fa', {});
+                } else {
+                    showError('There was an error enabling 2FA, please verify your token');
+                }
+            });
+        });    
+
+        // Unregister 2FA 
+        $( "#formunregister2fa" ).submit(function(event){
+            event.preventDefault();
+            var token = $('#input2faverify').val();
+            var data = {
+                checktoken: token
+            }
+            api('user:disable_2fa', data, function(json) {
+                if ((json.result == "success") && (json.data == true)) {
+                    showSuccess('2FA Disabled');
+                    updateContent('form_2fa', {});
+                } else {
+                    showError('There was an error disbling 2FA, please verify your token');
+                }
+            });
+        });
+    
+    };
+
+
+    // ---------------------------------------------------------
+    //   Log Viewer
+    // ---------------------------------------------------------
+
+
+    // ---------------------------------------------------------
+    //   Logout 
+    // ---------------------------------------------------------
+
+
+    contentHooks['tab_logout'] - function() {
+
+    }
+    
     
 });

@@ -1,20 +1,13 @@
 <%- include('../partials/header.ejs'); %>
 <%- include('../partials/protected.ejs'); %>
-  <container role="navigation">
-  
-    <div class="d-flex align-items-start">
-      <div class="nav flex-column nav-pills me-3" id="tabs-tab" role="tablist" aria-orientation="vertical">
-        <a class="nav-link active frostybot-nav-left" id="tabs-accounts-tab" data-bs-toggle="pill" href="#tabs-accounts" role="tab" aria-controls="tabs-accounts" aria-selected="true">Accounts</a>
-        <a class="nav-link frostybot-nav-left" id="tabs-accounts-tab" data-bs-toggle="pill" href="#tabs-security" role="tab" aria-controls="tabs-security" aria-selected="true">Security</a>
-        <a class="nav-link frostybot-nav-left" id="tabs-logout-tab" data-bs-toggle="pill" href="#tabs-logout" role="tab" aria-controls="tabs-logout" aria-selected="false">Logout</a>
-      </div>
-      <div class="tab-content flex-fill" id="tabs-tabContent">
-        <div class="frostybot-panel tab-pane fade show active" id="tabs-accounts" role="tabpanel" aria-labelledby="tabs-accounts-tab"><%- include('../partials/tab.accounts.ejs'); %></div>
-        <div class="frostybot-panel tab-pane fade" id="tabs-security" role="tabpanel" aria-labelledby="tabs-security-tab"><%- include('../partials/tab.security.ejs'); %></div>
-        <div class="frostybot-panel tab-pane fade" id="tabs-logout" role="tabpanel" aria-labelledby="tabs-logout-tab">Logging out...</div>
-      </div>
-    </div>
 
-  </container>
+  <div class="row flex-nowrap">
+    <div class="col">
+      <%- include('../partials/menu.main.ejs'); %>
+    </div>
+    <div class="col-10">
+      <%- include('../partials/content.main.ejs'); %>      
+    </div>
+  </div>
 
 <%- include('../partials/footer.ejs'); %>
