@@ -1,47 +1,31 @@
 // Database Abstraction Layer
 
-const sqlite3 = require('better-sqlite3');
-const db = new sqlite3(__dirname.replace('core','database') + '/database.db');
-const frostybot_module = require('./mod.base')
+const frostybot_module = require(__dirname.substr(0, __dirname.lastIndexOf( '/' ) ) + '/core/mod.base')
 
-module.exports = class frostybot_database_module extends frostybot_module {
+module.exports = class frostybot_database_base_module extends frostybot_module {
 
     // Constructor
 
     constructor() {
         super()
-        db.pragma('journal_mode = wal');
     }
-
-    // Query data from the database
-
-    query(sql, values = []) {
-        return db.prepare(sql).all(values);
-    }
-
-    // Execute a SQL statement
-
-    exec(sql, values = []) {
-        return db.prepare(sql).run(values);
-    }
-
 
     // Select data from the database
 
-    select(table, where = {}) {
+    async select(table, where = {}) {
         var sql = '';
         var whereList = [];
         for (var key in where) {
             whereList.push("`" + key + "` = ?");
         }
         var sql = "SELECT * FROM `" + table + "`" + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
-        return this.query(sql, Object.values(where));
+        return await this.query(sql, Object.values(where));
     }
 
 
     // Insert into table
 
-    insert(table, data) {
+    async insert(table, data) {
         var sql = '';
         var colList = [];
         var valList = [];
@@ -50,13 +34,13 @@ module.exports = class frostybot_database_module extends frostybot_module {
             valList.push('?');
         }
         sql = "INSERT INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES (" + valList.join(",") + ");";
-        return this.exec(sql, Object.values(data));
+        return await this.exec(sql, Object.values(data));
     }
 
 
     // Select data from the database
 
-    update(table, data, where = []) {
+    async update(table, data, where = []) {
         var sql = '';
         var dataList = [];
         var values = [];
@@ -72,13 +56,13 @@ module.exports = class frostybot_database_module extends frostybot_module {
             values.push(val);
         }
         var sql = "UPDATE `" + table + "` SET " + dataList.join(",") + " " + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
-        return this.exec(sql, values);
+        return await this.exec(sql, values);
     }
 
 
     // Delete data from the database
 
-    delete(table, where = []) {
+    async delete(table, where = []) {
         var sql = '';
         var whereList = [];
         for (var key in where) {
@@ -86,35 +70,7 @@ module.exports = class frostybot_database_module extends frostybot_module {
             whereList.push("`" + key + "`= ?");
         }
         var sql = "DELETE FROM `" + table + "`" + (whereList.length > 0 ? " WHERE " + whereList.join(" AND ") : "") + ";";
-        return this.exec(sql, Object.values(where));
-    }
-
-
-    // Insert or update
-
-    insertOrUpdate(table, data, where = []) {
-        var data  = this.select(table, where);
-        if (data.count > 0) {
-            return this.update(table, data, where);
-        } else {
-            return this.insert(table, data);
-        }
-    }
-
-    
-    // Insert or Replace
-
-    insertOrReplace(table, data) {
-        var sql = '';
-        var colList = [];
-        var valList = [];
-        for (var key in data) {
-            var val = data[key];
-            colList.push(key);
-            valList.push("?");
-        }
-        sql = "INSERT OR REPLACE INTO `" + table + "` (`" + colList.join("`,`") + "`) VALUES (" + valList.join(",") + ");";
-        return this.exec(sql, Object.values(data));       
+        return await this.exec(sql, Object.values(where));
     }
 
 

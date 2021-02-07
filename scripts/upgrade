@@ -8,7 +8,7 @@ cd "$SCRIPTPATH" &
 cd ../ &
 
 echo "Checking for updates..."
-sudo git checkout stable > /dev/null 2>&1
+#sudo git checkout stable > /dev/null 2>&1
 sudo git fetch > /dev/null 2>&1
 CHECK=`sudo git status | grep "up to date" | wc -l`
 
@@ -28,9 +28,13 @@ else
     DOSTART="false"
   fi
   echo "Frostybot server stopped successfully, upgrading now"
+  echo "Creating a backup..."
+  sudo tar czvf ~/`date +%s`.tar.gz /usr/local/frostybot-js  > /dev/null 2>&1
   echo "Updating Frostybot files from Github"
-  sudo git checkout stable > /dev/null 2>&1
+  #sudo git checkout stable > /dev/null 2>&1
+  #sudo git stash 
   sudo git pull -f
+  ./scripts/dbupgrade
   echo "Updating MOTD"
   sudo cp -f /usr/local/frostybot-js/scripts/motd /etc/motd
   echo "Installing outstanding NodeJS modules"

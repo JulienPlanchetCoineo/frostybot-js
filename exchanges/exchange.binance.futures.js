@@ -26,10 +26,16 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         };
     }
 
-
     // Custom params
 
-    custom_params(type, order_params, custom_params) {
+    async custom_params(type, order_params, custom_params) {
+        /*
+        if (!order_params.hasOwnProperty('params')) {
+            order_params.params = {};
+        }
+        var position_mode = await this.ccxtobj.fapiPrivateGetPositionSideDual();
+        var dual = position_mode.hasOwnProperty('dualSidePosition') ? position_mode.dualSidePosition : false;
+        */
         return order_params;
     }    
 
@@ -60,7 +66,8 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
     // Get list of current positions
 
     async positions() { 
-        let raw_positions = await this.ccxt('fapiPrivate_get_positionrisk');
+        this.set_cache_time('fapiPrivate_get_positionrisk', 5);
+        let raw_positions = await this.execute('fapiPrivate_get_positionrisk');
         await this.markets();
         // Get futures positions
         var positions = []; 
@@ -126,6 +133,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
+        this.set_cache_time('fapiPublic_get_ticker_bookticker', 10);
         var tickersRaw = await this.ccxt('fapiPublic_get_ticker_bookticker')
         for (var i = 0; i < tickersRaw.length; i++) {
             var tickerRaw = tickersRaw[i];

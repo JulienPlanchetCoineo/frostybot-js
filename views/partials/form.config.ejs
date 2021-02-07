@@ -1,0 +1,307 @@
+<%
+
+if (typeof(form_config) != undefined) {
+
+  var stub = form_config.stub;
+
+%>
+<form id="configform" class="row">
+  <div class="row">
+
+    <div class="col" style="margin-left: 10px">     <!--  LEFT COLUMN -->
+
+      <div class="row flex-nowrap">
+        <div class="col" style="border: solid 1px #AAAAAA; border-radius: 5px; padding-top: 10px; padding-bottom: 10px; margin-left: 5px; margin-bottom: 10px">
+
+          <div class="row mb-2 flex-nowrap">
+            <div class="col">
+              <label class="col-form-label-md frostybot-form-label-lq"><b>General Settings</b></label>
+            </div>
+          </div>
+
+          <div class="row mb-2 flex-nowrap">
+            <label for="inputstub" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Stub</label>
+            <div class="col">
+              <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" disabled id="inputproviderstub" value="<%= stub %>">
+            </div>
+          </div>
+
+          <%
+
+              function falseToEmptyString(val) {
+                return (val == false) ? '' : val;
+              }
+
+              function stubConfig(config, key) {
+                return falseToEmptyString(config.hasOwnProperty(stub + ':' + key) ? config[stub + ':' + key] : false);
+              }
+
+              var providers = form_config.hasOwnProperty('providers') ? form_config.providers : [];
+              var config = form_config.hasOwnProperty('config') ? form_config.config : {};
+              var symbols = form_config.hasOwnProperty('symbols') ? form_config.symbols : {};
+              var maxposqty = stubConfig(config, 'maxposqty');
+              var defsize = stubConfig(config, 'defsize');
+              var defstoptrigger = stubConfig(config, 'defstoptrigger');
+              var defprofittrigger = stubConfig(config, 'defprofittrigger');
+              var defprofitsize = stubConfig(config, 'defprofitsize');
+              var griddata = form_config.hasOwnProperty('griddata') ? form_config.griddata : [];
+
+              if (providers.length > 0) {
+
+                var provider = stubConfig(config, 'provider');
+
+          %>
+
+          <div class="row mb-2 flex-nowrap">
+            <label for="inputexchange" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Signal Provider</label>
+            <div class="col">
+              <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputprovider">
+                <option value="" <%= (provider == '' ? 'selected' : '')%>>None</option>
+                <%
+                  for(var i=0; i < providers.length; i++) {
+                    var item = providers[i];
+                %>
+                    <option value="<%= item.uuid %>" <%= (provider == item.uuid ? 'selected' : '')%>><%= item.name %></option>
+                <%
+                  }
+                %>
+              </select>
+            </div>
+          </div>
+
+          <%
+              }
+          %>
+    
+          <div class="row mb-2 flex-nowrap">
+            <label for="inputmaxposqty" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Max Positions</label>
+            <div class="col">
+              <select class="form-select form-select-sm form-control-sm frostybot-input frostybot-input-sm" aria-label=".form-select-sm example" id="inputmaxposqty">
+                <option value="">Unlimited</option>
+                <%
+                  for(var i=1; i <= 20; i++) {
+                %>
+                    <option value="<%= i %>" <%= ( maxposqty==i ? 'selected' : '')%>><%= i %></option>
+                <%
+                  }
+                %>
+
+              </select>
+            </div>
+          </div>
+
+
+          </div>
+        </div>
+
+
+        <div class="row flex-nowrap">
+          <div class="col" style="border: solid 1px #AAAAAA; border-radius: 5px; padding-top: 10px; padding-bottom: 10px; margin-left: 5px; margin-bottom: 10px">
+
+            <div class="row mb-2 flex-nowrap">
+              <div class="col">
+                <label class="col-form-label-md frostybot-form-label-lq"><b>Account-Level Position Defaults</b></label>
+              </div>
+            </div>
+
+            <div class="row mb-2 flex-nowrap">
+              <label for="inputsubaccount" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Default Size</label>
+              <div class="col">
+                <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="inputdefsize" value="<%= defsize %>">
+              </div>
+            </div>
+      
+            <div class="row mb-2 flex-nowrap">
+              <label for="inputsubaccount" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Default&nbsp;Stoploss</label>
+              <div class="col">
+                <select  id="inputdefstoptrigger" class="">
+                  <option value=""></option>
+                  <%
+                    for (var i=1; i<=20; i++) {
+                  %>
+                  <option value="<%= i %>%" <%= ( defstoptrigger==(i+'%') ? 'selected' : '')%>><%= i %>%</option>
+                  <%
+                    }
+                  %>
+                </select>
+              </div>
+            </div>
+      
+            <div class="row mb-2 flex-nowrap">
+              <label for="inputsubaccount" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Default&nbsp;Take&nbsp;Profit</label>
+              <div class="col">
+                <select id="inputdefprofittrigger" class="">
+                  <option value=""></option>
+                  <%
+                    for (var i=5; i<=100; i+=5) {
+                  %>
+                  <option value="<%= i %>%" <%= ( defprofittrigger==(i+'%') ? 'selected' : '')%>><%= i %>%</option>
+                  <%
+                    }
+                  %>
+                </select>
+              </div>
+            </div>
+      
+            <div class="row mb-2 flex-nowrap">
+              <label for="inputsubaccount" class="col-sm-2 col-form-label-sm frostybot-form-label-lg">Take Profit Size</label>
+              <div class="col">
+                <select id="inputdefprofitsize" class="">
+                  <option value=""></option>
+                  <%
+                    for (var i=5; i<=100; i+=5) {
+                  %>
+                  <option value="<%= i %>%" <%= ( defprofitsize==(i+'%') ? 'selected' : '')%>><%= i %>%</option>
+                  <%
+                    }
+                  %>
+                </select>
+              </div>
+            </div>
+  
+          </div>
+        </div>
+
+
+    </div>
+    <div class="col-8" style="margin-left: 5px; margin-right: 0px;">     <!--  RIGHT COLUMN -->
+
+
+      <div class="row flex-nowrap">
+        <div class="col" style="border: solid 1px #AAAAAA; border-radius: 5px; padding-top: 10px; padding-bottom: 10px; margin-left: 5px; margin-bottom: 10px">
+
+          <div class="row mb-2 flex-nowrap">
+            <div class="col">
+              <label class="col-form-label-md frostybot-form-label-lq"><b>Pair-Level Settings</b></label>
+            </div>
+          </div>
+
+          <div class="row mb-2 flex-nowrap">
+            <div class="col" id="form_config_pairs">
+              <!--label class="loadingmessage col-form-label-sm">(Loading, please wait...)</label-->
+              <div id="configpairs"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  <div class="row">
+      <div class="col text-center">
+        <button type="button" class="btn btn-primary frostybot-button-sm" id="configcancel"><span class="fa fa-times"></span> Close</button>
+      </div>
+  </div>
+</form>
+
+<%
+}
+%>
+
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+  var gridbase64 = "<%= griddata %>";
+  var griddata = JSON.parse(atob(gridbase64));
+
+  var stoptriggervals = [{ value: '', label: '' }];
+  var profittriggervals = [{ value: '', label: '' }];
+
+  for (var i=1; i<=20; i++)
+    stoptriggervals.push({ value: i + '%', label: i + '%' });
+  
+  for (var i=5; i<=100; i+=5) {
+    profittriggervals.push({ value: i + '%', label: i + '%' });
+  }
+
+  var profitsizevals = profittriggervals;
+
+  var stoptriggersource = {
+    datatype: "array",
+    datafields: [
+        { name: 'label', type: 'string' },
+        { name: 'value', type: 'string' }
+    ],
+    localdata: stoptriggervals
+  };
+
+  var profittriggersource = {
+    datatype: "array",
+    datafields: [
+        { name: 'label', type: 'string' },
+        { name: 'value', type: 'string' }
+    ],
+    localdata: profittriggervals
+  };
+
+  var profitsizesource = {
+    datatype: "array",
+    datafields: [
+        { name: 'label', type: 'string' },
+        { name: 'value', type: 'string' }
+    ],
+    localdata: profitsizevals
+  };
+
+  var stoptriggeradapter = new $.jqx.dataAdapter(stoptriggersource, {autoBind: true});
+  var profittriggeradapter = new $.jqx.dataAdapter(profittriggersource, {autoBind: true});
+  var profitsizeadapter = new $.jqx.dataAdapter(profitsizesource, {autoBind: true});
+
+  var gridsource = {
+    localdata: griddata,
+    datafields: [
+        { name: 'symbol', type: 'string', map: '0'},
+        { name: 'ignored', type: 'bool', map: '1' },
+        { name: 'defsize', type: 'string', map: '2' },
+        { name: 'defstoptrigger', type: 'string', map: '3' },
+        { name: 'defprofittrigger', type: 'string', map: '4' },
+        { name: 'defprofitsize', type: 'string', map: '5' }
+    ],
+    datatype: "array"
+  };
+  
+  var gridadapter = new $.jqx.dataAdapter(gridsource);
+       
+  $("#configpairs").jqxGrid({
+    width: '100%',
+    height: '400px',
+    source: gridadapter,
+    selectionmode: 'singlecell',
+    columnsresize: true,
+    editable: true,
+    filterable: true,
+    sortable: true,
+    columns: [
+      { text: 'Symbol', datafield: 'symbol', filterable: true, editable: false },
+      { text: 'Ignored', datafield: 'ignored', width: 70, columntype: 'checkbox', cellsalign: 'center', align: 'center', filterable: false },
+      { text: 'Default Size', datafield: 'defsize', width: 100, cellsalign: 'center', align: 'center', filterable: false },
+      { text: 'Stoploss %', datafield: 'defstoptrigger', width: 100, columntype: 'combobox', cellsalign: 'center', align: 'center', filterable: false, 
+              createeditor: function (row, value, editor) {
+                editor.jqxComboBox({ source: stoptriggeradapter, displayMember: 'label', valueMember: 'value' });
+              } },
+      { text: 'Take Profit %', datafield: 'defprofittrigger', width: 100, columntype: 'combobox', cellsalign: 'center', align: 'center', filterable: false, 
+              createeditor: function (row, value, editor) {
+                editor.jqxComboBox({ source: profittriggeradapter, displayMember: 'label', valueMember: 'value' });
+              } },
+      { text: 'Profit Size', datafield: 'defprofitsize', width: 100, columntype: 'combobox', cellsalign: 'center', align: 'center', filterable: false, 
+              createeditor: function (row, value, editor) {
+                editor.jqxComboBox({ source: profitsizeadapter, displayMember: 'label', valueMember: 'value' });
+              }  }
+    ]
+  });
+
+
+  $("#configpairs").on('cellselect', function (event) {
+    var column = $("#configpairs").jqxGrid('getcolumn', event.args.datafield);
+    var value = $("#configpairs").jqxGrid('getcellvalue', event.args.rowindex, column.datafield);
+    var displayValue = $("#configpairs").jqxGrid('getcellvalue', event.args.rowindex, column.displayfield);
+  });
+
+
+
+});
+
+</script>

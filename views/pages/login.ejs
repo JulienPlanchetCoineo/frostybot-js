@@ -1,0 +1,50 @@
+<%- include('../partials/header.ejs'); %>
+<% if (recaptchasite != false) { %>
+  <script src="https://www.google.com/recaptcha/api.js?render=<%= recaptchasite %>"></script>
+<% } %>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="frostybot-panel w-50">
+      <div class="w-100 frostybot-panel-header"><p class="m-0"><span class="fa fa-sign-in"></span> <b>Login</b></p></div>
+      <div class="w-100 frostybot-panel-content">
+        <div class="container">
+          <form id="loginform" data-recaptchasite="<%= recaptchasite %>">
+            <div class="mb-3 flex-nowrap">
+              <% if (regsuccess) { %>
+                <p>You have successfully registered, please login below:<br /></p>
+              <% } %>
+              <% if (sessiontimeout) { %>
+                <p>Your session timed out, please login again below:<br /></p>
+              <% } %>
+              <label for="inputemail" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="inputemail">
+            </div>
+            <div class="row mb-3 flex-nowrap">
+              <div class="col">
+                <label for="inputpassword" class="form-label">Password</label>
+                <input type="password" class="form-control frostybot-input-sm" id="inputpassword">  
+              </div>
+              <div class="col">
+                <label for="input2fa" class="form-label">2FA Token <i>(if enabled)</i></label>
+                <input type="text" class="form-control frostybot-input-sm" id="input2fa">
+              </div>
+            </div>
+            <div class="mb-3 text-center">
+              <button type="submit" class="btn btn-success m-2 frostybot-button-sm"><span class="fa fa-sign-in"></span> Login</button><% if (showregister) { %><button type="button" id="registerbutton" class="btn btn-primary frostybot-button-sm"><span class="fa fa-user-plus"></span> Register</button><% } %>
+            </div>
+          </form>
+          <script>
+            $( document ).ready(function() {
+              $('#inputemail').focus();
+              $('#registerbutton').on('click', function() {
+                document.location.href = '/ui/register';
+              })
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>

@@ -14,10 +14,11 @@ fi
 
 URL="http://127.0.0.1:$PORT/frostybot"
 
-for x in "autostart" "start" "stop" "status" "debug" "upgrade" "test"; do
-    if [ "$COMMAND" == "$x" ]; then
+for x in "autostart" "start" "stop" "status" "debug" "upgrade" "test" "log" "branch" "dbupgrade"; do
+    if [ "$1" == "$x" ]; then
         cd "$SCRIPTPATH"
-        ./scripts/$x
+        PARAM="${COMMAND/$x/''}"
+        eval "./scripts/$x $PARAM"
         cd "$CURRENTPATH"
         exit
     fi

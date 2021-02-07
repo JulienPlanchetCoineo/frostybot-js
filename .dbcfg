@@ -1,0 +1,4 @@
+{
+    "type": "sqlite",
+    "file": "database/database.db"
+}

@@ -35,7 +35,7 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
     // Get whitelist
 
-    get(params) {
+    async get(params) {
 
         var schema = {
             ip: {
@@ -48,14 +48,14 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
         var ip = this.utils.extract_props(params, 'ip');
         //this.tradingview();
-        var result = (ip == undefined ? this.settings.get('whitelist') : this.settings.get('whitelist', ip, false));
+        var result = (ip == undefined ? await this.settings.get('whitelist') : await this.settings.get('whitelist', ip, false));
         if (result !== false) {
             if (result.hasOwnProperty('ip')) {
-                this.output.debug('whitelist_get', [result.ip, result.description]);
+                this.output.debug('whitelist_get', [result.ipAddress, result.description]);
             } else {
                 result = this.utils.remove_values(result, [false, undefined]);
                 Object.values(result).forEach(val => {
-                    this.output.debug('whitelist_get', [val.ip, val.description]);
+                    this.output.debug('whitelist_get', [val.ipAddress, val.description]);
                 });
             }
             return result;
@@ -66,7 +66,7 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
     // Add IP to whitelist
 
-    add(params) {
+    async add(params) {
 
         var schema = {
             ip: {
@@ -78,7 +78,7 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         var [ip, description] = this.utils.extract_props(params, ['ip', 'description']);
-        if (!this.settings.get('whitelist', ip)) {
+        if (!await this.settings.get('whitelist', ip)) {
             var data = {
                 ipAddress: ip,
                 description: description,
@@ -95,7 +95,7 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
     // Delete IP from whitelist
 
-    delete(params) {
+    async delete(params) {
         
         var schema = {
             ip: {
@@ -107,7 +107,7 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
         if (!(params = this.utils.validator(params, schema))) return false; 
 
         var ip = this.utils.extract_props(params, 'ip');
-        var acl = this.settings.get('whitelist', ip);
+        var acl = await this.settings.get('whitelist', ip);
         if (acl) {
             if (acl.canDelete == 1) {
                 if (this.settings.delete('whitelist', ip)) {
@@ -123,8 +123,8 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
     // Enable whitelist verification
 
-    enable() {
-        if (this.settings.set('whitelist', 'enabled', true)) {
+    async enable() {
+        if (await this.settings.set('whitelist', 'enabled', true)) {
             return this.output.success('whitelist_enable')
         }
         return this.output.error('whitelist_enable')
@@ -133,8 +133,8 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
     // Disable whitelist verification
     
-    disable() {
-        if (this.settings.set('whitelist', 'enabled', false)) {
+    async disable() {
+        if (await this.settings.set('whitelist', 'enabled', false)) {
             return this.output.success('whitelist_disable')
         }
         return this.output.error('whitelist_disable')
@@ -143,8 +143,8 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
     // Check if whitelist is enabled
 
-    is_enabled() {
-        var result = this.settings.get('whitelist', 'enabled');
+    async is_enabled() {
+        var result = await this.settings.get('whitelist', 'enabled');
         if ((result === null) || (result == true)) {
             this.output.notice('whitelist_enabled')
             return true;
@@ -155,11 +155,11 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
     // Verify IP in whitelist
 
-    verify(ip) {
+    async verify(ip) {
         if (this.utils.is_object(ip) && ip.hasOwnProperty('ip')) 
             ip = ip.ip
         if (this.is_enabled()) {
-            var acl = this.settings.get('whitelist', ip);
+            var acl = await this.settings.get('whitelist', ip);
             if (acl) {
                 this.output.notice('whitelist_verify', ip);
                 return true

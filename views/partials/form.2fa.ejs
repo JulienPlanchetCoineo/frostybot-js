@@ -1,0 +1,73 @@
+<div class="row mb-2" style="width: 550px;">
+
+<% 
+  if (typeof(form_2fa) == 'undefined') {
+    var enabled = false;
+    var enable = false;
+  } else {
+    var enabled = form_2fa.enabled;
+    var enable = form_2fa.enable;
+  }
+
+  if (!enabled && !enable) {
+
+%>
+
+<div class="row mb-2"><button type="button" class="btn btn-primary frostybot-button-md" id="enable2fabutton"><span class="fa fa-lock"></span> Enable 2FA</button></div>    
+
+<%
+  
+  }
+
+  if (!enabled && enable) {
+
+    var secret = form_2fa.secret;
+    var qrcode = form_2fa.qrcode;
+
+%>
+
+<form id="formregister2fa">
+  <div class="row mb-2">
+    <input type="text" class="frostybot-input" id="input2fasecret" disabled value="<%= secret %>" style="width: 520px; margin-left: 12px; font-family:'Courier New', Courier, monospace; font-size: 16pt">
+  </div>
+  <div class="row">
+    <div class="col">
+        <img class="frostybot-qrcode" src="<%= qrcode %>" /><br />
+    </div>
+    <div class="col">
+        <label class="mb-3">2FA is currently disabled. To enable it, scan the QR code or enter the key above using Google Authenticator. After that, verify your authenticator token below.</label>
+        <label for="input2faverify" class="col-sm-2">Token</label>
+        <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="input2faverify" style="width: 100px;">
+        <button type="button" class="btn btn-success frostybot-button-sm" style="width: 80px; margin-left: 5px; height: 31px; padding: 2px;" id="verify2fabutton"><span class="fa fa-check"></span> Verify</button>
+    </div>
+</div>
+</form>
+
+
+<%
+  
+  }
+
+  if (enabled == true) {
+
+%>
+
+<form id="formunregister2fa">
+    <div class="row">
+        <label class="mb-3">2FA is enabled. To disable, enter your token and click Disable 2FA.</label>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label for="input2faverify" class="col-sm-2">Token</label>
+            <input type="text" class="form-control-sm frostybot-input frostybot-input-sm" id="input2faverify"><button type="button" class="btn btn-danger frostybot-button-sm" style="width: 140px; margin-left: 10px; height: 31px; padding: 2px;" id="disable2fabutton"><span class="fa fa-ban"></span> Disable 2FA</button>
+        </div>  
+    </div>
+</form>
+
+<%
+
+  }
+
+%>
+
+</div>

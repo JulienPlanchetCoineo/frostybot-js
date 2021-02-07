@@ -1,6 +1,10 @@
 // Module to manage program settings in the database settings table
 
 const frostybot_module = require('./mod.base')
+var context = require('express-http-context');
+md5 = require('md5');
+
+const global_keys = ['core', 'whitelist', 'signalprovider'];
 
 module.exports = class frostybot_settings_module extends frostybot_module {
 
@@ -12,66 +16,64 @@ module.exports = class frostybot_settings_module extends frostybot_module {
 
     // Get settings(s)
 
-    get(mainkey = null, subkey = null, defval = null) {
-        //this.link('database')
-        if (mainkey == null) {
-            result = this.database.select('settings' )
-            var obj = {}
-            result.forEach(function(setting) {
-                var mainkey = setting.mainkey
-                var subkey = setting.subkey
-                if (!obj.hasOwnProperty(mainkey)) {
-                    obj[mainkey] = {}
-                }
-                obj[mainkey][subkey] = JSON.parse(setting.value)
-            });
-            return obj    
-        } else {
-            if (subkey == null) {
-                result = this.database.select('settings', { mainkey: mainkey } )
-                var obj = {}
-                result.forEach(function(setting) {
-                    var subkey = setting.subkey;
-                    var value = setting.value
-                    obj[subkey] = JSON.parse(value);
-                });
-                return obj    
-            } else {
-                var result = this.database.select('settings', { mainkey: mainkey, subkey: subkey } )
-                if (result.length == 0) {
-                    if (defval != undefined) {
-                        this.set(mainkey, subkey, defval);
-                        return defval
-                    } else {
-                        return null;
-                    }
-                }
-                if (result.length == 1) {
-                    var value = result[0].value
-                    return this.utils.is_json(value) ? JSON.parse(value) : value;
-                } 
-                if (result.length > 1) {
-                    var arr = []
-                    result.forEach(function(setting) {
-                        var value = setting.value
-                        arr.push(JSON.parse(value))
-                    })
-                    return arr
-                } 
-            }
+    async get(mainkey = null, subkey = null, defval = null) {
+        var uuid = global_keys.includes(mainkey) ? '00000000-0000-0000-0000-000000000000' : context.get('uuid');
+        if (uuid == undefined) uuid = '00000000-0000-0000-0000-000000000000';
+        var cachekey = md5(uuid + (mainkey != null ? mainkey : '') + (subkey != null ? subkey : ''));
+        //if (result = this.cache.get(cachekey)) {
+        //    return result;
+        //}
+        //var query = this.database.type == 'mysql' ? { uuid: uuid } : {};
+        var query = { uuid: uuid };
+        if (mainkey != null) query['mainkey'] = mainkey;
+        if (subkey != null)  query['subkey'] = subkey;
+        var result = await this.database.select('settings', query);
+        
+        switch (result.length) {
+            case 0      :   if (defval != undefined) {
+                                this.set(mainkey, subkey, defval);
+                                return defval
+                            } else return null;
+            case 1      :   var val = result[0].value
+                            val = this.utils.is_json(val) ? JSON.parse(val) : val;
+                            val = ['true','false'].includes(val) ? Boolean(val) : val;
+                            this.cache.set(cachekey, val, 60);
+                            return val;
+            default     :   var obj = {};
+                            for (var i=0; i < result.length; i++) {
+                                var setting = result[i];
+                                var subkey = setting.subkey;
+                                val = this.utils.is_json(setting.value) ? JSON.parse(setting.value) : setting.value;
+                                val = ['true','false'].includes(val) ? Boolean(val) : val;
+                                obj[subkey] = val;
+                            }
+                            this.cache.set(cachekey, obj, 5);
+                            return obj;
         }
     }
 
 
     // Set Settings(s)
 
-    set(mainkey, subkey, value) {
+    async set(mainkey, subkey, value) {
+        var uuid = global_keys.includes(mainkey) ? '00000000-0000-0000-0000-000000000000' : context.get('uuid');
+        if (uuid == undefined) uuid = '00000000-0000-0000-0000-000000000000';
+        var cachekey = md5(uuid + (mainkey != null ? mainkey : '') + (subkey != null ? subkey : ''));
+        //var query = this.database.type == 'mysql' ? { uuid: uuid } : {};
+        var query = { uuid: uuid };
+        if (mainkey != null) query['mainkey'] = mainkey;
+        if (subkey != null)  query['subkey'] = subkey;
         if (value != null && typeof value === 'object' && value.value !== null && Object.keys(value).length == 1) {
-            value = JSON.stringify(value.value)
+            var val = JSON.stringify(value.value)
         } else {
-            value = JSON.stringify(value)
+            var val = JSON.stringify(value)
         }
-        if (this.database.insert('settings',  { mainkey: mainkey, subkey: subkey, value: value }).changes == 1) {
+        if (val == null) val = '';
+        query['value'] = val;
+        var result = await this.database.insertOrReplace('settings', query);
+        if (result.changes > 0) {
+            var cachekey = md5(uuid + (mainkey != null ? mainkey : '') + (subkey != null ? subkey : ''));
+            this.cache.set(cachekey, value, 60);
             return true;
         }    
         return false;
@@ -80,16 +82,18 @@ module.exports = class frostybot_settings_module extends frostybot_module {
     
     // Delete Settings(s)
 
-    delete(mainkey, subkey) {
-        if (subkey == null) {
-            if (this.database.delete('settings', { mainkey: mainkey }).changes > 0) {
-                return true;
-            }
-        } else {
-            if (this.database.delete('settings', { mainkey: mainkey, subkey: subkey }).changes > 0) {
-                return true;
-            }
-        }
+    async delete(mainkey, subkey) {
+        var uuid = global_keys.includes(mainkey) ? '00000000-0000-0000-0000-000000000000' : context.get('uuid');
+        if (uuid == undefined) uuid = '00000000-0000-0000-0000-000000000000';
+        var cachekey = md5(uuid + (mainkey != null ? mainkey : '') + (subkey != null ? subkey : ''));
+        this.cache.set(cachekey, undefined, 60);
+        var query = this.database.type == 'mysql' ? { uuid: uuid } : {};
+        if (mainkey != null) query['mainkey'] = mainkey;
+        if (subkey != null)  query['subkey'] = subkey;
+        var result = await this.database.delete('settings', query);
+        if (result.changes > 0) {
+            return true;
+        }    
         return false;
     }
 
