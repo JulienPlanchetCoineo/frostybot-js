@@ -107,6 +107,18 @@ To see the status of the server, use this command:
 frostybot status
 ```
 
+#### Enabling the Web GUI interface
+
+To enable the GUI, use the following command:
+```
+frostybot gui:enable email=<your email address> password=<your preferred password>
+```
+
+You will then be able to browse to http://<your vps ip> and login to the GUI. Currently you can configure your API keys and a bunch of other settings via the GUI.
+
+![gui](https://i.imgur.com/gAYTwQM.png "#GUI")
+
+
 #### Add your exchange API keys to Frostybot
 
 You will need to identify this account in Frostybot using what is called a stub. It is a lowercase single word to name the account in Frostybot. You will use this stub in all subsequent interactions with the exchange. For example, if your exchange subaccount is called "Algo"-Trading"", add your API keys using this command:
