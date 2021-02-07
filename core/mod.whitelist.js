@@ -46,16 +46,27 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
 
         if (!(params = this.utils.validator(params, schema))) return false; 
 
-        var ip = this.utils.extract_props(params, 'ip');
+        var [ip, ipAddress] = this.utils.extract_props(params, ['ip','ipAddress']);
+        ip = (ip != undefined ? ip : ipAddress);
         //this.tradingview();
         var result = (ip == undefined ? await this.settings.get('whitelist') : await this.settings.get('whitelist', ip, false));
         if (result !== false) {
-            if (result.hasOwnProperty('ip')) {
-                this.output.debug('whitelist_get', [result.ipAddress, result.description]);
+            if (result.hasOwnProperty('ip') || result.hasOwnProperty('ipAddress') ) {
+                var ip = result.ip !== undefined ? result.ip : (result.ipAddress != undefined ? result.ipAddress : false);
+                this.output.debug('whitelist_get', [ip, result.description]);
             } else {
                 result = this.utils.remove_values(result, [false, undefined]);
                 Object.values(result).forEach(val => {
-                    this.output.debug('whitelist_get', [val.ipAddress, val.description]);
+                    var ip = (val.ip !== undefined ? val.ip : val.ipAddress);
+                    var description = String(val.description).toLowerCase() == 'localhost' ? 'localhost' : val.description;
+                    var canDelete = val.canDelete;
+                    val = {
+                        ip: ip,
+                        description: description,
+                        canDelete: canDelete
+                    }
+                    result[ip] = val;
+                    this.output.debug('whitelist_get', [ip , description]);
                 });
             }
             return result;
@@ -80,7 +91,7 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
         var [ip, description] = this.utils.extract_props(params, ['ip', 'description']);
         if (!await this.settings.get('whitelist', ip)) {
             var data = {
-                ipAddress: ip,
+                ip: ip,
                 description: description,
                 canDelete: 1
             }
@@ -156,8 +167,8 @@ module.exports = class frostybot_whitelist_module extends frostybot_module {
     // Verify IP in whitelist
 
     async verify(ip) {
-        if (this.utils.is_object(ip) && ip.hasOwnProperty('ip')) 
-            ip = ip.ip
+        if (this.utils.is_object(ip) && (ip.hasOwnProperty('ip') || ip.hasOwnProperty('ipaddress'))) 
+            ip = ip.ip != undefined ? ip.ip : ip.ipaddress;
         if (this.is_enabled()) {
             var acl = await this.settings.get('whitelist', ip);
             if (acl) {
