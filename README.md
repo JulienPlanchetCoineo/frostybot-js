@@ -1,4 +1,4 @@
-![logo](https://i.imgur.com/sdvNN7T.png "#FrostyBot")
+![logo](https://i.imgur.com/erwsVFZ.png "#FrostyBot")
 
 ## Frostybot-JS : A NodeJS API endpoint for Cryptocurrency Trading
 
@@ -106,6 +106,18 @@ To see the status of the server, use this command:
 ```
 frostybot status
 ```
+
+#### Enabling the Web GUI interface
+
+To enable the GUI, use the following command:
+```
+frostybot gui:enable email=<your email address> password=<your preferred password>
+```
+
+You will then be able to browse to http://\<your vps ip\> and login to the GUI. Currently you can configure your API keys and a bunch of other settings via the GUI.
+
+![gui](https://i.imgur.com/gAYTwQM.png "#GUI")
+
 
 #### Add your exchange API keys to Frostybot
 

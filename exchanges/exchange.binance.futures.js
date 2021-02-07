@@ -75,7 +75,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
             .filter(raw_position => raw_position.positionAmt != 0)
             .forEach(async raw_position => {
                 const symbol = raw_position.symbol;
-                const market = await this.get_market_by_id_or_symbol(symbol);
+                const market = await this.get_market_by_id(symbol);
                 const direction = (raw_position.positionAmt > 0 ? 'long' : (raw_position.positionAmt <  0 ? 'short' : 'flat'));
                 const base_size = (raw_position.positionAmt * 1);
                 const entry_price = (raw_position.entryPrice * 1);
