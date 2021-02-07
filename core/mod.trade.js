@@ -1184,14 +1184,14 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         var stub = params.stub;
         var positions = await this.positions(params);
 
-        this.queue.clear(stub, symbol)   
+        this.initialize_exchange(params);
         if (this.utils.is_array(positions)) {
             for(var i = 0; i < positions.length; i++) {
                 var symbol = positions[i].symbol;
-                await this.create_order('close', {stub: stub, symbol: symbol});
+                await this.create_and_submit_order('close', {stub: stub, symbol: symbol});
             }
         }
-        return await this.queue.process(stub, symbol);
+        return true;
 
     }
 
