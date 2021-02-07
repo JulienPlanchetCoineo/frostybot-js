@@ -13,17 +13,67 @@ module.exports = class frostybot_exchange_base {
             markets: null,
             balances: null,
             markets_by_id: {},
-            markets_by_symbol: {},
+            markets_by_symbol: {}
+        }
+        this.interfaces = {
+            methods: [
+                'positions',
+                'position',
+                'markets',
+                'market',
+                'ticker',
+                'total_balance_usd',
+                'free_balance_usd',
+                'available_equity_usd',
+                'balances',
+                'orders',
+                'cancel',
+                'cancel_all',
+                'get_market_by_id',
+                'get_market_by_symbol',
+                'get_market_by_id_or_symbol',
+                'create_order',
+                'custom_params',
+                'leverage',
+                'symbols',
+            ],
+            cache: {
+                'market' : 60,
+                'fetch_markets' : 60,
+                'fetch_orders' : 5,
+                'fetch_open_orders' : 5,
+                'fetch_closed_orders' : 5,
+            }
         }
         this.stub = stub;
-        this.account = this.accounts.getaccount(stub);
+        this.load_account();
+  
+    }
+
+    // Set method cache time
+
+    set_cache_time(method, sec) {
+        this.interfaces.cache[method] = sec;
+    }
+
+    // Load account
+
+    async load_account() {
+        this.account = await this.accounts.getaccount(this.stub);
         if (this.account) {
-            const accountParams = this.accounts.ccxtparams(this.account);
+            this.shortname = await this.accounts.get_shortname_from_stub(this.stub);
+            const accountParams = await this.accounts.ccxtparams(this.account);
             const exchangeId = this.account.exchange
             const exchangeClass = ccxtlib[exchangeId]
             this.ccxtobj = new exchangeClass (accountParams.parameters)
             this.ccxtobj.options.adjustForTimeDifference = true
-            this.ccxtobj.loadMarkets();
+            try {
+                await this.ccxtobj.loadMarkets();    
+                return true;
+            } catch(error) {
+                this.output.exception(error);
+                return false;
+            }
         }
     }
 
@@ -47,58 +97,59 @@ module.exports = class frostybot_exchange_base {
             params = [params];
         }
         await this.markets();
+        var result = false;
         if (typeof(this[method]) == 'function') {
-            return await this.normalizer(method, params);
+            result = await this.normalizer(method, params);
         } else {
-            return await this.ccxt(method, params);
+            result = await this.ccxt(method, params);
+        }
+        return result;
+    }
+
+    // Cache Execute
+
+    async cache_exec(type, method, params = []) {
+        if (!this.utils.is_array(params)) params = [params];
+        if (this.ccxtobj == undefined) await this.load_account();
+        try {
+            this.shortname = await this.accounts.get_shortname_from_stub(this.stub);
+            var stat = new this.classes.metric([this.shortname, this.stub, type, method].join(':'));
+            stat.start();
+            var cachetime = this.interfaces.cache.hasOwnProperty(method) ? this.interfaces.cache[method] : null;
+            var key = md5([this.shortname, this.stub, type, method, this.utils.serialize(params)].join('|'));
+            var value = cachetime == null ? undefined : this.cache.get( key );
+            if ( value == undefined ) {
+                var result = null;
+                switch (type) {
+                    case 'normalizer'   :   var result = await this[method](...params);
+                                            break;
+                    case 'ccxt'         :   var result = await this.ccxtobj[method](...params);
+                                            break;
+                }
+                if (result != null) {this.cache.set( key, result, cachetime );}
+            } else {
+                stat.cached = true;
+                var result = value;
+            }
+            stat.end();
+            this.output.add_stat(stat);
+            return result;
+        }
+        catch (error) {
+            return { result: 'error', data: error }
         }
     }
 
     // Normalizer Wrapper
 
     async normalizer(method, params = []) {
-        return await this[method](...params);     
+        return await this.cache_exec('normalizer', method, params);
     }
 
     // CCXT Wrapper
 
     async ccxt(method, params = []) {
-        try {
-            if (!this.utils.is_array(params)) {
-                params = [params];
-            }
-            var cache_methods = {
-                //'fetch_tickers' : 5,
-                'fetch_markets' : 5,
-                'private_get_get_positions' : 5,
-                'private_get_get_account_summary': 5,
-                'private_get_positions' : 5,
-                'fetch_orders' : 5,
-                'fetch_open_orders' : 5,
-                'fetch_closed_orders' : 5,
-                'public_get_get_book_summary_by_currency': 5,
-                'v3_get_ticker_bookticker': 5,
-                'fapiPublic_get_ticker_bookticker': 5,
-                'fapiPrivate_get_positionrisk' : 5,
-            }
-            if (cache_methods.hasOwnProperty(method)) {
-                var cachetime = cache_methods[method]
-                var key = md5([this.stub, method, this.utils.serialize(params)].join('|'));
-                var value = this.cache.get( key );
-                if ( value == undefined ) {
-                    var result = await this.ccxtobj[method](...params);
-                    this.cache.set( key, result, cachetime );
-                } else {
-                    var result = value;
-                }
-            } else {
-                var result = await this.ccxtobj[method](...params);
-            }
-            return result;
-        }
-        catch (error) {
-            return { result: 'error', data: error }
-        }
+        return await this.cache_exec('ccxt', method, params);
     }
 
     // Get market by ID
@@ -190,7 +241,7 @@ module.exports = class frostybot_exchange_base {
                 });
                 if ((market.usd.quote != null) && (market.usd.base == null)) {
                     market.usd.base = market.usd.quote * market.avg;
-                }
+                }    
             } else {
                 market.usd = market.avg;
             }
