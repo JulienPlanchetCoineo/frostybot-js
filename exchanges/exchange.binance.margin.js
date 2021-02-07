@@ -80,6 +80,7 @@ module.exports = class frostybot_exchange_binance_margin extends frostybot_excha
 
     async markets() {
         var marginpairs = [];
+        this.set_cache_time('sapiGetMarginAllPairs', 3600);
         var marginpairsresult = await this.ccxt('sapiGetMarginAllPairs');
         if (Array.isArray(marginpairsresult)) {
             for(var i = 0; i < marginpairsresult.length; i++) {
@@ -129,6 +130,7 @@ module.exports = class frostybot_exchange_binance_margin extends frostybot_excha
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
+        this.set_cache_time('v3_get_ticker_bookticker', 10);
         var tickersRaw = await this.ccxt('v3_get_ticker_bookticker')
         for (var i = 0; i < tickersRaw.length; i++) {
             var tickerRaw = tickersRaw[i];

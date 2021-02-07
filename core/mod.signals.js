@@ -67,59 +67,28 @@ module.exports = class frostybot_signals_module extends frostybot_module {
 
     // Get supported providers by account stub
 
-    async get_providers_by_stub(params) {
+    async get_providers_by_stub(stub) {
 
-        var schema = {
-            stub: { required: 'string', format: 'lowercase' }
-        }
-
-        if (!(params = this.utils.validator(params, schema))) return false; 
-
-        var stub = params.stub;
         var account = await this.accounts.get(stub);
+        var result = [];
         account = account.hasOwnProperty(stub) ? account[stub] : account;
 
         if (account) {
-            var defsize = await this.config.get(stub + ':defsize');
-            var curprovider = await this.config.get(stub + ':provider');
-            var maxposqty = await this.config.get(stub + ':maxposqty');
-            var options = {
-                defsize :  defsize,
-                maxposqty :  maxposqty,
-                provider: curprovider
-            };
             var exchange = account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : '');
             var providers = await this.get_providers();
             if (this.utils.is_object(providers)) {
                 var data = Object.values(providers);
                 if (data.length > 0) {
-                    var data =  data.filter(item => item.exchanges.includes(exchange));
-                }
-                return {
-                    options: options,
-                    data: data
+                    var result = data.filter(item => item.exchanges.includes(exchange));
                 }
             }
         }
-
-        return {
-            options: {},
-            data: []
-        }
-
+        return result;
     }
 
     // Get symbol ignore list for stub
 
-    async get_ignore_list(params) {
-        var schema = {
-            stub: { required: 'string', format: 'lowercase' }
-        }
-
-        if (!(params = this.utils.validator(params, schema))) return false; 
-
-        var stub = params.stub;        
-
+    async get_ignore_list(stub) {
         var markets = await this.trade.markets({stub: stub});
         var ignored = await this.config.get(stub + ':ignored');
         ignored = [null, false, ''].includes(ignored) ? [] : ignored.split(",");
@@ -203,7 +172,7 @@ module.exports = class frostybot_signals_module extends frostybot_module {
 
         var schema = {
             provider: { required: 'string', format: 'lowercase' },
-            exchange: { required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit', 'binance_futures', 'binance_spot', 'binanceus', 'bitmex'] },
+            exchange: { required: 'string', format: 'lowercase', oneof: ['ftx', 'deribit', 'binance_futures', 'binance_spot', 'binance_margin', 'binance_coinm', 'binanceus', 'bitmex'] },
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
@@ -343,9 +312,11 @@ module.exports = class frostybot_signals_module extends frostybot_module {
                 symbol: symbol,
             }
 
+            /*
             if (['long', 'short', 'buy', 'sell'].includes(signal)) {
                 cmd['size'] = config[account.stub+':defsize'];
             }
+            */
 
             var core = global.frostybot._modules_['core'];
             core.execute_single(cmd, true);

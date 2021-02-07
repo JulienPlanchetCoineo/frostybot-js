@@ -33,6 +33,7 @@ const api_methods = {
         'takeprofit', 
         'trailstop', 
         'close', 
+        'closeall',
         'market', 
         'markets', 
         'balances', 
@@ -95,13 +96,11 @@ const api_methods = {
 
     signals: [
         'add_provider',
+        'get_providers',
         'add_exchange',
         'remove_exchange',
         'add_ip',
         'remove_ip',
-        'get_providers',
-        'get_providers_by_stub',
-        'get_ignore_list',
         'send',
     ],
 
@@ -381,20 +380,37 @@ module.exports = class frostybot_core_module extends frostybot_module {
                     }
 
                     // Check for symbol mapping and use it if required, verify that market exists
-                    if (module != 'symbolmap' && params.hasOwnProperty('symbol') && params.hasOwnProperty('stub')) {
+                    if (module != 'symbolmap' && (params.hasOwnProperty('symbol') || params.hasOwnProperty('tvsymbol')) && params.hasOwnProperty('stub')) {
                         var exchangeid = await this.accounts.get_exchange_from_stub(params.stub);
                         if (exchangeid !== false) {
-                            // Check for symbolmap and use it if configured
-                            var mapping = await this.symbolmap.map(exchangeid, params.symbol);
-                            if (mapping !== false) {
-                                this.output.notice('symbol_mapping', [exchangeid, params.symbol, mapping])
-                                params.symbol = mapping.toUpperCase();
-                            }
-                            params.symbol = params.symbol.toUpperCase();
-                            // Check that market symbol is valid
                             var exchange = new this.classes.exchange(stub);
                             if (exchange != undefined) {
-                                let result = await exchange.market({symbol: params.symbol});
+
+                                // Check if TradingView syminfo.tickerid supplied in tvsymbol parameter
+                                var tvsymbol = !params.hasOwnProperty('symbol') && params.hasOwnProperty('tvsymbol') ? params.tvsymbol : null;
+                                if (tvsymbol !== null) {
+                                    let result = await exchange.execute('market', {tvsymbol: tvsymbol.toUpperCase()});
+                                    if (result instanceof this.classes.market) {
+                                        var symbol = result.symbol;
+                                        this.output.notice('tvsymbolmap_map', [exchangeid, tvsymbol, symbol]);
+                                        params.symbol = symbol;
+                                        delete params.tvsymbol;
+                                    } else {
+                                        return this.output.error('tvsymbolmap_map', [tvsymbol]);
+                                    }
+                                }
+
+                                // Check for symbolmap and use it if configured
+                                var mapping = await this.symbolmap.map(exchangeid, params.symbol);
+                                if (mapping !== false) {
+                                    this.output.notice('symbol_mapping', [exchangeid, params.symbol, mapping])
+                                    params.symbol = mapping.toUpperCase();
+                                }
+                                params.symbol = params.symbol.toUpperCase();
+                            
+                                // Check that market symbol is valid
+
+                                let result = await exchange.execute('market', {symbol: params.symbol});
                                 if (this.utils.is_empty(result)) {
                                     return await this.output.parse(this.output.error('unknown_market', params.symbol));
                                 }
@@ -415,7 +431,7 @@ module.exports = class frostybot_core_module extends frostybot_module {
                     return await this.output.parse(this.output.error('unknown_method', method));  
                 }
             } else {
-                return await this.output.parse(this.output.error('unknown_module', module));  
+                return await this.output.parse(this.output.error('unknown_module', (module == 'this' ? 'Invalid format' : module)));  
             }
         }
         return await this.output.parse(this.output.error('malformed_param', parsed));

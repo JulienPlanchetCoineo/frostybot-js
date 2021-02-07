@@ -140,8 +140,9 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
-        for (var i = 0; i < this.collateral_assets.length; i++) {
-            var currency = this.collateral_assets[i];
+        var currencies = this.collateral_assets;
+        for (var c = 0; c < currencies.length; c++) {
+            var currency = currencies[c];
             var rawtickers = await this.ccxt('public_get_get_book_summary_by_currency', {currency: currency, kind: 'future'});
             var tickers = rawtickers.result;
             for (var j =0; j < tickers.length; j++) {
@@ -156,7 +157,7 @@ module.exports = class frostybot_exchange_deribit extends frostybot_exchange_bas
                 }
 
             }
-        }
+        };
         this.data.tickers = results;
         return results;
     }

@@ -4,6 +4,7 @@ const clc = require('cli-color');   // Make CLI colors fancy
 const md5 = require('md5');         // Used to ensure that the same message is not displayed multiple times
 const fs  = require('fs');          // Filesystem 
 const eol = require('os').EOL;      // Operating system end of line character(s)
+const ccxt = require('ccxt');       // CCXT Error Messages
 
 const frostybot_module = require('./mod.base')
 
@@ -61,7 +62,6 @@ module.exports = class frostybot_output_module extends frostybot_module {
         return true;
     }
     */
-
 
     // Check if message has been outputted
 
@@ -174,6 +174,19 @@ module.exports = class frostybot_output_module extends frostybot_module {
         return this.translate('success', id, params)
     }
 
+    exception(e) {
+        var type = e.constructor.name;
+        var message = e.message;
+        /*if (e instanceof ccxt.ExchangeError) {
+            var testmessage = JSON.parse(e.message.error.message);
+            console.log(testmessage);
+        }
+        console.log(message);
+        */
+       this.add_data(false);
+        return this.error('unhandled_exception', [type, message]);
+    }
+
 
     // Start a new section
 
@@ -200,6 +213,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
             result: 'success',
             type: null,
             data: null,
+            stats: [],
             cache: null,
             messages: []
         }
@@ -210,6 +224,9 @@ module.exports = class frostybot_output_module extends frostybot_module {
     // Get class of an object
 
     get_object_class(obj){
+        if ([null,undefined].includes(obj)) {
+            return null;
+        }
         var objtype = typeof(obj);
         if (objtype == 'boolean') {
             return 'boolean';
@@ -232,12 +249,17 @@ module.exports = class frostybot_output_module extends frostybot_module {
         return undefined;
     }
 
+    // Add statictic to output
+
+    add_stat(data) {
+        this.output_obj.stats.push(data);
+    }
 
     // Add data to the output
 
     add_data(data = {}) {
         var type = this.get_object_class(data);
-        if ((type.toLowerCase() == 'array') && (data.length > 0)) { // If data type is array, find out the type of the array elements
+        if ((String(type).toLowerCase() == 'array') && (data.length > 0)) { // If data type is array, find out the type of the array elements
             var subtype = this.get_object_class(data[0]);
             type = subtype + '[]';
         }
@@ -385,15 +407,19 @@ module.exports = class frostybot_output_module extends frostybot_module {
     }
 
     async format_output(output) {
-        if (this.utils.is_false(await this.config.get('output:debug', false))) 
-            output.messages = output.messages.filter(message => message.type.toLowerCase() != 'debug');
-        
+        var outputdebug = await this.config.get('output:debug', true);
+        if (Boolean(outputdebug) !== true) 
+            output.messages = output.messages.filter(message => message.type.toLowerCase() != 'debug');            
         switch (await this.config.get('output:messages', 'brief')) {
             case 'none'  : delete output.messages;
                            break;
             case 'brief' : output.messages = this.brief_messages(output.messages);
                            break;
         }   
+        var outputstats = await this.config.get('output:stats', false);
+        if (Boolean(outputstats) !== true) 
+            delete output.stats;
+
         return output;         
     }
 
@@ -401,7 +427,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
 
     async parse(result) {
         this.add_data(result);
-        var output = new this.classes.output(...this.utils.extract_props(this.output_obj, ['command', 'params', 'result', 'type', 'data', 'messages']));
+        var output = new this.classes.output(...this.utils.extract_props(this.output_obj, ['command', 'params', 'result', 'type', 'data', 'stats', 'messages']));
         this.reset();
         return await this.format_output(output);
     }
@@ -413,6 +439,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
         var result = '';
         var data = results;
         var type = 'frostybot_output[]';
+        var stats = [];
         var messages = [];
         for (var i = 0; i < results.length; i++) {
             var output_result = results[i];
@@ -420,7 +447,7 @@ module.exports = class frostybot_output_module extends frostybot_module {
                 result = (output_result.result == 'error' ? 'error' : (result == 'error' ? 'error' : 'success'));
             }
         }
-        var output = new this.classes.output('<multiple>', null, result, type, data, messages);
+        var output = new this.classes.output('<multiple>', null, result, type, data, stats, messages);
         return await this.format_output(output);
     }
 

@@ -404,15 +404,18 @@ module.exports = class frostybot_utils_module extends frostybot_module {
     serialize_object(obj) {
         if (!this.is_object(obj)) return false;
         var props = [];
-        for (const [prop, val] of Object.entries(obj)) {
-            if (['apikey','secret','password'].includes(prop.toLowerCase())) {
-                var newval = '********';
-            } else {
-                var newval = this.serialize(val);
+        if (![null, undefined].includes(obj)) {
+            for (const [prop, val] of Object.entries(obj)) {
+                if (['apikey','secret','password'].includes(prop.toLowerCase())) {
+                    var newval = '********';
+                } else {
+                    var newval = this.serialize(val);
+                }
+                props.push(prop + ': ' + newval);
             }
-            props.push(prop + ': ' + newval);
+            return '{' + props.join(', ') + '}';
         }
-        return '{' + props.join(', ') + '}';
+        return 'null';
     }
 
 

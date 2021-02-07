@@ -53,6 +53,7 @@ module.exports = class frostybot_exchange_bitmex extends frostybot_exchange_base
     // Get list of current positions
 
     async positions() { 
+        this.set_cache_time('private_get_position', 5);    
         let results = await this.ccxt('private_get_position');
         var raw_positions = results;
         await this.markets();
@@ -83,7 +84,7 @@ module.exports = class frostybot_exchange_bitmex extends frostybot_exchange_base
             return this.data.markets;
         }
         let results = await this.ccxt('fetch_markets');
-        var raw_markets = results;
+        var raw_markets = this.utils.is_array(results) ? results : [];
         this.data.markets = [];
         raw_markets
             .filter(raw_market => raw_market.active == true)

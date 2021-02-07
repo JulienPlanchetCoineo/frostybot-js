@@ -106,6 +106,18 @@ $( document ).ready(function() {
             });
     }
 
+    function setConfig(keyname, val) {
+        api('config:set', {keyname: val}, function(json) {
+            if (json.result == "success") {
+                showSuccess("Successfully set configuration option: " + keyname + " => " + val, 5000);
+                return true;
+            } else {
+                showError("Failed to set set configuration option: " + keyname, 5000);
+            }
+            return false;
+        });
+    }
+
     function loadPage(key) {
         document.location.href = key;
     }
@@ -501,6 +513,94 @@ $( document ).ready(function() {
     }
 
     function showConfigForm(stub) {
+        updateContent('form_config', {stub: stub}, function() {
+            setAccountsTitle('Configuration Options');
+            hideAccountsTableButtons()
+            $( "#form_config").show();   
+            
+            function update(keyname, val) {
+                var data = {};
+                data[keyname] = String(val == '' ? "null" : val).replace('None','null');
+                api('config:set', data, function(json) {
+                    if (json.result == "success") {
+                        showSuccess("Successfully set configuration option: " + keyname, 5000);
+                        return true;
+                    } else {
+                        showError("Failed to set set configuration option: " + keyname, 5000);
+                    }
+                    return false;
+                });
+            }
+
+            // Load Pair Config Grid
+            $("#configpairs").on('cellendedit', function (event) {
+                var column = $("#configpairs").jqxGrid('getcolumn', event.args.datafield);
+                var symbol = event.args.row.symbol;
+                var keyname = stub + ":" + symbol + ":" + event.args.datafield;
+                if (column.displayfield != column.datafield) {
+                  var val = event.args.value.value;
+                } else {
+                  var val = event.args.value;
+                }
+                update(keyname, val);
+                
+            });
+
+            // Load Combo Boxes
+
+            $("#inputdefstoptrigger").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
+            $("#inputdefprofittrigger").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
+            $("#inputdefprofitsize").jqxComboBox({ dropDownHeight: 250, width: 150, height: 30});
+                      
+            // Signal Provider Update
+
+            $( "#inputprovider").on('change', function() {
+                var val = $( "#inputprovider" ).val();
+                update(stub + ':provider', val);
+            });
+
+            // Max Positions Update
+
+            $( "#inputmaxposqty").on('change', function() {
+                var val = $( "#inputmaxposqty" ).val();
+                update(stub + ':maxposqty', val);
+            });
+
+            // Default Size Update
+
+            $( "#inputdefsize").on('blur', function() {
+                var val = $( "#inputdefsize" ).val();
+                update(stub + ':defsize', val);
+            });
+
+            // Default Stop Trigger Update
+
+            $( "#inputdefstoptrigger").on('change', function() {
+                var val = $( "#inputdefstoptrigger" ).val();
+                update(stub + ':defstoptrigger', val);
+            });
+
+            // Default Take Profit Update
+            $( "#inputdefprofittrigger").on("change", function() {
+                var val = $( "#inputdefprofittrigger" ).val();
+                update(stub + ':defprofittrigger', val);
+            });
+
+            // Default Profit Size Update
+            $( "#inputdefprofitsize").on("change", function() {
+                var val = $( "#inputdefprofitsize" ).val();
+                update(stub + ':defprofitsize', val);
+            });
+
+            // Cancel Button
+            $( "#configcancel" ).on( "click", function() {
+                hideAccountsForm();
+                hideConfigForm();
+                showAccountsTable();
+            }); 
+
+        });
+        /*
         $('.loadingmessage').show();
         $('#configsubmit').prop( "disabled", true );
         $('#inputproviderstub').val(stub).prop( "disabled", true );
@@ -554,6 +654,7 @@ $( document ).ready(function() {
             hideAccountsTableButtons()
             $( "#form_config").show();    
         });
+        */
     }
 
     function submitConfigForm() {
@@ -591,13 +692,6 @@ $( document ).ready(function() {
         event.preventDefault();
         submitConfigForm();
     });
-
-    $( "#configcancel" ).on( "click", function() {
-        hideAccountsForm();
-        hideConfigForm();
-        showAccountsTable();
-    });
-
 
     // ---------------------------------------------------------
     //   Change Password

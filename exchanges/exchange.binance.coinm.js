@@ -60,6 +60,7 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
     // Get list of current positions
 
     async positions() { 
+        this.set_cache_time('dapiPrivate_get_positionrisk', 5);
         let raw_positions = await this.ccxt('dapiPrivate_get_positionrisk');
         await this.markets();
         // Get futures positions
@@ -126,6 +127,7 @@ module.exports = class frostybot_exchange_binance_coinm extends frostybot_exchan
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
+        this.set_cache_time('dapiPublic_get_ticker_bookticker', 10);
         var tickersRaw = await this.ccxt('dapiPublic_get_ticker_bookticker')
         for (var i = 0; i < tickersRaw.length; i++) {
             var tickerRaw = tickersRaw[i];

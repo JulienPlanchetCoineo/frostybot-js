@@ -179,6 +179,60 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                                                 }
                                                 data[key] = config;    
                                                 break;
+                    case 'form_config'      :   var config = {}
+                                                if (params.hasOwnProperty('stub')) {
+                                                    var stub = params.stub;
+                                                    var shortname = await this.accounts.get_shortname_from_stub(stub);
+                                                    var cachekey = 'symbols:' + shortname;
+                                                    var cached = this.utils.cache.get(cachekey);
+                                                    if (cached == undefined) {
+                                                        var classes = require('./mod.classes');
+                                                        var exchange = new classes.exchange(stub);
+                                                        var markets = await exchange.execute('markets');
+                                                        if (this.utils.is_array(markets)) {
+                                                            var symbols = [];
+                                                            markets.forEach(market => {
+                                                                symbols.push(market.symbol);
+                                                            });
+                                                            symbols = symbols.sort();
+                                                        }
+                                                        this.utils.cache.set(key, symbols, 3600);
+                                                        cached = symbols;
+                                                    }
+                                                    var allconfig = await this.config.getall();
+                                                    const stubconfig = Object.keys(allconfig)
+                                                                        .filter(filterkey => filterkey.indexOf(stub) !== -1)
+                                                                        .reduce((obj, filterkey) => {
+                                                                            obj[filterkey] = allconfig[filterkey];
+                                                                            return obj;
+                                                                        }, {});
+
+                                                    var griddata = [];
+                                                    symbols.forEach(symbol => {
+                                                        var lowersymbol = symbol.toLowerCase();
+                                                        var gridrow = [
+                                                                symbol,
+                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':ignored') ? Boolean(stubconfig[stub + ':' + lowersymbol + ':ignored']) : false,
+                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defsize') ? stubconfig[stub + ':' + lowersymbol + ':defsize'] : '',
+                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defstoptrigger') ? stubconfig[stub + ':' + lowersymbol + ':defstoptrigger'] : '',
+                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defprofittrigger') ? stubconfig[stub + ':' + lowersymbol + ':defprofittrigger'] : '',
+                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defprofitsize') ? stubconfig[stub + ':' + lowersymbol + ':defprofitsize'] : '',
+                                                        ];
+                                                        griddata.push(gridrow);
+                                                    });
+                                                    var gridstring = JSON.stringify(griddata);
+                                                    let buff = new Buffer.from(gridstring);
+                                                    let base64grid = buff.toString('base64');
+                                                    config = {
+                                                        stub: stub,
+                                                        symbols: symbols,
+                                                        providers: await this.signals.get_providers_by_stub(stub),
+                                                        config: stubconfig,
+                                                        griddata: base64grid,
+                                                    }
+                                                }
+                                                data[key] = config;    
+                                                break;
 
                 }
                 var template = key.split('_').join('.');

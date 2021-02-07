@@ -101,7 +101,10 @@ app.all('/', async function(req, res) {
   //  next();
 });
 
-
+// Exception Handler
+app.use(function(err, req, res, next) {
+  res.send(500, err.message); // or whatever you want to send back
+});
 
 
 

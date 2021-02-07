@@ -304,4 +304,23 @@ module.exports = class frostybot_accounts_module extends frostybot_module {
     }
 
 
+    // Get exchange shortname from stub
+
+    async get_shortname_from_stub(stub) {
+        var context = require('express-http-context');
+        var uuid = context.get('uuid');
+        var cachekey = uuid + ':' + stub;
+        var cacheresult = this.cache.get(cachekey);
+        if (cacheresult == undefined) {
+            var account = await this.getaccount(stub);
+            if (account) {
+                var result = account.exchange + (account.hasOwnProperty('type') ? '_' + account.type : '');
+                this.cache.set(cachekey, result, 60);
+                return result;
+            }
+            return false;
+        }
+        return cacheresult;
+    }
+
 }

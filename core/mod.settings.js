@@ -36,14 +36,17 @@ module.exports = class frostybot_settings_module extends frostybot_module {
                             } else return null;
             case 1      :   var val = result[0].value
                             val = this.utils.is_json(val) ? JSON.parse(val) : val;
+                            val = ['true','false'].includes(val) ? Boolean(val) : val;
                             this.cache.set(cachekey, val, 60);
                             return val;
             default     :   var obj = {};
-                            result.forEach(function(setting) {
+                            for (var i=0; i < result.length; i++) {
+                                var setting = result[i];
                                 var subkey = setting.subkey;
-                                var value = setting.value;
-                                obj[subkey] = JSON.parse(value);
-                            })
+                                val = this.utils.is_json(setting.value) ? JSON.parse(setting.value) : setting.value;
+                                val = ['true','false'].includes(val) ? Boolean(val) : val;
+                                obj[subkey] = val;
+                            }
                             this.cache.set(cachekey, obj, 5);
                             return obj;
         }

@@ -31,6 +31,7 @@ module.exports = {
         loaded_module:      'Loaded module: {0}',
         whitelist_verify:   'API Access Granted: {0} is whitelisted: {0}',
         whitelist_get:      'Retrieved IP address from the whitelist: {0}: {1}',
+        tvsymbolmap_map:    'TradingView syminfo.tickerid mapping: {0}: {1} => {2}',
         symbolmap_get:      'Retrieved symbol mapping: {0}: {1} => {2}',
         convert_rel_price:  'Converted relative price: {0} => {1}',
         convert_size_usd:   'Size provided in USD on a stablecoin-paired asset. Using USD size as quote size.',
@@ -38,6 +39,10 @@ module.exports = {
         exchange_size_base: 'Exchange uses base sizing. Order size converted to {0}',
         exchange_size_quote:'Exchange uses quote sizing. Order size converted to {0}',
         convert_layered:    'Converted order parameters into {0} layered orders between {1} and {2}',
+        order_size_default: 'Size not provided, using default size: {0}',
+        order_sl_default:   'Stoploss not provided, using default stoploss: {0}',
+        order_tp_default:   'Take profit not provided, using default take profit: {0}',
+        order_tpsize_default: 'Take profit size not provided, using default take profit size: {0}',
         order_side_assumed: 'Order side not provided, assuming {0} order.',
         order_size_factor:  'The size of {0} has been converted to {1}',
         order_sizing_type:  'Order size provided in {0} ({1} size)',
@@ -66,6 +71,7 @@ module.exports = {
         order_sizing_ord:   'Order required to reach target: {0} {1} {2}',
         order_queued:       'Order added to queue: {0}',
         symbol_mapping:     'Using symbol mapping: {0}: {1} => {2}',
+        tvsymbolmap_map:    'TradingView syminfo.tickerid mapping: {0}: {1} => {2}',
         whitelist_disabled: 'Whitelist verification is disabled',
         whitelist_enabled:  'Whitelist verification is enabled',
         whitelist_verify:   'API Access Granted: {0} is whitelisted',
@@ -98,6 +104,7 @@ module.exports = {
         unknown_stub:       'Unknown Account: {0}. Please use accounts:add to add the account.',      
         unknown_market:     'Unknown Market: {0}. Please ensure that the market symbol is listed in \'trade:<stub>:markets\'.',      
         local_only:         'This command can only be executed from the CLI.',
+        unhandled_exception: 'Unhandled Exception: {0}: {1}',
 
         account_retrieve:   'Failed to retrieve account(s): {0}',
         account_create:     'Failed to create account: {0}',
@@ -121,6 +128,7 @@ module.exports = {
         symbolmap_get:      'Failed to retrieve symbol mapping: {0}: {1}',
         symbolmap_add:      'Failed to add symbol mapping: {0}: {1} => {2}',
         symbolmap_delete:   'Failed to delete symbol mapping: {0}: {1}',
+        tvsymbolmap_map:    'Failed to map TradingView syminfo.tickerid: {0}',
     
         convert_size_usd:   'Size provided in USD, but cannot find a pair to use for conversion',
         order_submit:       'Order submission failed: {0}',
@@ -164,6 +172,8 @@ module.exports = {
 
         config_invalid_key:  'Invalid config key: {0}',
         config_invalid_value:'Invalid value for {0} (Must be {1})',
+        config_invalid_stub: 'Invalid stub supplied: {0}',
+        config_invalid_symbol:'Invalid symbol supplied: {0}',
         config_set:          'Failed to configure setting: {0}: {1}',
 
         gui_enable:          'Failed to enable GUI',

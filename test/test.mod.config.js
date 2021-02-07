@@ -30,11 +30,11 @@ describe(test.title('Config Module (mod.config.js)'), function() {
             expect(val).to.equal(null);
         });
         it('should return configuration setting if configured', async function() {
-            if (await test.config.set('dummy:unittest', 'This is a string'))
+            if (await test.config.set('dummy:unittest', 'string'))
                 var val = await test.config.get('dummy:unittest');
             else
                 var val = 'Failed to set';
-            expect(val).to.equal("This is a string");
+            expect(val).to.equal("string");
         });
     });
 

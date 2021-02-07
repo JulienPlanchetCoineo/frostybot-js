@@ -122,6 +122,7 @@ module.exports = class frostybot_exchange_binance_spot extends frostybot_exchang
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
+        this.set_cache_time('v3_get_ticker_bookticker', 10);    
         var tickersRaw = await this.ccxt('v3_get_ticker_bookticker')
         for (var i = 0; i < tickersRaw.length; i++) {
             var tickerRaw = tickersRaw[i];

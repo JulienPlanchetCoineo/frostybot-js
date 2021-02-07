@@ -99,6 +99,7 @@
 .tab-content {
     background-color: #EEEEEE;
     margin : 10px;
+    border-radius: 10px;
 }
 
 .frostybot-nav-title {

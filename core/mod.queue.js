@@ -64,7 +64,8 @@ module.exports = class frostybot_queue_module extends frostybot_module {
     async process(stub, symbol) {
         var uuid = context.get('reqId')
         this.create(stub, symbol)
-        if (await this.config.get('debug:noexecute')) {
+        var noexecute = await this.config.get('debug:noexecute', false);
+        if (noexecute == true) {
             this.output.debug('debug_noexecute');
             var result = this.queue[uuid][stub][symbol];
             this.clear(stub, symbol);
@@ -77,7 +78,7 @@ module.exports = class frostybot_queue_module extends frostybot_module {
         this.output.notice('processing_queue', total); 
         var exchange = new this.classes.exchange(stub);
         for (const order of this.queue[uuid][stub][symbol]) {
-            let result = await exchange.create_order(order);
+            let result = await exchange.execute('create_order', order);
             if (result.result == 'success') {
                 success++;
                 this.output.success('order_submit', { ...{stub: stub}, ...order}); 

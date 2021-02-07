@@ -31,7 +31,7 @@ module.exports = class frostybot_user_module extends frostybot_module {
 
     async multiuser_enable(params) {
         var ip = context.get('srcIp');
-        if (['127.0.0.1','::1'].includes(ip)) {
+        if (['127.0.0.1','::1',undefined].includes(ip)) {
             var schema = {
                 email: {
                     required: 'string',
@@ -59,7 +59,7 @@ module.exports = class frostybot_user_module extends frostybot_module {
 
     async multiuser_disable(params = null) {
         var ip = context.get('srcIp');
-        if (['127.0.0.1','::1'].includes(ip)) {
+        if (['127.0.0.1','::1',undefined].includes(ip)) {
             if (await this.settings.set('core','multiuser:enabled', false)) {
                 return this.output.success('multiuser_disable');
             }
@@ -72,8 +72,8 @@ module.exports = class frostybot_user_module extends frostybot_module {
     // Check if Multi-User is Enabled
 
     async multiuser_isenabled() {
-        if (this.database.type != 'mysql') 
-            return false;
+        //if (this.database.type != 'mysql') 
+        //    return false;
         return await this.settings.get('core', 'multiuser:enabled', false);
     }
 

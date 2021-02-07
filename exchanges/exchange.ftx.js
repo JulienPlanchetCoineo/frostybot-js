@@ -43,6 +43,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
     // Get list of current positions
 
     async positions() { 
+        this.set_cache_time('private_get_position', 5);    
         let results = await this.ccxt('private_get_positions', {showAvgPrice: true});
         var raw_positions = results.result;
         await this.markets();
