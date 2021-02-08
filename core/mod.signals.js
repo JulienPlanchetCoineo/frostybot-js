@@ -312,7 +312,7 @@ module.exports = class frostybot_signals_module extends frostybot_module {
                 symbol: symbol,
             }
 
-            if (signal.toLowercase() == 'close') {
+            if (signal.toLowerCase() == 'close') {
                 cmd['cancelall'] = true;
             }
             /*
