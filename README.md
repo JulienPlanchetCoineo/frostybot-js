@@ -116,7 +116,7 @@ frostybot gui:enable email=<your email address> password=<your preferred passwor
 
 You will then be able to browse to http://\<your vps ip\> and login to the GUI. Currently you can configure your API keys and a bunch of other settings via the GUI.
 
-![gui](https://i.imgur.com/gAYTwQM.png "#GUI")
+![gui](https://i.imgur.com/jIVw4Ij.png "#GUI")
 
 
 #### Add your exchange API keys to Frostybot
