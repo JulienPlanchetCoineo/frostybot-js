@@ -312,6 +312,9 @@ module.exports = class frostybot_signals_module extends frostybot_module {
                 symbol: symbol,
             }
 
+            if (signal.toLowercase() == 'close') {
+                cmd['cancelall'] = true;
+            }
             /*
             if (['long', 'short', 'buy', 'sell'].includes(signal)) {
                 cmd['size'] = config[account.stub+':defsize'];
