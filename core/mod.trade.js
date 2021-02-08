@@ -834,10 +834,12 @@ module.exports = class frostybot_trade_module extends frostybot_module {
             if (defstoptriggersymbol !== false) {
                 this.output.debug('order_sl_default', [(stub + ':' + symbol + ':defstoptrigger').toLowerCase()]);
                 params.stoptrigger = operator + defstoptriggersymbol;
+                params.reduce = true;
             } else {
                 if (defstoptriggerstub !== false) {
                     this.output.debug('order_sl_default', [(stub + ':defstoptrigger').toLowerCase()]);
                     params.stoptrigger = operator + defstoptriggerstub;
+                    params.reduce = true;
                 }
             }
         } 
@@ -850,10 +852,12 @@ module.exports = class frostybot_trade_module extends frostybot_module {
             if (defprofittriggersymbol !== false) {
                 this.output.debug('order_tp_default', [(stub + ':' + symbol + ':defprofittrigger').toLowerCase()]);
                 params.profittrigger = operator + defprofittriggersymbol;
+                params.reduce = true;
             } else {
                 if (defprofittriggerstub !== false) {
                     this.output.debug('order_tp_default', [(stub + ':defprofittrigger').toLowerCase()]);
                     params.profittrigger = operator + defprofittriggerstub;
+                    params.reduce = true;
                 }
             }
         } 
