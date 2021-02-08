@@ -37,7 +37,7 @@ We kindly ask that you fully [**read the documentation**](https://github.com/Cry
 Use this API at your own risk. The authors accept no responsibility for losses incurred through using this software. This is a 0.x release which means it's beta software. So it may and probably will have some bugs. We strongly advise you to use a sub-account with a limited balance, or a testnet account to ensure that the bot is profitable before going live with any strategy. While we have gone to great lengths to test the software, if you do find any bugs, please report them to us in the [FrostyBot Discord Server](https://discord.gg/yK4U93s) or on Github, and we will sort them out. Remember that risk management is your responsibility. If you lose your account, that's entirely on you.
 
 ## Supported Exchanges
-Currently Bitmex, FTX, Deribit and Binance (Spot and Futures) are supported. But we will add support for others in the near future. 
+Currently Bitmex, FTX, Deribit and Binance (Spot, Margin, USDT and Coin-M Futures) are supported. But we will add support for others in the near future. 
 
 ## Scope      
 This bot is specifically designed to execute orders based on webhook or REST API requests. These can be from Tradingview, or any other software that can execute webhooks.
@@ -126,7 +126,7 @@ You will need to identify this account in Frostybot using what is called a stub.
 frostybot accounts:add stub=mystub exchange=ftx apikey="<apikey>" secret="<secret>" subaccount="Algo-Trading"
 ```
 
-**Important:** The subaccount parameter is case-sensitive. Make sure that it is exactly the same as the name on the exchange. The API keys will be tested with the exchange when you add them so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
+**Important:** On FTX, the subaccount parameter is case-sensitive and required if your are using a subaccount. It is not required for other exchanges. If using a subacocunt in FTX, make sure that it is exactly the same as the name on the exchange. The API keys will be tested with the exchange when you add them so you can be sure they work correctly. Once your API keys have been added, you're ready to start using Frostybot!
 
 ## Usage
 
