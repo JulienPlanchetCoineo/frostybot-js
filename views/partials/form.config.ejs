@@ -266,6 +266,7 @@ $(document).ready(function () {
   var gridadapter = new $.jqx.dataAdapter(gridsource);
 
   var gridheight = $(window).height() - 450;
+  if (gridheight < 326) gridheight = 326;
        
   $("#configpairs").jqxGrid({
     width: '100%',
