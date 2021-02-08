@@ -61,13 +61,17 @@ Object.keys(api).forEach(baseapi => {
             
             var uuid = params.hasOwnProperty('uuid') ? params.uuid : (params.hasOwnProperty('body') && params.body.hasOwnProperty('uuid') ? params.body.uuid : null);
             var token = params.hasOwnProperty('token') ? params.token : (params.hasOwnProperty('body') && params.body.hasOwnProperty('token') ? params.body.token : null);
-            
-            if (await core.verify_access(ip, uuid, token, params)) {
-                let result = await core.execute(params);
-                res.send(result);
+            if (command.command == 'output:status') {
+                resres.sendStatus(200);        // HTTP 200 (Health Check)
             } else {
-                res.sendStatus(401);       // HTTP 401: Unauthorized;
-            }        
+                if (await core.verify_access(ip, uuid, token, params)) {
+                    let result = await core.execute(params);
+                    res.send(result);
+                } else {
+                    res.sendStatus(401);       // HTTP 401: Unauthorized;
+                }        
+            }
+
         })
 
     }

@@ -105,6 +105,10 @@ const api_methods = {
         'send',
     ],
 
+    output: [
+        'status',
+    ],
+
 }
 
 const frostybot_module = require('./mod.base')

@@ -444,6 +444,12 @@ module.exports = class frostybot_output_module extends frostybot_module {
         return output;         
     }
 
+    // Output health status (for load balancers)
+
+    async status() {
+        return true;
+    }
+
     // Parse raw output into a frostybot_output object
 
     async parse(result) {
