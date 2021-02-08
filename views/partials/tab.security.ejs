@@ -9,19 +9,36 @@
   </div>
 </div>
 <div class="frostybot-panel-content pb-3">
-    <div class="row">
+    <div class="row flex-nowrap">
   
-      <div class="col">     <!--  LEFT COLUMN -->
+      <div class="col" style="border: solid 1px #AAAAAA; border-radius: 5px; padding-top: 10px; padding-bottom: 10px; margin-left: 5px; margin-bottom: 10px">     <!--  LEFT COLUMN -->
 
-        <%- include('../partials/form.changepassword.ejs'); %>
-  
-      </div>
-      <div class="col">     <!--  RIGHT COLUMN -->
-
-        <div id="form_2fa"></div>      
+        <div class="row mb-2 flex-nowrap">
+          <div class="col">
+            <label class="col-form-label-md frostybot-form-label-lq"><b>Change Password</b></label>
+          </div>
         </div>
-  
+        <div class="row mb-2 flex-nowrap">
+          <div class="col" id="form_changepassword">
+            <%- include('../partials/form.changepassword.ejs'); %>
+          </div>
+        </div>
+
       </div>
+      <div class="col"  style="border: solid 1px #AAAAAA; border-radius: 5px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px; margin-left: 10px; margin-bottom: 10px">     <!--  RIGHT COLUMN -->
+        
+        <div class="row mb-2 flex-nowrap">
+          <div class="col" style="margin-left: 10px;">
+            <label class="col-form-label-md frostybot-form-label-lq"><b>2FA Configuration</b></label>
+          </div>
+        </div>
+        <div class="row mb-2 flex-nowrap"> 
+          <div class="col" id="form_2fa" style="margin-left: 10px;">
+          </div>
+        </div>
+    
+      </div>
+
     </div>
 
 </div>

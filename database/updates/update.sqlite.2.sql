@@ -1,8 +1,3 @@
--- Version 1
-ALTER TABLE `users` ADD COLUMN `2fa` VARCHAR(40) DEFAULT 'false';
-
--- Version 2
-
 -- Create logs table
 
 CREATE TABLE logs (

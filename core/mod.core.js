@@ -73,6 +73,7 @@ const api_methods = {
         'verify_2fa',
         'register',
         'login',
+        'logout',
         'add',
         'delete',
         'change_password',

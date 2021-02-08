@@ -158,82 +158,9 @@ module.exports = class frostybot_gui_module extends frostybot_module {
             if (params.hasOwnProperty('key')) {
                 var key = params.key;
                 var data = { uuid : uuid };
-                switch (key) {
-                    case 'table_accounts'   :   var accounts = await this.accounts.get();
-                                                data[key] = accounts;
-                                                break;
-                    case 'form_2fa'         :   if (params.hasOwnProperty('enable') && String(params.enable) == 'true') {
-                                                    var secret = await this.user.create_2fa_secret();
-                                                    var config = {
-                                                        enabled: false,
-                                                        enable: true,
-                                                        secret: secret.secret.base32,
-                                                        qrcode: secret.qrcode
-                                                    }
-                                                } else {
-                                                    var user2fa = await this.user.get_2fa(uuid);
-                                                    var config = {
-                                                        enabled: (user2fa == false ? false : true),
-                                                        enable: false,
-                                                    };
-                                                }
-                                                data[key] = config;    
-                                                break;
-                    case 'form_config'      :   var config = {}
-                                                if (params.hasOwnProperty('stub')) {
-                                                    var stub = params.stub;
-                                                    var shortname = await this.accounts.get_shortname_from_stub(stub);
-                                                    var cachekey = 'symbols:' + shortname;
-                                                    var cached = this.utils.cache.get(cachekey);
-                                                    if (cached == undefined) {
-                                                        var classes = require('./mod.classes');
-                                                        var exchange = new classes.exchange(stub);
-                                                        var markets = await exchange.execute('markets');
-                                                        if (this.utils.is_array(markets)) {
-                                                            var symbols = [];
-                                                            markets.forEach(market => {
-                                                                symbols.push(market.symbol);
-                                                            });
-                                                            symbols = symbols.sort();
-                                                        }
-                                                        this.utils.cache.set(key, symbols, 3600);
-                                                        cached = symbols;
-                                                    }
-                                                    var allconfig = await this.config.getall();
-                                                    const stubconfig = Object.keys(allconfig)
-                                                                        .filter(filterkey => filterkey.indexOf(stub) !== -1)
-                                                                        .reduce((obj, filterkey) => {
-                                                                            obj[filterkey] = allconfig[filterkey];
-                                                                            return obj;
-                                                                        }, {});
-
-                                                    var griddata = [];
-                                                    symbols.forEach(symbol => {
-                                                        var lowersymbol = symbol.toLowerCase();
-                                                        var gridrow = [
-                                                                symbol,
-                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':ignored') ? Boolean(stubconfig[stub + ':' + lowersymbol + ':ignored']) : false,
-                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defsize') ? stubconfig[stub + ':' + lowersymbol + ':defsize'] : '',
-                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defstoptrigger') ? stubconfig[stub + ':' + lowersymbol + ':defstoptrigger'] : '',
-                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defprofittrigger') ? stubconfig[stub + ':' + lowersymbol + ':defprofittrigger'] : '',
-                                                                stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defprofitsize') ? stubconfig[stub + ':' + lowersymbol + ':defprofitsize'] : '',
-                                                        ];
-                                                        griddata.push(gridrow);
-                                                    });
-                                                    var gridstring = JSON.stringify(griddata);
-                                                    let buff = new Buffer.from(gridstring);
-                                                    let base64grid = buff.toString('base64');
-                                                    config = {
-                                                        stub: stub,
-                                                        symbols: symbols,
-                                                        providers: await this.signals.get_providers_by_stub(stub),
-                                                        config: stubconfig,
-                                                        griddata: base64grid,
-                                                    }
-                                                }
-                                                data[key] = config;    
-                                                break;
-
+                var contentfunc = 'content_' + key.toLowerCase()
+                if (typeof( this[contentfunc] ) == 'function') {
+                    data[key] = await this[contentfunc](params);
                 }
                 var template = key.split('_').join('.');
                 return this.render_page(res, "partials/" + template + ".ejs", data);   
@@ -241,6 +168,121 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                 return res.send({'error' : 'invalid_key'});
             }
         }
+    }
+
+    // 2FA Form
+
+    async content_form_2fa(params) {
+        if (params.hasOwnProperty('enable') && String(params.enable) == 'true') {
+            var secret = await this.user.create_2fa_secret();
+            var config = {
+                enabled: false,
+                enable: true,
+                secret: secret.secret.base32,
+                qrcode: secret.qrcode
+            }
+        } else {
+            var uuid = params.hasOwnProperty('token') ? (params.token.hasOwnProperty('uuid') ? params.token.uuid : false) : false;
+            if (uuid != null) {
+                var user2fa = await this.user.get_2fa(uuid);
+                var config = {
+                    enabled: (user2fa == false ? false : true),
+                    enable: false,
+                };
+            } else {
+                var config = {};
+            }
+        }
+        return config; 
+    }
+
+    // Accounts Table
+
+    async content_table_accounts(params) {
+        return await this.accounts.get();
+    }
+
+    // Accounts Form
+
+    async content_form_accounts(params) {
+        var config = {}
+        if (params.hasOwnProperty('stub')) {
+            var stub = params.stub;
+            var accounts = await this.accounts.get(stub);
+            if (accounts.hasOwnProperty(stub)) {
+                var account = accounts[stub];
+                var params = account.parameters;
+                delete account.parameters;
+                account.exchange = await this.accounts.get_shortname_from_stub(stub);
+                var config = {...account, ...params};
+            }
+        }
+        return config;
+    }
+
+    // Account Config Form
+
+    async content_form_config(params) {
+        var config = {}
+        if (params.hasOwnProperty('stub')) {
+            var stub = params.stub;
+            var shortname = await this.accounts.get_shortname_from_stub(stub);
+            var classes = require('./mod.classes');
+            var exchange = new classes.exchange(stub);
+            var markets = await exchange.execute('markets');
+            if (this.utils.is_array(markets)) {
+                var symbols = [];
+                markets.forEach(market => {
+                    symbols.push(market.symbol);
+                });
+                symbols = symbols.sort();
+            }
+            var allconfig = await this.config.getall();
+            const stubconfig = Object.keys(allconfig)
+                                .filter(filterkey => filterkey.indexOf(stub) !== -1)
+                                .reduce((obj, filterkey) => {
+                                    obj[filterkey] = allconfig[filterkey];
+                                    return obj;
+                                }, {});
+
+            var griddata = [];
+            symbols.forEach(symbol => {
+                var lowersymbol = symbol.toLowerCase();
+                var gridrow = [
+                        symbol,
+                        stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':ignored') ? Boolean(stubconfig[stub + ':' + lowersymbol + ':ignored']) : false,
+                        stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defsize') ? stubconfig[stub + ':' + lowersymbol + ':defsize'] : '',
+                        stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defstoptrigger') ? stubconfig[stub + ':' + lowersymbol + ':defstoptrigger'] : '',
+                        stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defprofittrigger') ? stubconfig[stub + ':' + lowersymbol + ':defprofittrigger'] : '',
+                        stubconfig.hasOwnProperty(stub + ':' + lowersymbol + ':defprofitsize') ? stubconfig[stub + ':' + lowersymbol + ':defprofitsize'] : '',
+                ];
+                griddata.push(gridrow);
+            });
+            var gridstring = JSON.stringify(griddata);
+            let buff = new Buffer.from(gridstring);
+            let base64grid = buff.toString('base64');
+            config = {
+                stub: stub,
+                symbols: symbols,
+                providers: await this.signals.get_providers_by_stub(stub),
+                config: stubconfig,
+                griddata: base64grid,
+            }
+        }
+        return config;
+    }
+
+    // Logout
+
+    async content_tab_logout(params) {
+        var uuid = params.hasOwnProperty('token') ? (params.token.hasOwnProperty('uuid') ? params.token.uuid : false) : false;
+        if (uuid !== false) {
+            var result = await this.user.logout({uuid: uuid});
+            if (result) {
+                return {logout: true};
+            }
+        }
+        return {logout: false};
     }
 
     // Verify Recaptcha Response
