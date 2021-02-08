@@ -77,6 +77,7 @@ const api_methods = {
         'add',
         'delete',
         'change_password',
+        'reset'
     ],
 
     websocket: [
