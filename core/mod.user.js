@@ -414,6 +414,41 @@ module.exports = class frostybot_user_module extends frostybot_module {
         return this.output.error('multiuser_delete', [uuid]);  
     }
 
+    // Reset user password (CLI Only)
+
+    async reset(params) {
+    
+        var ip = context.get('srcIp');
+
+        if (['127.0.0.1','::1'].includes(ip)) {
+    
+            var schema = {
+                email: {
+                    required: 'string',
+                },
+                password: {
+                    required: 'string'
+                }
+            }
+    
+            if (!(params = this.utils.validator(params, schema))) return false; 
+    
+            var [email, password] = this.utils.extract_props(params, ['email', 'password']);
+
+            var useruuid = await this.uuid_by_email(email);
+            if (useruuid !== false) {
+                var encr_pass = JSON.stringify(await this.encryption.encrypt(password, useruuid));
+                var result = await this.database.update('users', {password: encr_pass}, {uuid: useruuid});
+                if (result.changes > 0) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return this.output.error('local_only');         
+        }
+    }
+
   
 
 };
