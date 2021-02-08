@@ -238,6 +238,7 @@ module.exports = class frostybot_gui_module extends frostybot_module {
                 symbols = symbols.sort();
             }
             var allconfig = await this.config.getall();
+            if ([null, undefined].includes(allconfig)) allconfig = {};
             const stubconfig = Object.keys(allconfig)
                                 .filter(filterkey => filterkey.indexOf(stub) !== -1)
                                 .reduce((obj, filterkey) => {

@@ -1,5 +1,6 @@
-
--- Create uuid_v4 function
+--
+-- Function `uuid_v4`
+--
 
 DROP function IF EXISTS `uuid_v4`;
 
@@ -29,54 +30,70 @@ END$$
 
 DELIMITER ;
 
--- Create settings table
+
+--
+-- Table structure for table `logs`
+--
+
+CREATE TABLE IF NOT EXISTS `logs` (
+  `uid` int unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `type` varchar(10) NOT NULL,
+  `message` text NOT NULL,
+  PRIMARY KEY (`uid`),
+  KEY `IDX_UUID_TS` (`uuid`,`timestamp`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
+--
+-- Table structure for table `settings`
+--
 
 CREATE TABLE IF NOT EXISTS `settings` (
-	`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `uuid` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
-	`mainkey` VARCHAR(50) NOT NULL,
-	`subkey` VARCHAR(50) NOT NULL,
-	`value` JSON NOT NULL,
-	PRIMARY KEY (`uid`),
-	UNIQUE INDEX `UNQ` (`uuid`, `mainkey`, `subkey`)
-) COLLATE='latin1_swedish_ci';
+  `uid` int unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+  `mainkey` varchar(50) NOT NULL,
+  `subkey` varchar(50) NOT NULL,
+  `value` json NOT NULL,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `UNQ` (`uuid`,`mainkey`,`subkey`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
--- Insert default settings into settings table
+--
+-- Data for table `settings`
+--
 
-REPLACE INTO `settings` ( `mainkey`, `subkey`, `value` ) 
-VALUES 
-	( 'core', 'build', '1' ),
-	( 'core', 'language', '"en"' );
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','core','build','1');
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','core','language','\"en\"');
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','whitelist','52.32.178.7','{\"canDelete\": 0, \"ip\": \"52.32.178.7\", \"description\": \"TradingView Server Address\"}');
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','whitelist','54.218.53.128','{\"canDelete\": 0, \"ip\": \"54.218.53.128\", \"description\": \"TradingView Server Address\"}');
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','whitelist','34.212.75.30','{\"canDelete\": 0, \"ip\": \"34.212.75.30\", \"description\": \"TradingView Server Address\"}');
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','whitelist','52.89.214.238','{\"canDelete\": 0, \"ip\": \"52.89.214.238\", \"description\": \"TradingView Server Address\"}');
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','whitelist','127.0.0.1','{\"canDelete\": 0, \"ip\": \"127.0.0.1\", \"description\": \"localhost\"}');
+REPLACE INTO `settings` (`uuid`, `mainkey`, `subkey`, `value`) VALUES ('00000000-0000-0000-0000-000000000000','whitelist','::1','{\"canDelete\": 0, \"ip\": \"::1\", \"description\": \"localhost\"}');
 
--- Create default whitelist entries
-
-REPLACE INTO `settings` ( `mainkey`, `subkey`, `value` ) 
-VALUES 
-	( 'whitelist', '52.32.178.7', '{"ipAddress":"52.32.178.7", "description":"TradingView Server Address","canDelete":0}'),
-	( 'whitelist', '54.218.53.128', '{"ipAddress":"54.218.53.128", "description":"TradingView Server Address","canDelete":0}'),
-	( 'whitelist', '34.212.75.30', '{"ipAddress":"34.212.75.30", "description":"TradingView Server Address","canDelete":0}'),
-	( 'whitelist', '52.89.214.238', '{"ipAddress":"52.89.214.238", "description":"TradingView Server Address","canDelete":0}'),
-	( 'whitelist', '127.0.0.1', '{"ipAddress":"127.0.0.1", "description":"localhost","canDelete":0}'),
-	( 'whitelist', '::1', '{"ipAddress":"::1", "description":"localhost","canDelete":0}');
-
--- Create users table if required		
+--
+-- Table structure for table `users`
+--
 
 CREATE TABLE IF NOT EXISTS `users` (
-	`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`uuid` VARCHAR(36) NOT NULL,
-	`email` VARCHAR(100) NOT NULL,
-	`password` TEXT NOT NULL,
-	`enabled` BOOL NOT NULL DEFAULT true,
-	`last` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `token` VARCHAR(36) NULL DEFAULT NULL,
-    `expiry` DATETIME NULL DEFAULT NULL,
-	`2fa` VARCHAR(40) NULL DEFAULT 'false'
-	PRIMARY KEY (`uid`),
-	UNIQUE INDEX `UNQ_UUID` (`uuid`),
-	UNIQUE INDEX `UNQ_EMAIL` (`email`),
-	INDEX `IDX_UUID` (`uuid` ASC) VISIBLE,
-	INDEX `IDX_EMAIL` (`email` ASC) VISIBLE
-) COLLATE='latin1_swedish_ci';    
+  `uid` int unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` text NOT NULL,
+  `enabled` tinyint NOT NULL DEFAULT '1',
+  `last` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `token` varchar(36) DEFAULT NULL,
+  `expiry` datetime DEFAULT NULL,
+  `2fa` varchar(40) DEFAULT 'false',
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `UNQ_UUID` (`uuid`),
+  UNIQUE KEY `UNQ_EMAIL` (`email`),
+  KEY `IDX_UUID` (`uuid`),
+  KEY `IDX_EMAIL` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
 
 DROP TRIGGER IF EXISTS `users_before_insert`;
 DROP TRIGGER IF EXISTS `users_before_update`;
@@ -97,14 +114,11 @@ FOR EACH ROW
 $$
 DELIMITER ;
 
--- Create logs table
 
-CREATE TABLE IF NOT EXISTS `logs` (
-	`uid` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `uuid` CHAR(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
-	`timestamp` DATETIME NOT NULL DEFAULT current_timestamp,
-	`type` VARCHAR(10) NOT NULL,
-	`message` TEXT NOT NULL,
-	PRIMARY KEY (`uid`),
-	INDEX `IDX_UUID_TS` (`uuid`, `timestamp`)
-) COLLATE='latin1_swedish_ci';
+
+
+--
+-- Update version
+--
+
+REPLACE INTO `settings` (`mainkey`, `subkey`, `value`) VALUES ('core', 'mysql:dbver', '1');

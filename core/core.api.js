@@ -8,6 +8,7 @@ module.exports = {
 
         'post|/'                            :   'this:execute',     // Catch-all router for /frostybot Webhook
         'post|/:uuid'                       :   'this:execute',     // Catch-all router for /frostybot/:uuid Webhook (Multi User)
+        'get|/status'                       :   'output:status',    // Health Status (Used for Load Balancers)
 
     },
 

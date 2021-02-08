@@ -105,6 +105,10 @@ const api_methods = {
         'send',
     ],
 
+    output: [
+        'status',
+    ],
+
 }
 
 const frostybot_module = require('./mod.base')
@@ -142,10 +146,12 @@ module.exports = class frostybot_core_module extends frostybot_module {
             'gui:main',
             'gui:login',
             'gui:register',
-            //'gui:content',
+            'gui:verify_recaptcha',
+            'gui:content',
             'user:register',
             'user:login',
         ]
+
 
         if (!localhost && isapi && multiuser && param_uuid == null && !all_ip_allowed.includes(command)) {
             await this.output.error('required_param', ['uuid']);
