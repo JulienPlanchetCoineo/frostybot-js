@@ -28,7 +28,7 @@ module.exports = class frostybot_settings_module extends frostybot_module {
         if (mainkey != null) query['mainkey'] = mainkey;
         if (subkey != null)  query['subkey'] = subkey;
         var result = await this.database.select('settings', query);
-        console.log(result)
+
         switch (result.length) {
             case 0      :   if (defval != undefined) {
                                 this.set(mainkey, subkey, defval);
