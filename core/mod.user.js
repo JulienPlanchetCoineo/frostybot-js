@@ -98,7 +98,6 @@ module.exports = class frostybot_user_module extends frostybot_module {
     
         if (!(params = this.utils.validator(params, schema))) return false; 
         var email = this.utils.extract_props(params, ['email']);
-	console.debug("email : " + email);
 
         var result = await this.database.select('users', {email: email});
         if (result.length > 0)
