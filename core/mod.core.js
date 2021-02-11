@@ -77,7 +77,8 @@ const api_methods = {
         'add',
         'delete',
         'change_password',
-        'reset'
+        'reset',
+	'uuid_by_email_api',
     ],
 
     websocket: [
