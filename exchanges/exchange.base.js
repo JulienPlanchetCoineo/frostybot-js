@@ -38,6 +38,8 @@ module.exports = class frostybot_exchange_base {
                 'symbols',
             ],
             cache: {
+                'balances' : 5,
+                'position' : 2,
                 'market' : 60,
                 'fetch_markets' : 60,
                 'fetch_orders' : 5,
