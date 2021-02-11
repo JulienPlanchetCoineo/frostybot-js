@@ -304,7 +304,8 @@ module.exports = class frostybot_exchange_base {
                     const total = raw_balance.total;
                     var price = this.get_usd_price(currency)
                     const balance = new this.classes.balance(currency, price, free, used, total);
-                    if (Math.round(balance.usd.total) != 0) {
+                    if (total != 0) {
+                        console.log(balance)
                         balances.push(balance);
                     }
                 });
