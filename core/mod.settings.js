@@ -28,7 +28,7 @@ module.exports = class frostybot_settings_module extends frostybot_module {
         if (mainkey != null) query['mainkey'] = mainkey;
         if (subkey != null)  query['subkey'] = subkey;
         var result = await this.database.select('settings', query);
-        
+        console.log(result)
         switch (result.length) {
             case 0      :   if (defval != undefined) {
                                 this.set(mainkey, subkey, defval);
@@ -36,7 +36,7 @@ module.exports = class frostybot_settings_module extends frostybot_module {
                             } else return null;
             case 1      :   var val = result[0].value
                             val = this.utils.is_json(val) ? JSON.parse(val) : val;
-                            val = ['true','false'].includes(val) ? Boolean(val) : val;
+                            val = ['true','false','"true"','"false"'].includes(val) ? (String(val.replace(/"/g,"")) == 'true' ? true : false)  : val;
                             this.cache.set(cachekey, val, 60);
                             return val;
             default     :   var obj = {};
@@ -44,7 +44,7 @@ module.exports = class frostybot_settings_module extends frostybot_module {
                                 var setting = result[i];
                                 var subkey = setting.subkey;
                                 val = this.utils.is_json(setting.value) ? JSON.parse(setting.value) : setting.value;
-                                val = ['true','false'].includes(val) ? Boolean(val) : val;
+                                val = ['true','false','"true"','"false"'].includes(val) ? (String(val.replace(/"/g,"")) == 'true' ? true : false) : val;
                                 obj[subkey] = val;
                             }
                             this.cache.set(cachekey, obj, 5);
