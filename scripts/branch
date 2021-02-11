@@ -1,0 +1,47 @@
+#!/bin/bash
+
+PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+CURRENTPATH=`pwd`
+SCRIPTPATH=`dirname "$(readlink -f "$0")"`
+BRANCH=`echo "$@"`
+
+cd "$SCRIPTPATH" &
+cd ../ &
+
+echo "Switching Frostybot branch to $BRANCH..."
+if [ ! "$PID" == "" ]; then
+  ./scripts/stop
+  while [ ! "$PID" == "" ]; do
+    sleep 2
+    PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+  done
+  echo "Frostybot server stopped"
+  cd "$CURRENTPATH" &
+  DOSTART="true"
+else
+  DOSTART="false"
+fi
+echo "Creating a backup..."
+sudo tar czvf ~/`date +%s`.tar.gz /usr/local/frostybot-js  > /dev/null 2>&1
+echo "Switching branch..."
+#sudo git stash
+sudo git checkout $BRANCH
+sudo git pull -f
+echo "Updating MOTD"
+sudo cp -f /usr/local/frostybot-js/scripts/motd /etc/motd
+echo "Installing outstanding NodeJS modules"
+sudo npm install --unsafe-perm > /dev/null 2>&1
+echo "Updating existing NodeJS modules"
+sudo npm upgrade > /dev/null 2>&1
+if [ "$DOSTART" == "true" ]; then
+  ./scripts/start
+  while [ "$PID" == "" ]; do
+    sleep 2
+    PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+  done
+  echo "Frostybot server started"
+fi
+
+echo "Completed switching to $BRANCH"
+
+cd "$CURRENTPATH" &

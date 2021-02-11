@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const api = require('../core/core.api');
+const fs = require('fs'); 
 
 // Create routes
 
@@ -12,7 +13,7 @@ Object.keys(api).forEach(baseapi => {
 
         var [method, route] = routeinfo.split('|')
 
-        route = baseapi + route
+        //route = baseapi + route
         
         router[method](route, async function(req, res, next) {            
 
@@ -20,12 +21,14 @@ Object.keys(api).forEach(baseapi => {
 
             const routeparts = req.route.path.split('/')
             const baseapi = '/' + routeparts[1]
-            const route = '/' + routeparts.slice(2).join('/')
+            const route = '/' + routeparts.slice(1).join('/')
 
             const api = require('../core/core.api');
-
-            const routes = api.hasOwnProperty(baseapi) ? api[baseapi] : null
-
+            var baseapis = Object.keys(route);
+            for (var i =0; i < baseapis.count; i++) {
+                const routes = api.hasOwnProperty(baseapi) ? api[baseapi] : null
+                if (routes != null) break;
+            }
             const routeinfo = [req.method.toLowerCase(), route].join('|')
 
             if (routes.hasOwnProperty(routeinfo)) {
@@ -42,17 +45,33 @@ Object.keys(api).forEach(baseapi => {
                 body: {...command, ...req.params, ...req.query, ...body}
             }
             
-            // Uncomment the second line below if using Frostybot behind a reverse proxy
-            // Current commented out to prevent source address spoofing using x-forwarded-for headers
-            var ip = req.connection.remoteAddress.replace('::ffff:','').replace('::1, ','');
-            //var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).replace('::ffff:','').replace('::1, ','');
+            // Get Reverse Proxy Address 
 
-            if (core.verify_whitelist(ip)) {
-                let result = await core.execute(params);
-                res.send(result);
+            const proxyfile = '../.proxy';
+            try {
+                var proxy = fs.readFileSync(proxyfile, {encoding:'utf8', flag:'r'});
+                if (proxy == '') proxy = false;
+            } catch {
+                var proxy = false;
+            }
+
+            // Get Source IP Address
+
+            var ip = ((proxy !== false ? req.headers['x-forwarded-for'] : false) || req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
+            
+            var uuid = params.hasOwnProperty('uuid') ? params.uuid : (params.hasOwnProperty('body') && params.body.hasOwnProperty('uuid') ? params.body.uuid : null);
+            var token = params.hasOwnProperty('token') ? params.token : (params.hasOwnProperty('body') && params.body.hasOwnProperty('token') ? params.body.token : null);
+            if (command.command == 'output:status') {
+                res.sendStatus(200);           // HTTP 200 (Health Check)
             } else {
-                res.sendStatus(401);       // HTTP 401: Unauthorized;
-            }    
+                if (await core.verify_access(ip, uuid, token, params)) {
+                    let result = await core.execute(params);
+                    res.send(result);
+                } else {
+                    res.sendStatus(401);       // HTTP 401: Unauthorized;
+                }        
+            }
+
         })
 
     }

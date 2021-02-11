@@ -6,7 +6,9 @@ module.exports = {
 
     '/frostybot' : {
 
-        'post|/'                            :   'this:execute'      // Catch-all router for /frostybot Webhook
+        'post|/'                            :   'this:execute',     // Catch-all router for /frostybot Webhook
+        'post|/:uuid'                       :   'this:execute',     // Catch-all router for /frostybot/:uuid Webhook (Multi User)
+        'get|/status'                       :   'output:status',    // Health Status (Used for Load Balancers)
 
     },
 
@@ -28,6 +30,11 @@ module.exports = {
         'delete|/cache/flush'               :   'cache:flush',      // Flush the cache
         'get|/cache/stats'                  :   'cache:stats',      // Retrieve cache statistics
 
+        // Configuration
+
+        'get|/config/:key'                  :   'config:get',       // Get configuration setting
+        'post|/config/:key'                 :   'config:set',       // Set configuration setting
+
         // Symbol Map Handling
 
         'get|/symbolmap/:exchange'          :   'symbolmap:get',    // Retrieve all symbol mapping for an exchange
@@ -47,6 +54,11 @@ module.exports = {
         'post|/whitelist'                   :   'whitelist:add',    // Add a whitelist entry
         'put|/whitelist'                    :   'whitelist:add',    // Update a whitelist entry
         'delete|/whitelist/:ip'             :   'whitelist:delete', // Delete whitelist entry for specific IP address
+
+        // User Handling
+
+        //'post|/user/multiuser_enable'       :   'user:multiuser_enable',   // Enable Multi-User Mode (MySQL Required)
+        //'post|/user/multiuser_disable'      :   'user:multiuser_disable',  // Disable Multi-User Mode (MySQL Required)
 
         // Trading
 
@@ -69,12 +81,16 @@ module.exports = {
         'delete|/trade/:stub/order/:id'     :   'trade:cancel',     // Cancel specific order ID
         'delete|/trade/:stub/orders'        :   'trade:cancelall',  // Cancel all orders
 
+        // Signal Provider Signals
+
+        'post|/signal/send'                 :   'signals:send',     // Send signal provider signal
+        'post|/signals/send'                :   'signals:send',     // Send signal provider signal
+
         // Websocket Management
 
         'post|/websocket/:stub/subscribe/:channel'  :   'websocket:subscribe',  // Subscrive to websocket channel
 
     },
-
 
 }
 

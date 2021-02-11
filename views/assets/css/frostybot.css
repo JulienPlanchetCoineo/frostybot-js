@@ -1,0 +1,152 @@
+#frostybot-logo {
+    margin-top: 10px;
+    height: 50px;
+}
+
+#frostybot-notifications {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 9000 !important;
+}
+
+#contentmain {
+    min-width: 930px;
+}
+
+.frostybot-tab-content {
+    margin: 10px;
+}
+
+.frostybot-form-label {
+    width: 80px;
+}
+
+.frostybot-form-label-lg {
+    width: 120px;
+}
+
+.frostybot-input {
+    border: solid 1px #AAAAAA;
+}
+
+.frostybot-input-lg {
+    width: 500px;
+    border: solid 1px #AAAAAA;
+}
+
+.frostybot-input-md {
+    width: 300px;
+    border: solid 1px #AAAAAA;
+}
+
+.frostybot-input-sm {
+    width: 150px;
+    border: solid 1px #AAAAAA;
+}
+
+.frostybot-button-sm {
+    width: 110px;
+}
+
+.frostybot-button-md {
+    width: 170px;
+}
+
+.frostybot-qrcode {
+    width: 225px;
+    height: 225px;
+    margin-bottom: 10px;
+    border: solid 1px #444444;
+}
+
+.frostybot-panel-header {
+    height: 50px;
+    vertical-align: middle;
+    background-color: #DDDDDD;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding-left: 14px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    font-weight: bold;
+    font-size: 14pt;
+    color: #444444;
+    font-family: var(--bs-font-sans-serif);
+}
+
+.frostybot-panel-content {
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 0px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.frostybot-panel {
+    background-color: #EEEEEE;
+    border: solid 1px #c5c5c5;
+    border-radius: 5x;
+    padding: 0px;
+}
+
+.jqx-menu-item-top {
+    font-size: 14pt;
+    font-family: var(--bs-font-sans-serif);
+}
+
+.frostybot-navbutton {
+    padding: 2px;
+    border : none;
+    width: 80px;
+    color: #444444;
+}
+
+.frostybot-table-action {
+    height: 16px;
+    width: 16px;
+}
+
+.frostybot-nav-left {
+    width : 120px;
+}
+
+#mainmen {
+    border: none !important;
+}
+
+.tab-content {
+    background-color: #EEEEEE;
+    margin : 10px;
+    border-radius: 10px;
+}
+
+.frostybot-nav-title {
+    margin-left: 10px;
+}
+
+.navbar-collapse.collapse {
+    display: block!important;
+  }
+  
+.navbar-nav>li, .navbar-nav {
+    float: left !important;
+}
+
+.navbar-nav.navbar-right:last-child {
+    margin-right: -15px !important;
+}
+
+.navbar-right {
+    float: right!important;
+}
+
+.loading {
+    position: absolute;
+    right: 10px;;
+    top: 10px;;
+    z-index: 9999999999999;
+    border: none;
+}
+

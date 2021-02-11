@@ -1,0 +1,25 @@
+#!/bin/bash
+
+CURRENTPATH=`pwd`
+SCRIPTPATH=`dirname "$(readlink -f "$0")" | sed -e 's/\/scripts//g'`
+
+TYPE=`cat $SCRIPTPATH/.dbcfg | jq '.type' | sed 's/"//g'`
+
+cd "$SCRIPTPATH" &
+
+echo "Checking for database upgrades"
+
+if [ "$TYPE" == "sqlite" ]; then
+    FILE=`cat .dbcfg | jq '.file' | sed 's/"//g'`
+    DBVER=`sqlite3 $FILE "SELECT CASE COUNT(value) WHEN 0 THEN 0 ELSE value END FROM settings WHERE mainkey='core' AND subkey='sqlite:dbver';"`
+    UPGFILE="database/updates/update.sqlite.$DBVER.sql"
+    if [ -f "$UPGFILE" ]; then
+        echo "Upgrading $TYPE database using $UPGFILE" 
+        sudo sqlite3 $FILE < $UPGFILE
+        echo "Database upgrade completed"
+    else
+        echo "No database upgrade required"
+    fi
+fi
+
+cd "$CURRENTPATH" &

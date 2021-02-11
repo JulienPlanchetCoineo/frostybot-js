@@ -13,13 +13,13 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
 
     // Get mappings
 
-    get(params) {
+    async get(params) {
 
         var schema = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance','bitmex'],
+                oneof: ['ftx', 'deribit', 'binance', 'binanceus', 'bitmex'],
             },
             symbol: {
                 optional: 'string',
@@ -32,7 +32,7 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
         var [exchange, symbol] = this.utils.extract_props(params, ['exchange', 'symbol']);
         var exchange = exchange.toLowerCase();
         var symbol = symbol != undefined ? symbol.toUpperCase() : null;
-        var result = (symbol == null ? this.settings.get('symbolmap:' + exchange) : this.settings.get('symbolmap:' + exchange, symbol, false));
+        var result = (symbol == null ? await this.settings.get('symbolmap:' + exchange) : await this.settings.get('symbolmap:' + exchange, symbol, false));
         if ((typeof result == 'string') && (symbol != null)) {
             var mapping = result;
             result = {};
@@ -55,13 +55,13 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
 
     // Add symbol mapping
 
-    add(params) {
+    async add(params) {
 
         var schema = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance','bitmex'],
+                oneof: ['ftx', 'deribit', 'binance', 'binanceus', 'bitmex'],
             },
             symbol: {
                 required: 'string',
@@ -92,13 +92,13 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
 
     // Delete symbol mapping
 
-    delete(params) {
+    async delete(params) {
 
         var schema = {
             exchange: {
                 required: 'string',
                 format: 'lowercase',
-                oneof: ['ftx', 'deribit', 'binance','bitmex'],
+                oneof: ['ftx', 'deribit', 'binance', 'binanceus', 'bitmex'],
             },
             symbol: {
                 required: 'string',
@@ -123,7 +123,7 @@ module.exports = class frostybot_symbolmap_module extends frostybot_module {
     // Map symbol
 
     async map(exchange, symbol) {
-        var result = await this.settings.get('symbolmap:' + exchange, symbol.toUpperCase())
+        var result = await await this.settings.get('symbolmap:' + exchange, symbol.toUpperCase())
         return (result === null ? false : result)
     }
 

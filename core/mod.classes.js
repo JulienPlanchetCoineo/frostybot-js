@@ -1,11 +1,14 @@
 // Frostybot Custom Classes
 
 md5 = require ('md5');
+const { v4: uuidv4 } = require('uuid');
+var context = require('express-http-context');
 
 // The base class (All Frostybot classes are derived from this)
 class frostybot_base {
   constructor () {}
 }
+
 
 // Account Balance Object
 
@@ -65,24 +68,18 @@ class frostybot_market extends frostybot_base {
 // Position Base Object
 
 class frostybot_position extends frostybot_base {
-  constructor (market, direction, base_size, quote_size, price, raw) {
-    super ();
 
-    var usdbase = market.usd.hasOwnProperty ('base')
-      ? market.usd.base
-      : market.usd;
-    var usdquote = market.usd.hasOwnProperty ('quote')
-      ? market.usd.quote
-      : market.usd;
+  constructor (market, direction, base_size, quote_size, price, raw = null) {
+    super ();
+    var usdbase = market.usd.hasOwnProperty ('base') ? market.usd.base : market.usd;
+    var usdquote = market.usd.hasOwnProperty ('quote') ? market.usd.quote : market.usd;
     //this.raw = raw;
 
     this.symbol = market.symbol;
     this.type = market.type;
     this.direction = direction;
 
-    var sizing = base_size == null
-      ? 'quote'
-      : quote_size == null ? 'base' : 'unknown';
+    var sizing = base_size == null ? 'quote' : quote_size == null ? 'base' : 'unknown';
     switch (sizing) {
       case 'base':
         this.base_size = Math.abs(base_size);
@@ -96,38 +93,33 @@ class frostybot_position extends frostybot_base {
         break;
     }
   }
+
 }
 
 // Futures Position Object
 
 class frostybot_position_futures extends frostybot_position {
-  constructor (
-    market,
-    direction,
-    base_size,
-    quote_size,
-    entry_price,
-    liquidation_price,
-    raw = null
-  ) {
+
+  constructor (market, direction, base_size, quote_size, entry_price, liquidation_price, raw = null) {
     super (market, direction, base_size, quote_size, entry_price, raw);
     this.entry_price = entry_price;
     this.entry_value = Math.abs(this.base_size * this.entry_price);
-    this.current_price = market.avg != null
-      ? market.avg
-      : (market.bid + market.ask) / 2;
+    this.current_price = market.avg != null ? market.avg : (market.bid + market.ask) / 2;
     this.current_value = Math.abs(this.base_size * this.current_price);
     this.liquidation_price = liquidation_price;
     this.pnl = (this.direction == "short" ? -1 : 1) * (this.current_value - this.entry_value); // Calculate PNL is not supplied by exchange
   }
+
 }
 
 // Spot Position Object
 
 class frostybot_position_spot extends frostybot_position {
+
   constructor (market, direction, base_size, quote_size, raw = null) {
     super (market, direction, base_size, quote_size, market.avg, raw);
   }
+
 }
 
 // Order Object
@@ -146,7 +138,7 @@ class frostybot_order extends frostybot_base {
     filled_base,
     filled_quote,
     status,
-    raw = null
+    //raw = null
   ) {
     super ();
     this.symbol = market.symbol;
@@ -183,152 +175,121 @@ class frostybot_order extends frostybot_base {
 // Output Object
 
 class frostybot_output extends frostybot_base {
-  constructor (command, params, result, type, data, messages) {
+  constructor (command, params, result, type, data, stats, messages) {
     super ();
     this.command = command;
     this.params = params != null
-      ? helper.censorProps (params, ['apikey', 'secret'])
+      ? helper.censorProps (params, ['apikey', 'secret', 'password', 'oldpassword', 'newpassword'])
       : undefined;
     this.result = result;
     this.type = type;
     this.data = data;
+    this.stats = stats;
     this.messages = messages;
   }
+}
+
+// Performance Metric
+
+class frostybot_metric extends frostybot_base {
+
+  constructor(metric) {
+    super ();
+    this.context = context.get('reqId');
+    this.metric = metric;
+    this.uuid = uuidv4();
+    this.cached = false;
+  }
+
+  start() {
+    this.start_time = (new Date).getTime();
+  }
+
+  end() {
+    this.end_time = (new Date).getTime();
+    this.duration = (this.end_time - this.start_time) / 1000;
+  }
+
 }
 
 // Frostybot Exchange Handler
 
 class frostybot_exchange extends frostybot_base {
-  // Constructor
 
-  constructor (stub) {
-    super ();
-    this.exchanges = {};
+    // Constructor
 
-    // Which normalizer methods should be exposed to the exchange class
-    this.exposed_methods = [
-      'positions',
-      'position',
-      'markets',
-      'market',
-      'ticker',
-      'total_balance_usd',
-      'free_balance_usd',
-      'available_equity_usd',
-      'balances',
-      'orders',
-      'cancel',
-      'cancel_all',
-      'get_market_by_id',
-      'get_market_by_symbol',
-      'get_market_by_id_or_symbol',
-      'create_order',
-      'custom_params',
-      'leverage',
-    ];
-
-    // Methods to cache and how many seconds they should be cached for
-
-    this.cached_methods = {
-      //positions: 2,
-      //position: 2,
-      available_equity_usd: 2,
-      markets: 10,
-      market: 10,
-      ticker: 10,
-      balances: 2,
-      orders: 2,
-      get_market_by_id: 10,
-      get_market_by_symbol: 10,
-      get_market_by_id_or_symbol: 10,
-    };
-
-    this.load_modules ();
-    this.load_handler (stub);
-    this.load_methods ();
-  }
-
-  // Create module shortcuts
-
-  load_modules () {
-    Object.keys (global.frostybot._modules_).forEach (module => {
-      if (!['core', 'classes'].includes (module)) {
-        this[module] = global.frostybot._modules_[module];
-      }
-    });
-  }
-
-  // Load exchange handler for stub
-
-  load_handler (stub) {
-    this.load_modules ();
-    //this['accounts'] = global.frostybot._modules_['accounts'];
-    this.handler = null;
-    var account = this.accounts.getaccount (stub);
-    if (account) {
-      account = this.utils.lower_props (account);
-      if (account && account.hasOwnProperty (stub)) {
-        account = account[stub];
-      }
-      const exchange_id = account.exchange;
-      this.exchange_id = exchange_id;
-      var type = account.hasOwnProperty ('type') ? account.type : null;
-      this.exchanges[exchange_id] = require ('../exchanges/exchange.' +
-        exchange_id +
-        (type != null ? '.' + type : ''));
-      const exchange_class = this.exchanges[exchange_id];
-      this.handler = new exchange_class (stub);
+    constructor (stub) {
+      super ();
+      this.stub = stub;
+      this.exchanges = {};
+      this.exhandler = null;
+      this.load_modules();
+      this.load_handler(stub);
     }
-  }
 
-  // Load methods
+    // Create module shortcuts
 
-  load_methods () {
-    this.exposed_methods.forEach (method => {
-      this[method] = async params => {
-        return await this.cache_method (method, params);
-      };
-    });
-  }
+    load_modules () {
+      Object.keys (global.frostybot._modules_).forEach (module => {
+        if (!['core', 'classes'].includes (module)) {
+          this[module] = global.frostybot._modules_[module];
+        }
+      });
+    }
 
-  // Cache method
+    // Load exchange handler for stub
 
-  async cache_method (method, params) {
-    if (this.handler == undefined) this.load_handler (params.stub);
-
-    if (this.cached_methods.hasOwnProperty (method)) {
-      var cachetime = this.cached_methods[method];
-      var key = md5 (
-        [this.stub, method, this.utils.serialize (params)].join ('|')
-      );
-      var value = this.cache.get (key);
-      if (value == undefined) {
-        var result = await this.handler.execute (method, params);
-        this.cache.set (key, result, cachetime);
-      } else {
-        var result = value;
+    async load_handler (stub) {
+      this.load_modules ();
+      //this['accounts'] = global.frostybot._modules_['accounts'];
+      if (stub == undefined) {
+        stub = context.get('stub');
       }
-    } else {
-      var result = await this.handler.execute (method, params);
+      this.exhandler = null;
+      var account = await this.accounts.getaccount (stub);
+      if (account) {
+        account = this.utils.lower_props (account);
+        if (account && account.hasOwnProperty (stub)) {
+          account = account[stub];
+        }
+        const exchange_id = (account.hasOwnProperty('exchange') ? account.exchange : undefined);
+        if (exchange_id == undefined) {
+          //return this.output.error('account_retrieve', 'Undefined stub')
+          return false;
+        }
+        this.exchange_id = exchange_id;
+        var type = account.hasOwnProperty ('type') ? account.type : null;
+        this.exchanges[exchange_id] = require ('../exchanges/exchange.' + exchange_id + (type != null ? '.' + type : ''));
+        const exchange_class = this.exchanges[exchange_id];
+        this.exhandler = new exchange_class (stub);
+        this.exhandler.interfaces.methods.forEach(method => this.load_method(method));
+      }
     }
-    return result;
-  }
 
-  // Normalizer and CCXT Execution Handler
+    // Load Method
 
-  async execute (method, params = []) {
-    if (this.handler != undefined) {
-      return await this.handler.execute (method, params);
+    load_method(method) {
+      this[method] =  async (params) => {return await this.execute (method, params);}
     }
-    return false;
-  }
 
-  // Get Exchange property
+    // Normalizer and CCXT Execution Handler
 
-  get (property) {
-    return this.handler[property];
-  }
+    async execute (method, params = []) {
+      if (this.exhandler == undefined) await this.load_handler (params == undefined ? this.stub : params.stub);
+      if (this.exhandler != undefined) {
+          return await this.exhandler.execute (method, params);
+      }
+      return false;
+    }
+
+    // Get Exchange property
+
+    get (property) {
+      return this.exhandler[property];
+    }
+
 }
+
 
 // Frostybot Websocket Ticker
 
@@ -411,6 +372,7 @@ module.exports = {
   position_spot: frostybot_position_spot,
   market: frostybot_market,
   order: frostybot_order,
+  metric: frostybot_metric,
   output: frostybot_output,
   exchange: frostybot_exchange,
   websocket_trade: frostybot_websocket_trade,

@@ -26,10 +26,16 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         };
     }
 
-
     // Custom params
 
-    custom_params(type, order_params, custom_params) {
+    async custom_params(type, order_params, custom_params) {
+        /*
+        if (!order_params.hasOwnProperty('params')) {
+            order_params.params = {};
+        }
+        var position_mode = await this.ccxtobj.fapiPrivateGetPositionSideDual();
+        var dual = position_mode.hasOwnProperty('dualSidePosition') ? position_mode.dualSidePosition : false;
+        */
         return order_params;
     }    
 
@@ -37,6 +43,9 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
 
     async leverage(params) {
         var [symbol, type, leverage] = this.utils.extract_props(params, ['symbol', 'type', 'leverage']);
+        await this.markets();
+        var market = await this.get_market_by_id_or_symbol(symbol);
+        symbol = market.id;
         var type = (type == 'cross' ? 'CROSSED' : (type == 'isolated' ? 'ISOLATED' : null));
         var leverage = leverage.toLowerCase().replace('x', '');
         await this.ccxt('fapiPrivate_post_margintype', { symbol: symbol, marginType: type});
@@ -57,7 +66,8 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
     // Get list of current positions
 
     async positions() { 
-        let raw_positions = await this.ccxt('fapiPrivate_get_positionrisk');
+        this.set_cache_time('fapiPrivate_get_positionrisk', 5);
+        let raw_positions = await this.execute('fapiPrivate_get_positionrisk');
         await this.markets();
         // Get futures positions
         var positions = []; 
@@ -65,7 +75,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
             .filter(raw_position => raw_position.positionAmt != 0)
             .forEach(async raw_position => {
                 const symbol = raw_position.symbol;
-                const market = await this.get_market_by_id_or_symbol(symbol);
+                const market = await this.get_market_by_id(symbol);
                 const direction = (raw_position.positionAmt > 0 ? 'long' : (raw_position.positionAmt <  0 ? 'short' : 'flat'));
                 const base_size = (raw_position.positionAmt * 1);
                 const entry_price = (raw_position.entryPrice * 1);
@@ -89,7 +99,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
         var raw_markets = results;
         this.data.markets = [];
         raw_markets
-            .filter(raw_market => raw_market.active == true)
+            .filter(raw_market => raw_market.active == true && raw_market.info.contractType.toLowerCase() == 'perpetual')
             .forEach(raw_market => {
                 const id = raw_market.id;
                 const symbol = raw_market.symbol;
@@ -123,6 +133,7 @@ module.exports = class frostybot_exchange_binance_futures extends frostybot_exch
     async fetch_tickers() {
         var results = {};
         this.data.tickers = {};
+        this.set_cache_time('fapiPublic_get_ticker_bookticker', 10);
         var tickersRaw = await this.ccxt('fapiPublic_get_ticker_bookticker')
         for (var i = 0; i < tickersRaw.length; i++) {
             var tickerRaw = tickersRaw[i];

@@ -1,8 +1,9 @@
-var express     = require('express');
-var bodyParser  = require('body-parser');
-const fs        = require('fs'); 
+var express = require('express');
+var bodyParser = require('body-parser');
+const fs = require('fs'); 
 const { v4: uuidv4 } = require('uuid');
-var context     = require('express-http-context');
+var context = require('express-http-context');
+const cookieParser = require('cookie-parser');
 
 // Set App Title
 
@@ -13,9 +14,10 @@ process.title = "frostybot-js";
 const loader      = require('./core/core.loader');
 loader.load_all()
 
-// API Router
+// Routers
 
-var apiRouter = require('./routes/routes.api');  
+var apiRouter = require('./routes/routes.api');
+var guiRouter = require('./routes/routes.gui');
 
 // Load Express
 
@@ -31,7 +33,18 @@ try {
   var port = (process.env.FROSTYBOT_PORT || 80);
 }
 app.set('port', port);
-fs.writeFileSync(portfile, port)
+fs.writeFileSync(portfile, port.toString())
+
+// Get Reverse Proxy Address 
+
+const proxyfile = __dirname + '/.proxy';
+try {
+  var proxy = fs.readFileSync(proxyfile, {encoding:'utf8', flag:'r'});
+  if (proxy == '') proxy = false;
+} catch {
+  var proxy = false;
+}
+
 
 // Trust reverse proxy if used
 // Only use this if you are configuring Frostybot behind a reverse proxy
@@ -57,17 +70,43 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(context.middleware);
 app.use(function(req, res, next) {
     context.set('reqId', uuidv4());
+    var ip = ((proxy !== false ? req.headers['x-forwarded-for'] : false) || req.socket.remoteAddress).replace('::ffff:','').replace('::1, ','');
+    context.set('srcIp', ip);
     var reqId = context.get('reqId');
     next();
 });
 
-// Map to Main API router
+// Cookie Middleware
 
-app.use('/', apiRouter);
+app.use(cookieParser());
 
-// Map to UI
+// Setting up Views
 
-app.use('/ui', express.static('ui'))
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
+// Static Assets
+
+app.use(express.static('views/assets'))
+
+// Router Configuration
+  
+app.use('/rest', apiRouter);      // REST API
+app.use('/frostybot', apiRouter); // WebSocket API
+app.use('/ui', guiRouter);        // GUI
+
+// Redirect to the GUI
+app.all('/', async function(req, res) {
+    res.redirect('/ui')
+  //  next();
+});
+
+// Exception Handler
+app.use(function(err, req, res, next) {
+  res.send(500, err.message); // or whatever you want to send back
+});
+
+
 
 // Export app
 

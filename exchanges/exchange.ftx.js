@@ -17,7 +17,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
             stoploss_market   : 'stop',
             takeprofit_limit  : 'takeProfit', 
             takeprofit_market : 'takeProfit',
-            trailing_stop     : 'trailingStop', 
+            trailstop         : 'trailingStop', 
             post              : 'postOnly',
             reduce            : 'reduceOnly',
             ioc               : 'ioc',
@@ -30,6 +30,10 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
     // Custom params
 
     custom_params(type, order_params, custom_params) {
+        if (order_params.type == 'trailingStop') {
+            order_params.params['trailValue'] = order_params.params.triggerPrice;
+            delete order_params.params.triggerPrice;
+        }
         return order_params;
     }    
 
@@ -43,12 +47,14 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
     // Get list of current positions
 
     async positions() { 
+        this.set_cache_time('private_get_position', 5);    
         let results = await this.ccxt('private_get_positions', {showAvgPrice: true});
         var raw_positions = results.result;
         await this.markets();
         // Get futures positions
         var positions = []; 
-        await raw_positions
+        if (this.utils.is_array(raw_positions)) {
+            await raw_positions
             .filter(raw_position => raw_position.size != 0)
             .forEach(async raw_position => {
                 const symbol = raw_position.future;
@@ -61,6 +67,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
                 const position = new this.classes.position_futures(market, direction, base_size, null, entry_price, liquidation_price, raw);
                 positions.push(position)
             })
+        }
         // Emulate spot "positions" against USD for non-stablecoin balances
         var balances = await this.balances();
         this.stablecoins.forEach(async (stablecoin) => {

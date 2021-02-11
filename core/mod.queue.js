@@ -53,7 +53,7 @@ module.exports = class frostybot_queue_module extends frostybot_module {
             params = [params]
         }
         params.forEach(order => {
-            this.output.notice('order_queued', this.utils.serialize(order))
+            this.output.notice('order_queued', order)
             this.queue[uuid][stub][symbol].push(order)
         });
     }
@@ -64,6 +64,13 @@ module.exports = class frostybot_queue_module extends frostybot_module {
     async process(stub, symbol) {
         var uuid = context.get('reqId')
         this.create(stub, symbol)
+        var noexecute = await this.config.get('debug:noexecute', false);
+        if (noexecute == true) {
+            this.output.debug('debug_noexecute');
+            var result = this.queue[uuid][stub][symbol];
+            this.clear(stub, symbol);
+            return result;
+        }
         this.results[uuid][stub][symbol] = []
         var total = this.queue[uuid][stub][symbol].length;
         var success = 0;
@@ -71,16 +78,16 @@ module.exports = class frostybot_queue_module extends frostybot_module {
         this.output.notice('processing_queue', total); 
         var exchange = new this.classes.exchange(stub);
         for (const order of this.queue[uuid][stub][symbol]) {
-            let result = await exchange.create_order(order);
+            let result = await exchange.execute('create_order', order);
             if (result.result == 'success') {
                 success++;
-                this.output.success('order_submit', [stub, this.utils.serialize(order)]); 
+                this.output.success('order_submit', { ...{stub: stub}, ...order}); 
             } else {
                 //output.set_exitcode(-1);
                 var message = result.error.type + ': ' + (this.utils.is_object(result.error.message) ? this.utils.serialize_object(result.error.message) : result.error.message);
                 var params = this.utils.serialize(result.params);
                 var info = message + ': ' + params;
-                this.output.error('order_submit', [stub, info, this.utils.serialize(order)]); 
+                this.output.error('order_submit', { ...{error: result.error}, ...{stub: stub}, ...order} ); 
             }
             this.results[uuid][stub][symbol].push(result);
         };

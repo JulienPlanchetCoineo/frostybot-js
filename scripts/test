@@ -2,10 +2,10 @@
 
 PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
 CURRENTPATH=`pwd`
-SCRIPTPATH=`dirname "$(readlink -f "$0")"`
+SCRIPTPATH=`dirname "$(readlink -f "$0")" | sed -e 's/\/scripts//g'`
+TESTS=`echo "$@" | xargs | sed -e 's/,/ /g'`
 
 cd "$SCRIPTPATH" &
-cd ../ &
 
 echo "Starting Frostybot unit testing"
 if [ ! "$PID" == "" ]; then
@@ -20,7 +20,18 @@ else
   DOSTART="false"
 fi
 echo "Frostybot server stopped successfully, proceeding with tests"
-sudo npm test
+if [ "$TESTS" == "" ]; then
+  sudo npm test
+else
+  FILES=""
+  for x in $TESTS; do
+    FILE="$SCRIPTPATH/test/test.mod.$x.js"
+    if [ -f "$FILE" ]; then
+      FILES="$FILES $FILE"
+    fi
+  done;
+  sudo npm test $FILES
+fi
 if [ "$DOSTART" == "true" ]; then
   ./scripts/start
   while [ "$PID" == "" ]; do

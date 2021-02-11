@@ -1,0 +1,7 @@
+#/bin/bash
+
+PID=`sudo ps ax | grep "frostybot-js" | grep -v grep | awk '{print $1}'`
+CURRENTPATH=`pwd`
+SCRIPTPATH=`dirname "$(readlink -f "$0")" | sed -e 's/\/scripts//g'`
+PARAMS=`echo "$@" | xargs`
+eval "tail $PARAMS $SCRIPTPATH/log/frostybot.log"

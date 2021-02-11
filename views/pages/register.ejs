@@ -1,0 +1,44 @@
+<%- include('../partials/header.ejs'); %>
+<% if (recaptchasite != false) { %>
+  <script src="https://www.google.com/recaptcha/api.js?render=<%= recaptchasite %>"></script>
+<% } %>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="frostybot-panel w-50">
+      <div class="w-100 frostybot-panel-header"><p class="m-0"><span class="fa fa-user-plus"></span> <b>Register</b></p></div>
+      <div class="w-100 frostybot-panel-content">
+        <div class="container">
+          <form id="registerform" data-recaptchasite="<%= recaptchasite %>">
+            <div class="mb-3">
+              <label for="inputemail" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="inputemail">
+            </div>
+            <div class="mb-3 row">
+              <div class="col">
+                <label for="inputpassword" class="form-label">Password</label>
+                <input type="password" class="form-control frostybot-input-sm" id="inputpassword">  
+              </div>
+              <div class="col">
+                <label for="inputconfirm" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control frostybot-input-sm" id="inputconfirm">                  
+              </div>
+            </div>
+            <div class="mb-3 text-center">
+              <button type="submit" class="btn btn-success frostybot-button-sm m-2"><span class="fa fa-user-plus"></span> Register</button><button type="button" id="cancelbutton" class="btn btn-primary frostybot-button-sm m-2"><span class="fa fa-ban"></span> Cancel</button>
+            </div>
+          </form>
+          <script>
+            $( document ).ready(function() {
+              $('#inputemail').focus();
+              $('#cancelbutton').on('click', function() {
+                document.location.href = '/ui/login';
+              });
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer.ejs'); %>
