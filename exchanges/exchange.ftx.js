@@ -17,7 +17,7 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
             stoploss_market   : 'stop',
             takeprofit_limit  : 'takeProfit', 
             takeprofit_market : 'takeProfit',
-            trailing_stop     : 'trailingStop', 
+            trailstop         : 'trailingStop', 
             post              : 'postOnly',
             reduce            : 'reduceOnly',
             ioc               : 'ioc',
@@ -30,6 +30,10 @@ module.exports = class frostybot_exchange_ftx extends frostybot_exchange_base {
     // Custom params
 
     custom_params(type, order_params, custom_params) {
+        if (order_params.type == 'trailingStop') {
+            order_params.params['trailValue'] = order_params.params.triggerPrice;
+            delete order_params.params.triggerPrice;
+        }
         return order_params;
     }    
 

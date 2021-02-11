@@ -175,6 +175,12 @@ module.exports = class frostybot_trade_module extends frostybot_module {
                                 usd = (stopusd != undefined ? stopusd : usd);
                                 price = (stopprice == undefined ? stoptrigger : stopprice);
                                 break;
+            case 'trailstop' :  size = (stopsize != undefined ? stopsize : size);
+                                base = (stopbase != undefined ? stopbase : base);
+                                quote = (stopquote != undefined ? stopquote : quote);
+                                usd = (stopusd != undefined ? stopusd : usd);
+                                price = (stopprice == undefined ? stoptrigger : stopprice);
+                                break;
             case 'takeprofit' : size = (profitsize != undefined ? profitsize : size);
                                 base = (profitbase != undefined ? profitbase : base);
                                 quote = (profitquote != undefined ? profitquote : quote);
@@ -184,7 +190,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
 
         // Default size when no size provided for stoploss and takeprofit
-        if ((['stoploss', 'takeprofit'].includes(type)) && (size == null) && (base == null) && (quote == null) && (usd == null)) {
+        if ((['stoploss', 'takeprofit', 'trailstop'].includes(type)) && (size == null) && (base == null) && (quote == null) && (usd == null)) {
             var order_sizing = this.exchange[stub].get('order_sizing');
             var position = await this.get_position(stub, symbol);
             switch (order_sizing) {
@@ -696,6 +702,11 @@ module.exports = class frostybot_trade_module extends frostybot_module {
                                 var below = 'sell';
                                 side = undefined;
                                 break;
+            case 'trailstop' :  var [stub, symbol, side, trigger, reduce, tag] = this.utils.extract_props(params, ['stub', 'symbol', 'side', 'trailstop', 'reduce', 'tag']);
+                                var above = 'buy';
+                                var below = 'sell';
+                                side = undefined;
+                                break;
             case 'takeprofit' : var [stub, symbol, side, trigger, triggertype, price, reduce, tag] = this.utils.extract_props(params, ['stub', 'symbol', 'side', 'profittrigger', 'triggertype', 'profitprice', 'reduce', 'tag']);
                                 var above = 'sell';
                                 var below = 'buy';
@@ -730,6 +741,11 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         }
 
         // Get parameters from the normalizer
+        //this.initialize_exchange(params);
+        //console.log(params);
+        //console.log(this.exchange[stub]);
+        //return false;
+
         this.param_map = this.exchange[stub].get('param_map');
         this.order_sizing = this.exchange[stub].get('order_sizing');
         this.stablecoins = this.exchange[stub].get('stablecoins');
@@ -738,11 +754,21 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         const market = await this.exchange[stub].execute('get_market_by_id_or_symbol',symbol);
 
         //Check if stoptrigger or stopprice is relative and convert if necessary
-        if (this.is_relative(trigger)) {
+        if (this.is_relative(trigger) && ['stoploss', 'takeprofit'].includes(type)) {
             trigger = this.get_relative_price(market, trigger);
         }
         if ((price != undefined) && (this.is_relative(price))) {
             price = this.get_relative_price(market, price);
+        }
+
+        // Convert percentage price to value for trailstop
+        if ((type == 'trailstop')  && (trigger.indexOf('%') != -1)) {
+            var position = await this.get_position(stub, symbol);
+            if (position !== false) {
+                var side = position.direction == "long" ? "sell" : "buy"
+                var operator = side == "buy" ? "+" : "-";
+            }
+            trigger = (operator + this.round_price(market, Math.abs(market.avg * (trigger.replace('%','') / 100)))) * 1;
         }
 
         // If side is undefined, assume side based on trigger above or below market price
@@ -761,7 +787,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         // Base order params object
         var order_params = {
             symbol  :   symbol.toUpperCase(),
-            type    :   this.param_map[(price == undefined ? type + '_market' : type + '_limit')],
+            type    :   this.param_map[(type == 'trailstop' ? 'trailstop' : (price == undefined ? type + '_market' : type + '_limit'))],
             side    :   side.toLowerCase(),
             amount  :   amount,
             price   :   (price != undefined ? price : null),
@@ -1144,7 +1170,7 @@ module.exports = class frostybot_trade_module extends frostybot_module {
         var schema = {
             stub:        { required: 'string', format: 'lowercase', },
             symbol:      { required: 'string', format: 'uppercase', },
-            trailstop:   { required: 'string',  },
+            trailstop:   { required: 'string'},
         }
 
         if (!(params = this.utils.validator(params, schema))) return false; 
