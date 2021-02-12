@@ -76,6 +76,7 @@ const api_methods = {
         'logout',
         'add',
         'delete',
+	'delete_by_mail',
         'change_password',
         'reset',
 	'uuid_by_email_api',

@@ -414,7 +414,6 @@ module.exports = class frostybot_user_module extends frostybot_module {
     // Delete user
 
     async delete(params) {
-
         var schema = {
             uuid: {
                 required: 'string',
@@ -430,6 +429,26 @@ module.exports = class frostybot_user_module extends frostybot_module {
             return true;
         }  
         return this.output.error('multiuser_delete', [uuid]);  
+    }
+
+
+    // Delete user by mail
+
+    async delete_by_mail(params) {
+        var schema = {
+            email: {
+                required: 'string',
+            },
+        }
+
+        if (!(params = this.utils.validator(params, schema))) return false; 
+        var email = params.email;
+        var result = await this.database.delete('users',  {email: email});
+        if (result.changes > 0) {
+            this.output.success('multiuser_delete', [email]);
+            return true;
+        }  
+        return this.output.error('multiuser_delete', [email]);  
     }
 
     // Reset user password (CLI Only)

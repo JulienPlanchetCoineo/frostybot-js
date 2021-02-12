@@ -90,15 +90,15 @@ module.exports = {
 
         'post|/websocket/:stub/subscribe/:channel'  :   'websocket:subscribe',  // Subscrive to websocket channel
 
-	// Register user
+        // Register user
 
-	'post|/user/uuid' : 'user:uuid_by_email_api', // Get user's UUID by mail
-	'post|/user/register' : 'user:register', // Register user
-	'post|/user/add' : 'user:register', // Add user and get UUID
-	'post|/user/add/' : 'user:add', // Add multiuser and return UUID as result
-	'delete|/user/:uuid' : 'user:delete', // Delete multiuser based on UUID
+        'post|/user/uuid' : 'user:uuid_by_email_api', // Get user's UUID by mail
+        'post|/user/register' : 'user:register', // Register user
+        'post|/user/add' : 'user:add', // Add multiuser and return UUID as result
+        'post|/user/delete' : 'user:delete_by_mail', // Delete multiuser based on UUID
 
     },
 
 }
+
 
